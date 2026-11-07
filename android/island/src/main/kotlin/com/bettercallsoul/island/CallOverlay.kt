@@ -11,6 +11,8 @@ import android.graphics.Rect
 import android.graphics.Point
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.os.SystemClock
 import android.provider.Settings
 import android.text.TextUtils
@@ -29,6 +31,9 @@ import androidx.core.content.edit
 import kotlin.math.hypot
 import kotlin.math.roundToInt
 
+/** Where the call's sound goes: the speaker button lights up for the speaker, a small mark shows a headset. */
+enum class PillRoute { Earpiece, Speaker, Bluetooth, Wired }
+
 /**
  * The small pill that floats over other apps during a call: tap it to reopen the call, or tap the
  * red button to hang up. While a call rings it shows the caller, and the green button answers
@@ -41,6 +46,7 @@ class CallOverlay(
     private val onAnswer: () -> Unit,
     private val onSpeaker: () -> Unit = {},
     private val onHangUp: () -> Unit,
+    private val timerColor: Int = Color.WHITE,
 ) {
     private val context = context.applicationContext
     private val windows = this.context.getSystemService(WindowManager::class.java)
@@ -50,10 +56,24 @@ class CallOverlay(
     private var root: View? = null
     private var timer: Chronometer? = null
     private var green: ImageView? = null
+    private var mark: ImageView? = null
     private var ringing = false
-    private var speakerOn = false
+    private var route: PillRoute? = PillRoute.Earpiece
     private var style = PillStyle()
     private var snapping: ValueAnimator? = null
+    private val handler = Handler(Looper.getMainLooper())
+    private var beatBig = false
+
+    /** A beat of the answer button; a timed toggle, so it beats even with Android's animations off. */
+    private val beat = object : Runnable {
+        override fun run() {
+            val button = green ?: return
+            beatBig = !beatBig
+            val scale = if (beatBig) BEAT_SCALE else 1f
+            button.animate().scaleX(scale).scaleY(scale).setDuration(BEAT_MILLIS / 2).start()
+            handler.postDelayed(this, BEAT_MILLIS)
+        }
+    }
     private val params = WindowManager.LayoutParams(
         WindowManager.LayoutParams.WRAP_CONTENT,
         WindowManager.LayoutParams.WRAP_CONTENT,
@@ -63,12 +83,16 @@ class CallOverlay(
         PixelFormat.TRANSLUCENT,
     ).apply { gravity = Gravity.TOP or Gravity.START }
 
-    /** Does nothing until the user has allowed drawing over other apps. */
-    fun show(connectedAt: Long?, speakerOn: Boolean = false) {
+    /**
+     * Does nothing until the user has allowed drawing over other apps. [route] is where the sound goes;
+     * null leaves the speaker button out, for a call whose sound can't be told.
+     */
+    fun show(connectedAt: Long?, route: PillRoute? = PillRoute.Earpiece) {
         if (!Settings.canDrawOverlays(context)) return
         if (root == null) attach()
         val clock = timer ?: return
-        this.speakerOn = speakerOn
+        this.route = route
+        stopBeat()
         setRinging(false)
         if (connectedAt == null) {
             clock.stop()
@@ -87,32 +111,61 @@ class CallOverlay(
         setRinging(true)
         clock.stop()
         clock.text = caller
+        if (!beatBig) {
+            handler.removeCallbacks(beat)
+            handler.post(beat)
+        }
     }
 
-    /** Ringing: a green answer button. In a call: a speaker switch, white while the speaker is on. */
+    private fun stopBeat() {
+        handler.removeCallbacks(beat)
+        beatBig = false
+        green?.animate()?.cancel()
+        green?.scaleX = 1f
+        green?.scaleY = 1f
+    }
+
+    /**
+     * Ringing: a green answer button. In a call: a speaker switch, white while the speaker is on, and a
+     * dot-sized mark above the time while the sound is in a headset.
+     */
     private fun setRinging(value: Boolean) {
         ringing = value
         val button = green ?: return
         val background = button.background as GradientDrawable
+        val route = route
+        button.visibility = if (value || route != null) View.VISIBLE else View.GONE
         if (value) {
             button.setImageResource(R.drawable.ic_overlay_call)
             background.setColor(CALL_GREEN)
             button.imageTintList = ColorStateList.valueOf(Color.WHITE)
             button.contentDescription = context.getString(R.string.overlay_answer)
         } else {
+            val speakerOn = route == PillRoute.Speaker
             button.setImageResource(R.drawable.ic_overlay_speaker)
             background.setColor(if (speakerOn) Color.WHITE else SPEAKER_OFF)
             button.imageTintList = ColorStateList.valueOf(if (speakerOn) Color.BLACK else Color.WHITE)
             button.contentDescription = context.getString(R.string.overlay_speaker)
             button.isSelected = speakerOn
         }
+        val headset = when (route.takeIf { !value }) {
+            PillRoute.Bluetooth -> R.drawable.ic_overlay_bluetooth
+            PillRoute.Wired -> R.drawable.ic_overlay_headset
+            else -> null
+        }
+        mark?.apply {
+            visibility = if (headset == null) View.GONE else View.VISIBLE
+            headset?.let(::setImageResource)
+        }
     }
 
     fun hide() {
+        stopBeat()
         snapping?.cancel()
         timer?.stop()
         timer = null
         green = null
+        mark = null
         root?.let(windows::removeView)
         root = null
     }
@@ -120,13 +173,25 @@ class CallOverlay(
     private fun attach() {
         style = PillStyle.load(context)
         val clock = Chronometer(context).apply {
-            setTextColor(Color.WHITE)
+            setTextColor(timerColor)
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f * style.scale)
             fontFeatureSettings = "tnum"
             gravity = Gravity.CENTER
             maxWidth = if (style.vertical) sdp(96f) else sdp(150f)
             maxLines = 1
             ellipsize = TextUtils.TruncateAt.END
+        }
+        val headsetMark = ImageView(context).apply {
+            imageTintList = ColorStateList.valueOf(timerColor)
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+            layoutParams = LinearLayout.LayoutParams(sdp(MARK_DP), sdp(MARK_DP))
+            visibility = View.GONE
+        }
+        val middle = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            addView(headsetMark)
+            addView(clock)
         }
         val call = circle(R.drawable.ic_overlay_call, CALL_GREEN).apply {
             setOnClickListener { if (ringing) onAnswer() else onSpeaker() }
@@ -153,7 +218,7 @@ class CallOverlay(
             setOnClickListener { onOpen() }
             val (first, last) = if (style.endFirst) end to call else call to end
             addView(first)
-            addView(clock, spaced())
+            addView(middle, spaced())
             addView(last)
         }
         // The window has to be a little larger than the pill, or the shadow is cut off at its edge.
@@ -183,6 +248,7 @@ class CallOverlay(
         root = frame
         timer = clock
         green = call
+        mark = headsetMark
     }
 
     private fun circle(icon: Int, color: Int) = ImageView(context).apply {
@@ -314,5 +380,8 @@ class CallOverlay(
         const val CALL_GREEN = 0xFF12A85F.toInt()
         const val END_RED = 0xFFE5484D.toInt()
         const val SPEAKER_OFF = 0x40FFFFFF
+        const val BEAT_SCALE = 1.15f
+        const val MARK_DP = 11f
+        const val BEAT_MILLIS = 500L
     }
 }

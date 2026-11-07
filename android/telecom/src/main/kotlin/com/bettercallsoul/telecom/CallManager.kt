@@ -1,6 +1,7 @@
 package com.bettercallsoul.telecom
 
 import com.bettercallsoul.diag.DebugLog
+import com.bettercallsoul.island.PillRoute
 import android.content.Context
 import android.net.Uri
 import android.annotation.SuppressLint
@@ -54,6 +55,15 @@ data class AudioUiState(
     val routeKnown: Boolean = false,
 ) {
     val speakerOn: Boolean get() = routeType == AudioRouteType.Speaker
+
+    /** For the pill's button. */
+    val pillRoute: PillRoute
+        get() = when (routeType) {
+            AudioRouteType.Speaker -> PillRoute.Speaker
+            AudioRouteType.Bluetooth -> PillRoute.Bluetooth
+            AudioRouteType.Wired -> PillRoute.Wired
+            AudioRouteType.Earpiece, AudioRouteType.Other -> PillRoute.Earpiece
+        }
     val onBluetooth: Boolean get() = routeType == AudioRouteType.Bluetooth
 }
 
@@ -73,6 +83,10 @@ object CallManager {
 
     private lateinit var directory: CallerDirectory
     internal var silentWhenFaceDown: () -> Boolean = { false }
+        private set
+
+    /** The user's choice that a call coming in while the phone is in use rings in the pill, not a pop-up. */
+    internal var ringInPill: () -> Boolean = { false }
         private set
 
     private var service: InCallService? = null
@@ -108,9 +122,10 @@ object CallManager {
     private val _ended = MutableStateFlow<EndedCall?>(null)
     val ended: StateFlow<EndedCall?> = _ended.asStateFlow()
 
-    fun init(directory: CallerDirectory, silentWhenFaceDown: () -> Boolean) {
+    fun init(directory: CallerDirectory, silentWhenFaceDown: () -> Boolean, ringInPill: () -> Boolean = { false }) {
         this.directory = directory
         this.silentWhenFaceDown = silentWhenFaceDown
+        this.ringInPill = ringInPill
     }
 
     @SuppressLint("MissingPermission") // The app opens only once the phone permission is granted.

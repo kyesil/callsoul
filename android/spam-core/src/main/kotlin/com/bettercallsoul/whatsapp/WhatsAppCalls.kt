@@ -4,7 +4,14 @@ import com.bettercallsoul.spam.SearchText
 
 enum class CallPhase { Ringing, Dialing, Ongoing, Missed }
 
-data class CallNotice(val name: String, val video: Boolean, val phase: CallPhase, val number: String = "")
+data class CallNotice(
+    val name: String,
+    val video: Boolean,
+    val phase: CallPhase,
+    val number: String = "",
+    /** Where the notification's timer counts from: the moment the call was answered. */
+    val talkingSince: Long? = null,
+)
 
 enum class CallOutcome { Incoming, Outgoing, Missed }
 
@@ -17,6 +24,58 @@ data class FinishedCall(
     /** How long the two talked; for a missed call, how long it rang, when that was seen. */
     val seconds: Long,
 )
+
+/** What Telecom knows of a finished call: exact times, where the notifications leave a guess. */
+data class TelecomCall(
+    val name: String,
+    val number: String,
+    val video: Boolean,
+    val incoming: Boolean,
+    val createdAt: Long,
+    /** 0 if nobody answered. */
+    val connectedAt: Long,
+    val endedAt: Long,
+) {
+    fun finished(): FinishedCall {
+        val answered = connectedAt > 0
+        val outcome = when {
+            !incoming -> CallOutcome.Outgoing
+            answered -> CallOutcome.Incoming
+            else -> CallOutcome.Missed
+        }
+        val millis = when {
+            answered -> endedAt - connectedAt
+            outcome == CallOutcome.Missed -> endedAt - createdAt
+            else -> 0
+        }
+        return FinishedCall(name, number, video, outcome, createdAt, millis.coerceAtLeast(0) / 1000)
+    }
+}
+
+/** Remembers Telecom's calls, so that the notifications of the same call aren't stored a second time. */
+class TelecomCoverage {
+    private var live = 0
+    private var lastEnd = 0L
+
+    /** Whether a call is going on right now. */
+    val active: Boolean get() = live > 0
+
+    fun opened() {
+        live++
+    }
+
+    fun closed(end: Long) {
+        live = (live - 1).coerceAtLeast(0)
+        lastEnd = maxOf(lastEnd, end)
+    }
+
+    /** Whether a call that began at [start] is one of them. A missed call's note comes just after its end. */
+    fun covers(start: Long): Boolean = live > 0 || start <= lastEnd + MARGIN_MILLIS
+
+    private companion object {
+        const val MARGIN_MILLIS = 60_000L
+    }
+}
 
 /**
  * Reads a WhatsApp notification. WhatsApp offers no other way to learn about its calls, so this goes
@@ -88,7 +147,9 @@ class WhatsAppCallTracker {
         call.removedAt = null
         call.video = call.video || notice.video
         if (call.number.isEmpty()) call.number = notice.number
-        if (notice.phase == CallPhase.Ongoing && call.answeredAt == null) call.answeredAt = now
+        if (notice.phase == CallPhase.Ongoing && call.answeredAt == null) {
+            call.answeredAt = notice.talkingSince?.coerceAtMost(now) ?: now
+        }
         return finished
     }
 
@@ -126,7 +187,7 @@ class WhatsAppCallTracker {
         }
         if (outcome == CallOutcome.Missed) remember(call.name, end)
         val seconds = when {
-            answered != null -> (end - answered) / 1000
+            answered != null -> (end - answered).coerceAtLeast(0) / 1000
             outcome == CallOutcome.Missed -> (end - call.startedAt) / 1000
             else -> 0
         }

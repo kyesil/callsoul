@@ -1,1 +1,1 @@
-First release: phone and contacts in one, swipe to call and answer, number labels, cloud spam warnings, a floating call pill, four languages.
+The call pill in WhatsApp calls too: hang up, get back to the call, see where the sound goes. Incoming calls ring in the pill instead of a pop-up. Recents show WhatsApp talk time and how long missed calls rang.

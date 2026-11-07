@@ -114,6 +114,8 @@
     <string name="settings_overlay_title">Показывать поверх других приложений</string>
     <string name="settings_overlay_body">Во время вызова поверх других приложений видны кнопки возврата к вызову, динамика и завершения.</string>
     <string name="settings_pill_title">Плашка вызова</string>
+    <string name="settings_pill_rings_title">Входящий звонок в плашке</string>
+    <string name="settings_pill_rings_body">Когда вы пользуетесь телефоном, входящий звонок звонит в плашке вместо всплывающего окна. Звонки WhatsApp тоже звонят в плашке, но уведомление самого WhatsApp скрыть нельзя.</string>
     <string name="settings_pill_orientation">Расположение</string>
     <string name="pill_horizontal">Горизонтально</string>
     <string name="pill_vertical">Вертикально</string>
@@ -336,6 +338,8 @@
     <string name="photo_gallery">Галерея</string>
     <string name="settings_whatsapp_title">Вызовы WhatsApp в недавних</string>
     <string name="settings_whatsapp_body">Добавляет вызовы WhatsApp в недавние по их уведомлениям, значок показывает голос или видео. Нужен доступ к уведомлениям; читаются только уведомления WhatsApp, данные не покидают телефон.</string>
+    <string name="settings_whatsapp_pill_title">Плашка вызова в звонках WhatsApp</string>
+    <string name="settings_whatsapp_pill_body">Завершите звонок WhatsApp или вернитесь к нему с плашки. Она показывает, куда идёт звук; там, где WhatsApp отдаёт звонки Android, включает и динамик.</string>
     <string name="call_end_spam">Спам: сообщить и завершить</string>
     <string name="spam_reported">Отмечено как спам</string>
 </resources>

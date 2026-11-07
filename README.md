@@ -39,7 +39,17 @@ One tap switches to the speaker even with Bluetooth connected, and a second tap 
 
 ### The call pill
 
-Moved to another app during a call? A small call pill comes with you at the edge of the screen. Turn on the speaker, hang up, or jump back to the call in one tap. Its side, size, button order and transparency are up to you.
+Moved to another app during a call? A small call pill comes with you at the edge of the screen. Turn on the speaker, hang up, or jump back to the call in one tap. Its side, size, button order and transparency are up to you. A call that comes in while you're using the phone rings in the pill instead of a pop-up, its answer button beating; answer or decline right there. You can turn this off in Settings.
+
+### WhatsApp calls too
+
+- The call pill comes up in WhatsApp calls too, even where WhatsApp doesn't reach the phone's own island, such as Honor's Magic Capsule. Hang up or get back to the call in one tap, with the time running in WhatsApp green.
+- On phones where WhatsApp reports its calls to Android, the pill's speaker button works too. Where it doesn't, only WhatsApp can move the sound, so the button opens WhatsApp's call screen.
+- An incoming WhatsApp call rings in the pill too, with WhatsApp's own answer and decline. WhatsApp's notification still shows; hiding it isn't up to us.
+- When the sound is on a Bluetooth or wired headset, a small mark shows above the time. The speaker button switches to the speaker in one tap, and leaving the speaker goes back to the headset, not the earpiece.
+- Your recents show how long a WhatsApp call lasted, and how long a missed one rang.
+- On those phones, people who aren't in your contacts come with their number, so you can get back to them.
+- WhatsApp calls are on from the start, and the pill has a switch of its own in Settings. Both need notification access, given once; nothing read leaves the phone.
 
 ### Against spam
 
@@ -52,7 +62,7 @@ Moved to another app during a call? A small call pill comes with you at the edge
 
 - Silent when face down: a phone lying on its face doesn't ring, and flipping it silences a ringing call.
 - Decline with a message: write your own quick SMS replies.
-- See WhatsApp calls in your recents, with an icon for voice or video. Optional; it needs notification access.
+- See WhatsApp calls in your recents, with an icon for voice or video; it's on from the start. The pill in WhatsApp calls has its own switch. Both need notification access.
 - How far from the edge swipes start, so they never clash with Android's back gesture.
 - The call pill's look, animations, and four languages: Turkish, English, Arabic and Russian.
 
@@ -102,6 +112,7 @@ To use Better Call Soul, make it your default phone app.
 - My contacts had turned into a dump, and apart from Samsung's I couldn't find a decent caller app on Android.
 - I really wanted spam protection and smart caller ID. There's no free service for that, so we're trying to do the evaluation on a free Supabase account; there isn't much data yet.
 - While building it I noticed that every manufacturer copied Apple and made an "island", each tied to its own operating system. They never agreed on a standard. That's why I added the call pill.
+- WhatsApp calls didn't even show in my phone's island; to hang up I had to pull down the notification. It was solvable, so the call pill now works in WhatsApp calls too.
 
 ## License
 

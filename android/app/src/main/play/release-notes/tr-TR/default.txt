@@ -1,1 +1,1 @@
-İlk sürüm: telefon ve rehber bir arada, kaydırarak arama ve cevaplama, numara etiketleri, bulut spam uyarısı, arama hapı, dört dil.
+WhatsApp aramalarında da arama hapı: kapat, aramaya dön, sesin nereden geldiğini gör. Gelen arama açılır bildirim yerine hapta çalar. WhatsApp konuşma süresi ve cevapsızlarda çalma süresi son aramalarda.

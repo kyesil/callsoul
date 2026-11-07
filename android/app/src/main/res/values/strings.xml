@@ -115,6 +115,8 @@
     <string name="settings_overlay_title">Show over other apps</string>
     <string name="settings_overlay_body">During a call, buttons to go back to it, switch the speaker or hang up show over other apps.</string>
     <string name="settings_pill_title">Call pill</string>
+    <string name="settings_pill_rings_title">Incoming calls ring in the pill</string>
+    <string name="settings_pill_rings_body">While you\'re using the phone, a call that comes in rings in the pill instead of a pop-up. WhatsApp calls ring in the pill too, but WhatsApp\'s own notification can\'t be hidden.</string>
     <string name="settings_pill_orientation">Layout</string>
     <string name="pill_horizontal">Horizontal</string>
     <string name="pill_vertical">Vertical</string>
@@ -311,6 +313,8 @@
     <string name="photo_gallery">Gallery</string>
     <string name="settings_whatsapp_title">WhatsApp calls in recents</string>
     <string name="settings_whatsapp_body">Adds WhatsApp calls to your recents from their notifications, with an icon for voice or video. Needs notification access; only WhatsApp\'s notifications are looked at and nothing leaves the phone.</string>
+    <string name="settings_whatsapp_pill_title">Call pill in WhatsApp calls</string>
+    <string name="settings_whatsapp_pill_body">Hang up or get back to a WhatsApp call from the pill. It shows where the sound goes; the speaker switches where WhatsApp lets Android handle its calls.</string>
     <string name="call_end_spam">Report spam and hang up</string>
     <string name="spam_reported">Reported as spam</string>
 </resources>

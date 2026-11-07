@@ -10,6 +10,7 @@ import androidx.annotation.RequiresApi
 import android.telecom.CallAudioState
 import android.os.Build
 import android.os.PowerManager
+import android.provider.Settings
 import android.telecom.Call
 import android.telecom.CallEndpoint
 import android.telecom.InCallService
@@ -66,7 +67,7 @@ class BcsInCallService : InCallService() {
         }
         scope.launch {
             combine(CallManager.call, CallManager.callScreenVisible, CallManager.audio) { call, screenVisible, audio ->
-                call?.takeIf { !screenVisible && it.phase != CallPhase.SelectingAccount }?.let { it to audio.speakerOn }
+                call?.takeIf { !screenVisible && it.phase != CallPhase.SelectingAccount }?.let { it to audio.pillRoute }
             }.collect { shown ->
                 val call = shown?.first
                 when {
@@ -75,7 +76,7 @@ class BcsInCallService : InCallService() {
                         DebugLog.i(TAG, "pill: ringing")
                         overlay.showRinging(call.caller.title)
                     }
-                    else -> overlay.show(call.connectedAt, speakerOn = shown.second)
+                    else -> overlay.show(call.connectedAt, shown.second)
                 }
             }
         }
@@ -98,6 +99,10 @@ class BcsInCallService : InCallService() {
     }
 
     override fun onCallAdded(call: Call) {
+        if (WhatsAppTelecomCalls.hasOwnScreen(call)) {
+            WhatsAppTelecomCalls.onCallAdded(call)
+            return
+        }
         CallManager.onCallAdded(call)
         // On an unlocked phone a ringing call stays a pop-up, so whatever is on screen isn't interrupted.
         val ringing = call.currentState == Call.STATE_RINGING || call.currentState == Call.STATE_SIMULATED_RINGING
@@ -110,6 +115,10 @@ class BcsInCallService : InCallService() {
     }
 
     override fun onCallRemoved(call: Call) {
+        if (WhatsAppTelecomCalls.hasOwnScreen(call)) {
+            WhatsAppTelecomCalls.onCallRemoved(call)
+            return
+        }
         CallManager.onCallRemoved(call)
     }
 
@@ -153,7 +162,7 @@ class BcsInCallService : InCallService() {
                 title = state.caller.title,
                 subtitle = state.caller.subtitle,
                 incoming = state.phase == CallPhase.Incoming,
-                quiet = CallManager.callScreenVisible.value,
+                quiet = CallManager.callScreenVisible.value || ringsInPill(state),
                 connectedAt = state.connectedAt,
                 open = PendingIntent.getActivity(
                     this, 0, callScreenIntent(this), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
@@ -191,6 +200,13 @@ class BcsInCallService : InCallService() {
             lock.release(PowerManager.RELEASE_FLAG_WAIT_FOR_NO_PROXIMITY)
         }
     }
+
+    /**
+     * A call that comes in while the phone is in use already rings in the pill; with the user's say, the
+     * pop-up stays away. On a locked phone the call screen opens as always.
+     */
+    private fun ringsInPill(state: CallUiState): Boolean =
+        state.phase == CallPhase.Incoming && CallManager.ringInPill() && Settings.canDrawOverlays(this) && screenInUse()
 
     private fun screenInUse(): Boolean =
         getSystemService(PowerManager::class.java).isInteractive &&

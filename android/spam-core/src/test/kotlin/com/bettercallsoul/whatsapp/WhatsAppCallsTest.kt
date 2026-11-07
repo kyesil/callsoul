@@ -2,6 +2,7 @@ package com.bettercallsoul.whatsapp
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -116,6 +117,27 @@ class WhatsAppCallTrackerTest {
         assertEquals(30, call.seconds)
     }
 
+    /** The phone handed the notifications over at the end of the call, all within the same moment. */
+    @Test
+    fun theNotificationsTimerGivesTheTalkTimeEvenIfTheyArriveLate() {
+        val tracker = WhatsAppCallTracker()
+        tracker.onNotice(ring, 2_000)
+        tracker.onNotice(talk.copy(talkingSince = 10_000), 10_100)
+        tracker.onRemoved(47_000)
+        val call = assertNotNull(tracker.flush(50_100, 3_000))
+        assertEquals(CallOutcome.Incoming, call.outcome)
+        assertEquals(37, call.seconds)
+        assertEquals(2_000, call.date)
+    }
+
+    @Test
+    fun aTimerThatStartsInTheFutureCountsFromTheNotice() {
+        val tracker = WhatsAppCallTracker()
+        tracker.onNotice(talk.copy(talkingSince = 90_000), 10_000)
+        tracker.onRemoved(40_000)
+        assertEquals(30, assertNotNull(tracker.flush(43_000, 3_000)).seconds)
+    }
+
     @Test
     fun aNewNoticeCancelsTheRemoval() {
         val tracker = WhatsAppCallTracker()
@@ -123,5 +145,60 @@ class WhatsAppCallTrackerTest {
         tracker.onRemoved(2_000)
         tracker.onNotice(talk, 3_000)
         assertNull(tracker.flush(10_000, 3_000))
+    }
+}
+
+class TelecomCallTest {
+    private val call = TelecomCall("Ali", "+905321234567", video = false, incoming = true, createdAt = 2_000, connectedAt = 10_083, endedAt = 45_406)
+
+    @Test
+    fun anAnsweredCallCountsFromTheAnswer() {
+        val finished = call.finished()
+        assertEquals(CallOutcome.Incoming, finished.outcome)
+        assertEquals(35, finished.seconds)
+        assertEquals(2_000, finished.date)
+        assertEquals(CallOutcome.Outgoing, call.copy(incoming = false).finished().outcome)
+        assertEquals(35, call.copy(incoming = false).finished().seconds)
+    }
+
+    @Test
+    fun anUnansweredCallThatCameInIsMissedWithItsRingTime() {
+        val finished = call.copy(connectedAt = 0, endedAt = 9_000).finished()
+        assertEquals(CallOutcome.Missed, finished.outcome)
+        assertEquals(7, finished.seconds)
+    }
+
+    @Test
+    fun anUnansweredCallWeMadeHasNoTime() {
+        val finished = call.copy(incoming = false, connectedAt = 0).finished()
+        assertEquals(CallOutcome.Outgoing, finished.outcome)
+        assertEquals(0, finished.seconds)
+    }
+}
+
+class TelecomCoverageTest {
+    @Test
+    fun nothingIsCoveredBeforeTelecomSpeaks() {
+        assertFalse(TelecomCoverage().covers(1_000_000))
+    }
+
+    @Test
+    fun aCallIsCoveredWhileItLastsAndItsNotificationsAfterwards() {
+        val coverage = TelecomCoverage()
+        coverage.opened()
+        assertTrue(coverage.active)
+        assertTrue(coverage.covers(1_000_000))
+        coverage.closed(1_000_000)
+        assertFalse(coverage.active)
+        assertTrue(coverage.covers(990_000))
+        assertTrue(coverage.covers(1_030_000))
+    }
+
+    @Test
+    fun aCallLongAfterIsNot() {
+        val coverage = TelecomCoverage()
+        coverage.opened()
+        coverage.closed(1_000_000)
+        assertFalse(coverage.covers(1_100_000))
     }
 }

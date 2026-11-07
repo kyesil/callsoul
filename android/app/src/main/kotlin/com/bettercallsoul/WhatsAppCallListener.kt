@@ -2,12 +2,15 @@ package com.bettercallsoul
 
 import android.app.Notification
 import android.app.Person
+import android.content.ComponentName
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import androidx.core.app.NotificationManagerCompat
 import com.bettercallsoul.diag.DebugLog
+import com.bettercallsoul.telecom.WhatsAppTelecomCalls
 import com.bettercallsoul.whatsapp.CallNotice
 import com.bettercallsoul.whatsapp.CallPhase
 import com.bettercallsoul.whatsapp.FinishedCall
@@ -26,19 +29,47 @@ import kotlinx.coroutines.launch
 class WhatsAppCallListener : NotificationListenerService() {
     private val scope = MainScope()
     private val tracker = WhatsAppCallTracker()
+    private val pill by lazy { WhatsAppPill(this) }
 
     override fun onDestroy() {
+        connected = false
+        pill.close()
         scope.cancel()
         super.onDestroy()
     }
 
+    override fun onListenerConnected() {
+        connected = true
+        DebugLog.i(TAG, "listener connected")
+    }
+
+    override fun onListenerDisconnected() {
+        connected = false
+        DebugLog.i(TAG, "listener disconnected")
+    }
+
     override fun onNotificationPosted(sbn: StatusBarNotification) {
         val notice = notice(sbn) ?: return
-        DebugLog.i(TAG, "notice ${notice.phase} video=${notice.video} category=${sbn.notification.category}")
-        tracker.onNotice(notice, System.currentTimeMillis())?.let(::store)
+        // Some phones hold an idle app's notifications back and hand them over together, so the time
+        // of arrival says little: the time of posting is the one that counts.
+        val late = System.currentTimeMillis() - sbn.postTime
+        DebugLog.i(TAG, "notice ${notice.phase} video=${notice.video} category=${sbn.notification.category} late=${late}ms")
+        tracker.onNotice(notice, sbn.postTime)?.let(::store)
+        // A notification that arrives late may be of a call that is already over.
+        if (container.whatsAppPillEnabled && callStillShown()) {
+            when {
+                notice.phase in PILL_PHASES -> {
+                    val answered = notice.talkingSince ?: sbn.postTime
+                    pill.show(sbn.notification, answered.takeIf { notice.phase == CallPhase.Ongoing })
+                }
+                notice.phase == CallPhase.Ringing && container.ringInPill -> pill.ring(sbn.notification, notice.name)
+            }
+        }
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification) {
+        // Also with the switch turned off in the middle of a call, when no notice comes out of it.
+        if (sbn.packageName in packages() && !callStillShown()) pill.hide()
         val notice = notice(sbn) ?: return
         if (notice.phase == CallPhase.Missed) return
         // One stage of a call may give way to the next as a separate notification: the call goes on.
@@ -64,7 +95,8 @@ class WhatsAppCallListener : NotificationListenerService() {
             category = notification.category,
             chronometer = extras.getBoolean(Notification.EXTRA_SHOW_CHRONOMETER),
         ) ?: return null
-        return notice.copy(number = numberIn(sbn))
+        val timer = extras.getBoolean(Notification.EXTRA_SHOW_CHRONOMETER)
+        return notice.copy(number = numberIn(sbn), talkingSince = notification.`when`.takeIf { timer && it > 0 })
     }
 
     /** WhatsApp names the other side as a tel: person or as a "905321234567@s.whatsapp.net" id, when it does. */
@@ -85,8 +117,9 @@ class WhatsAppCallListener : NotificationListenerService() {
     private fun packages() = if (BuildConfig.DEBUG) WHATSAPP_PACKAGES + "com.android.shell" else WHATSAPP_PACKAGES
 
     private fun store(call: FinishedCall) {
-        DebugLog.i(TAG, "call ${call.outcome} video=${call.video} seconds=${call.seconds}")
-        scope.launch { container.whatsApp.save(call) }
+        val known = WhatsAppTelecomCalls.covers(call.date)
+        DebugLog.i(TAG, "call ${call.outcome} video=${call.video} seconds=${call.seconds} telecomHasIt=$known")
+        if (!known) scope.launch { container.whatsApp.save(call) }
     }
 
     companion object {
@@ -94,9 +127,27 @@ class WhatsAppCallListener : NotificationListenerService() {
         private const val WHATSAPP_ID = "@s.whatsapp.net"
         private const val GRACE_MILLIS = 3_000L
         private val WHATSAPP_PACKAGES = setOf("com.whatsapp", "com.whatsapp.w4b")
+        private val PILL_PHASES = setOf(CallPhase.Dialing, CallPhase.Ongoing)
+
+        @Volatile
+        private var connected = false
 
         /** Whether the user has given this app notification access in Android's settings. */
         fun hasAccess(context: Context): Boolean =
             context.packageName in NotificationManagerCompat.getEnabledListenerPackages(context)
+
+        /**
+         * Some phones, Honor's among them, don't connect a listener again after the app was updated
+         * or stopped, and the calls then go unseen with nothing to show for it. Turning the component
+         * off and on makes Android look at it anew, now that the app is running.
+         */
+        fun reconnect(context: Context) {
+            if (connected || !hasAccess(context)) return
+            DebugLog.i(TAG, "listener not connected, asking again")
+            val listener = ComponentName(context, WhatsAppCallListener::class.java)
+            val packages = context.packageManager
+            packages.setComponentEnabledSetting(listener, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP)
+            packages.setComponentEnabledSetting(listener, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, PackageManager.DONT_KILL_APP)
+        }
     }
 }

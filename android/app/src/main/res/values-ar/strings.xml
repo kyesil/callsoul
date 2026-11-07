@@ -114,6 +114,8 @@
     <string name="settings_overlay_title">العرض فوق التطبيقات الأخرى</string>
     <string name="settings_overlay_body">أثناء المكالمة تظهر فوق التطبيقات الأخرى أزرار للعودة إليها وتشغيل مكبر الصوت وإنهائها.</string>
     <string name="settings_pill_title">فقاعة المكالمة</string>
+    <string name="settings_pill_rings_title">رنين المكالمة الواردة في الفقاعة</string>
+    <string name="settings_pill_rings_body">أثناء استخدام الهاتف، ترنّ المكالمة الواردة في الفقاعة بدل النافذة المنبثقة. وترنّ مكالمات واتساب في الفقاعة أيضًا، لكن لا يمكن إخفاء إشعار واتساب نفسه.</string>
     <string name="settings_pill_orientation">الاتجاه</string>
     <string name="pill_horizontal">أفقي</string>
     <string name="pill_vertical">عمودي</string>
@@ -362,6 +364,8 @@
     <string name="photo_gallery">المعرض</string>
     <string name="settings_whatsapp_title">مكالمات WhatsApp في السجل</string>
     <string name="settings_whatsapp_body">يضيف مكالمات WhatsApp إلى السجل من إشعاراتها مع رمز للصوت أو الفيديو. يتطلب الوصول إلى الإشعارات؛ تُقرأ إشعارات WhatsApp فقط ولا يغادر شيء الهاتف.</string>
+    <string name="settings_whatsapp_pill_title">فقاعة المكالمة في مكالمات واتساب</string>
+    <string name="settings_whatsapp_pill_body">أنهِ مكالمة واتساب أو عُد إليها من الفقاعة. تُظهر مصدر الصوت، وتشغّل مكبّر الصوت على الهواتف التي يترك فيها واتساب مكالماته لنظام أندرويد.</string>
     <string name="call_end_spam">الإبلاغ عن إزعاج وإنهاء المكالمة</string>
     <string name="spam_reported">تم الإبلاغ عن الرقم كمزعج</string>
 </resources>

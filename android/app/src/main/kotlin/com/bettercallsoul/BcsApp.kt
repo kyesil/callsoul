@@ -7,6 +7,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import android.app.Application
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import androidx.core.content.edit
 import androidx.compose.runtime.snapshotFlow
 import coil3.SingletonImageLoader
@@ -24,6 +26,7 @@ import com.bettercallsoul.calllog.withRingTimes
 import com.bettercallsoul.telecom.CallChannels
 import com.bettercallsoul.spam.SpamClient
 import com.bettercallsoul.telecom.CallManager
+import com.bettercallsoul.telecom.WhatsAppTelecomCalls
 import com.bettercallsoul.telecom.CallerDirectory
 import java.util.UUID
 
@@ -99,13 +102,31 @@ class AppContainer(context: Context) {
         prefs.edit { putString(KEY_RECENT_SEARCHES, searches.joinToString("\n")) }
     }
 
-    /** Off until the user turns it on, which also asks for notification access. */
-    var whatsAppCallsEnabled by mutableStateOf(prefs.getBoolean(KEY_WHATSAPP_CALLS, false))
+    /** On unless turned off; it works once the user gives notification access, which Android asks for. */
+    var whatsAppCallsEnabled by mutableStateOf(prefs.getBoolean(KEY_WHATSAPP_CALLS, true))
         private set
 
     fun saveWhatsAppCalls(enabled: Boolean) {
         whatsAppCallsEnabled = enabled
         prefs.edit { putBoolean(KEY_WHATSAPP_CALLS, enabled) }
+    }
+
+    /** A call coming in while the phone is in use rings in the pill instead of a pop-up, unless turned off. */
+    var ringInPill by mutableStateOf(prefs.getBoolean(KEY_RING_IN_PILL, true))
+        private set
+
+    fun saveRingInPill(enabled: Boolean) {
+        ringInPill = enabled
+        prefs.edit { putBoolean(KEY_RING_IN_PILL, enabled) }
+    }
+
+    /** The call pill in WhatsApp calls. On with the WhatsApp calls, unless turned off. */
+    var whatsAppPillEnabled by mutableStateOf(prefs.getBoolean(KEY_WHATSAPP_PILL, true))
+        private set
+
+    fun saveWhatsAppPill(enabled: Boolean) {
+        whatsAppPillEnabled = enabled
+        prefs.edit { putBoolean(KEY_WHATSAPP_PILL, enabled) }
     }
 
     /** On by default; the user can turn it off in Settings. Contacts are never sent. */
@@ -210,6 +231,8 @@ class AppContainer(context: Context) {
         const val KEY_RECENT_SEARCHES = "recent_searches"
         const val MAX_RECENT_SEARCHES = 10
         const val KEY_WHATSAPP_CALLS = "whatsapp_calls"
+        const val KEY_WHATSAPP_PILL = "whatsapp_pill"
+        const val KEY_RING_IN_PILL = "ring_in_pill"
         const val REPLY_SEPARATOR = "\u001F"
     }
 }
@@ -223,9 +246,18 @@ class BcsApp : Application() {
         container = AppContainer(this)
         DebugLog.init(this) { container.debugLogEnabled }
         DebugLog.i("App", "start ${BuildConfig.VERSION_NAME} (${BuildConfig.BUILD_TYPE})")
-        CallManager.init(container.directory) { container.silentWhenFaceDown }
+        CallManager.init(container.directory, { container.silentWhenFaceDown }, { container.ringInPill })
+        WhatsAppTelecomCalls.init { call -> if (container.whatsAppCallsEnabled) container.whatsApp.save(call) }
         CallChannels.create(this, getString(R.string.channel_incoming), getString(R.string.channel_ongoing))
         MissedCallReceiver.createChannel(this)
+        // Android connects the listener by itself on most phones, which takes a moment.
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (container.whatsAppCallsEnabled) WhatsAppCallListener.reconnect(this)
+        }, LISTENER_WAIT_MILLIS)
+    }
+
+    private companion object {
+        const val LISTENER_WAIT_MILLIS = 5_000L
     }
 }
 

@@ -259,6 +259,7 @@ private fun WhatsAppCallSettings() {
         onPauseOrDispose { }
     }
     Card {
+      Column {
         Row(Modifier.fillMaxWidth().padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
                 Text(stringResource(R.string.settings_whatsapp_title), fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
@@ -283,6 +284,21 @@ private fun WhatsAppCallSettings() {
                 },
             )
         }
+        // The pill rides on the WhatsApp calls: it can be on only while they are.
+        val calls = app.whatsAppCallsEnabled && access
+        Row(Modifier.fillMaxWidth().padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.settings_whatsapp_pill_title), fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
+                Text(stringResource(R.string.settings_whatsapp_pill_body), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Spacer(Modifier.width(6.dp))
+            Switch(
+                checked = calls && app.whatsAppPillEnabled,
+                enabled = calls,
+                onCheckedChange = app::saveWhatsAppPill,
+            )
+        }
+      }
     }
 }
 
@@ -510,9 +526,22 @@ private fun PillSettings(overlayAllowed: Boolean) {
         PillStyle.save(context, next)
     }
 
+    val app = context.container
     Card {
         Column(Modifier.fillMaxWidth().padding(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(R.string.settings_pill_title), fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.settings_pill_rings_title), fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(R.string.settings_pill_rings_body), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Spacer(Modifier.width(6.dp))
+                Switch(
+                    checked = app.ringInPill && overlayAllowed,
+                    enabled = overlayAllowed,
+                    onCheckedChange = app::saveRingInPill,
+                )
+            }
             Choice(
                 R.string.settings_pill_orientation,
                 listOf(stringResource(R.string.pill_horizontal), stringResource(R.string.pill_vertical)),

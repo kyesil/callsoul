@@ -114,6 +114,8 @@
     <string name="settings_overlay_title">Uygulamaların üzerinde göster</string>
     <string name="settings_overlay_body">Arama sürerken başka bir uygulamadayken aramaya dönme, hoparlör ve kapatma düğmesi görünür.</string>
     <string name="settings_pill_title">Arama hapı</string>
+    <string name="settings_pill_rings_title">Gelen arama hapta çalsın</string>
+    <string name="settings_pill_rings_body">Telefonu kullanırken gelen arama, açılır bildirim yerine hapta çalar. WhatsApp aramaları da hapta çalar, ama WhatsApp\'ın kendi bildirimi gizlenemez.</string>
     <string name="settings_pill_orientation">Yön</string>
     <string name="pill_horizontal">Yatay</string>
     <string name="pill_vertical">Dikey</string>
@@ -310,6 +312,8 @@
     <string name="photo_gallery">Galeri</string>
     <string name="settings_whatsapp_title">Son aramalarda WhatsApp</string>
     <string name="settings_whatsapp_body">WhatsApp aramalarını bildirimlerinden okuyup son aramalara ekler; simgesi sesli mi görüntülü mü olduğunu gösterir. Bildirim erişimi ister; yalnızca WhatsApp bildirimlerine bakılır, hiçbir şey telefondan çıkmaz.</string>
+    <string name="settings_whatsapp_pill_title">WhatsApp aramalarında arama hapı</string>
+    <string name="settings_whatsapp_pill_body">WhatsApp aramasını haptan kapat ya da aramaya dön. Sesin nereden geldiğini gösterir; WhatsApp aramalarını Android\'e bırakan telefonlarda hoparlörü de açar.</string>
     <string name="call_end_spam">Spam olarak bildir ve kapat</string>
     <string name="spam_reported">Spam olarak bildirildi</string>
 </resources>
