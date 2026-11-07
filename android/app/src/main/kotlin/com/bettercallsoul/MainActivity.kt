@@ -145,7 +145,8 @@ class MainActivity : ComponentActivity() {
         permissionsGranted = REQUIRED_PERMISSIONS.all { checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED }
         isDefaultDialer = holdsDialerRole()
         if (permissionsGranted) {
-            lifecycleScope.launch { seedOwnNumber(this@MainActivity) }
+            // A phone that refuses the contact must not take the app down with it, as One UI 9 did.
+            lifecycleScope.launch { runCatching { seedOwnNumber(this@MainActivity) } }
             lifecycleScope.launch { container.history.sync() }
             lifecycleScope.launch { container.trash.purgeOld() }
         }

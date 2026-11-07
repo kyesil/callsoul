@@ -336,8 +336,16 @@ class ContactEditor(
             RawContacts.CONTENT_URI, arrayOf(RawContacts.ACCOUNT_NAME), "${RawContacts.ACCOUNT_TYPE} = ?", arrayOf(GOOGLE), null,
         )?.use { buildList { while (it.moveToNext()) it.getStringOrNull(0)?.let(::add) } }.orEmpty()
         val google = (fromManager + fromGroups + fromContacts).filter { it.isNotBlank() }.distinct()
-        return listOf(ContactAccount(null, null)) + google.map { ContactAccount(it, GOOGLE) }
+        val phone = if (localAllowed() || google.isEmpty()) listOf(ContactAccount(null, null)) else emptyList()
+        return phone + google.map { ContactAccount(it, GOOGLE) }
     }
+
+    /**
+     * Whether the phone itself may hold new contacts. With the default account set to the cloud
+     * (Android 16 and later, Samsung's One UI 9 among them) Android refuses new contacts in phone
+     * storage or on the SIM.
+     */
+    fun localAllowed(): Boolean = systemDefault()?.type == null
 
     /**
      * Android's own "default account for new contacts" (Android 16 and later): a cloud account, the

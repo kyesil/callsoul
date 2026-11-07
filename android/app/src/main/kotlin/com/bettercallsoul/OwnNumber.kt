@@ -34,6 +34,12 @@ suspend fun seedOwnNumber(context: Context) {
         .filter(String::isNotBlank)
         .distinct()
     if (numbers.isEmpty()) return
+    // With the default account in the cloud the phone takes no contacts of its own, and the "Ben"
+    // contact is not worth syncing anywhere: it is left out for good. My card holds the number instead.
+    if (!app.editor.localAllowed()) {
+        app.ownNumberSeeded = true
+        return
+    }
 
     numbers.forEachIndexed { index, number ->
         if (app.contacts.match(number) == null) {
