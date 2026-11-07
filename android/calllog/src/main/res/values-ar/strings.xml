@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="type_mobile">الجوال</string>
+    <string name="type_home">المنزل</string>
+    <string name="type_work">العمل</string>
+    <string name="type_other">أخرى</string>
+    <string name="type_main">الرئيسي</string>
+    <string name="type_fax_work">فاكس العمل</string>
+    <string name="type_fax_home">فاكس المنزل</string>
+    <string name="type_pager">جهاز النداء</string>
+    <string name="type_birthday">عيد الميلاد</string>
+    <string name="type_anniversary">ذكرى سنوية</string>
+    <string name="type_homepage">الموقع</string>
+    <string name="type_blog">مدونة</string>
+    <string name="type_profile">الملف الشخصي</string>
+    <string name="rel_assistant">مساعد</string>
+    <string name="rel_brother">أخ</string>
+    <string name="rel_child">ابن/ابنة</string>
+    <string name="rel_domestic_partner">شريك المنزل</string>
+    <string name="rel_father">أب</string>
+    <string name="rel_friend">صديق</string>
+    <string name="rel_manager">مدير</string>
+    <string name="rel_mother">أم</string>
+    <string name="rel_parent">أحد الوالدين</string>
+    <string name="rel_partner">شريك</string>
+    <string name="rel_referred_by">أوصى به</string>
+    <string name="rel_relative">قريب</string>
+    <string name="rel_sister">أخت</string>
+    <string name="rel_spouse">زوج/زوجة</string>
+    <string name="source_phone">الهاتف</string>
+    <string name="source_sim">SIM</string>
+</resources>

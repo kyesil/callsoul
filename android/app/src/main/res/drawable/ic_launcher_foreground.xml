@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group android:scaleX="1.9" android:scaleY="1.9"
+        android:translateX="31.2" android:translateY="31.2">
+        <path android:pathData="M6.6,10.8c1.4,2.8 3.8,5.1 6.6,6.6l2.2,-2.2c0.3,-0.3 0.7,-0.4 1,-0.2 1.1,0.4 2.3,0.6 3.6,0.6 0.6,0 1,0.4 1,1V20c0,0.6 -0.4,1 -1,1C10.6,21 3,13.4 3,4c0,-0.6 0.4,-1 1,-1h3.5c0.6,0 1,0.4 1,1 0,1.2 0.2,2.4 0.6,3.6 0.1,0.3 0,0.7 -0.2,1L6.6,10.8z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="12" android:startY="3" android:endX="12" android:endY="21"
+                    android:startColor="#4A515A" android:endColor="#1A1F24" />
+            </aapt:attr>
+        </path>
+    </group>
+    <!-- Light reflected along the upper left edge of the glass. -->
+    <path android:fillType="evenOdd" android:pathData="M23,54a31,31 0,1 1,62,0a31,31 0,1 1,-62,0zM27,57a30,30 0,1 1,60,0a30,30 0,1 1,-60,0z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="32" android:startY="32" android:endX="58" android:endY="58"
+                android:startColor="#E0FFFFFF" android:endColor="#00FFFFFF" />
+        </aapt:attr>
+    </path>
+    <!-- A water drop on the glass. -->
+    <path android:pathData="M73,33.6C74.295,36.19 76.7,38.41 76.7,41C76.7,43.0435 75.0435,44.7 73,44.7C70.9565,44.7 69.3,43.0435 69.3,41C69.3,38.41 71.705,36.19 73,33.6z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="73" android:startY="33.6" android:endX="73" android:endY="44.7"
+                android:startColor="#381A1F24" android:endColor="#C0FFFFFF" />
+        </aapt:attr>
+    </path>
+    <path android:fillColor="#F2FFFFFF" android:pathData="M70.65,39.3a0.95,0.95 0,1 1,1.9,0a0.95,0.95 0,1 1,-1.9,0z" />
+</vector>

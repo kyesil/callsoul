@@ -1,0 +1,55 @@
+Better Call Soul brings your phone and contacts together in one calm, fast app. No ads, no extra screens. Big, quiet layouts made for one hand: find who you want right away and know who's calling at a glance.
+
+KEEP YOUR CONTACTS CLEAN
+The courier, the building manager, that one-time plumber: they don't belong in your address book. Give any number your own label and it shows by that name next time. Labels stay out of your contacts, so your list stays tidy.
+
+SWIPE TO CALL
+• Swipe a row right to call, left to message. Left opens WhatsApp or SMS, your choice.
+• Sliding rows of favourites and the people you talk to most: tap for the profile, double tap to call.
+• Long press the app icon and your favourites are right there.
+• The Search tab looks through contacts and calls at once and highlights the match.
+• On the keypad, names (T9) and numbers are found as you type.
+
+SPEAKER IN ONE TAP
+One tap switches to the speaker even with Bluetooth connected, and a second tap switches back. No digging through audio menus.
+
+THE CALL PILL
+Moved to another app during a call? A small call pill comes with you at the edge of the screen. Turn on the speaker, hang up, or jump back to the call in one tap. Its side, size, button order and transparency are up to you.
+
+AGAINST SPAM
+• When an unknown number calls, you see spam reports and the caller's name if there is one.
+• Worked it out mid-call? "Report spam and hang up" ends the call and reports the number in one tap.
+• A "Was this spam?" question after the call helps the data grow.
+• Numbers in your contacts are never sent, and you can turn the feature off in Settings.
+
+WHAT'S IN SETTINGS
+• Silent when face down: a phone lying on its face doesn't ring, and flipping it silences a ringing call.
+• Decline with a message: write your own quick SMS replies.
+• See WhatsApp calls in your recents, with an icon for voice or video. Optional; it needs notification access.
+• How far from the edge swipes start, so they never clash with Android's back gesture.
+• The call pill's look, animations, and four languages: Turkish, English, Arabic and Russian.
+
+STATISTICS
+See by week, month and year how long you talked, how many people you talked to, how much of it was with numbers outside your contacts, and who you talk to most. It stays on your phone and is kept for a year at most.
+
+WHEN A CALL COMES IN
+• If you're using the phone, a small notification instead of a full screen, so nothing gets interrupted.
+• Swipe to answer or decline, so it can't happen by accident in your pocket.
+• Call back from the missed-call notification in one tap.
+
+DURING A CALL
+• Hold, add a call, swap between calls and merge them.
+• The contact's other numbers, e-mail, work details and note sit quietly under the name.
+• The screen turns off when you hold the phone to your ear.
+
+CONTACTS
+• Every Google Contacts field: phone, e-mail, address, birthday, relations, custom fields, labels, notes and a photo from the camera.
+• Save to any of your Google accounts or to the phone, and move contacts between them.
+• Select several and delete; deleted contacts wait 30 days in a recycle bin.
+• Add a number to an existing contact, and share a contact as a card.
+• Scan a business card QR code and the new contact fills itself in.
+
+PRIVACY
+Your contacts and call history stay on your phone. The cloud spam lookup only covers numbers outside your contacts and can be turned off. See the privacy policy for details.
+
+To use Better Call Soul, make it your default phone app.

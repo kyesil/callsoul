@@ -1,0 +1,55 @@
+Better Call Soul, telefon ve rehberi tek uygulamada birleştiren, sade ve hızlı bir arama uygulaması. Reklam yok, gereksiz ekran yok. Büyük, sakin ekranları ve tek elle kullanıma uygun düzeniyle aradığını hemen bulursun, gelen aramayı bir bakışta tanırsın.
+
+REHBERİ ÇÖPLÜĞE ÇEVİRME
+Kargocu, site yönetimi, tek seferlik usta... Bu numaraları rehbere kaydetmene gerek yok. Rehberinde olmayan numaralara kendi etiketini ver, bir dahaki aramada o adla görünsün. Etiketler rehbere eklenmez, listen temiz kalır.
+
+KAYDIR VE ARA
+• Satırı sağa kaydır, arasın; sola kaydır, mesaj atsın. Sola kaydırma WhatsApp ya da SMS açar, seçim senin.
+• Ana sayfada kayan favoriler ve en çok konuştuğun kişiler: dokun profile git, çift dokun ara.
+• Uygulama simgesine uzun bas, favorilerin hemen orada.
+• Ara sekmesi kişilerde ve aramalarda birden arar, eşleşen harfleri vurgular.
+• Tuş takımında yazmaya başladığın anda isimle (T9) ve numarayla arama.
+
+TEK DOKUNUŞLA HOPARLÖR
+Bluetooth bağlıyken bile tek dokunuşla hoparlöre geçer, ikinci dokunuşta geri döner. Kulaklık menülerinde kaybolmazsın.
+
+ARAMA HAPI
+Konuşurken başka uygulamaya mı geçtin? Ekranın kenarındaki küçük arama hapı seninle gelir. Hoparlörü aç, aramayı kapat ya da tek dokunuşla aramaya dön. Yönü, boyutu, düğme sırası ve saydamlığı sana kalmış.
+
+SPAM'E KARŞI
+• Bilinmeyen bir numara aradığında spam bildirimleri ve varsa arayan adı görünür.
+• Konuşurken anladın mı? "Spam olarak bildir ve kapat" tek dokunuşla aramayı bitirir ve numarayı bildirir.
+• Arama sonunda "spam mıydı?" sorusuyla veri topluca büyür.
+• Rehberindeki numaralar hiçbir zaman gönderilmez; bu özelliği Ayarlar'dan kapatabilirsin.
+
+AYARLARDA NELER VAR
+• Yüzü kapalıyken sessiz çal: telefon ters duruyorsa zil çalmaz. Çalarken ters çevirince de susar.
+• Mesajla reddet: hazır SMS listeni kendin yaz.
+• WhatsApp aramalarını son aramalarda gör: simge sesli mi görüntülü mü olduğunu söyler. İsteğe bağlıdır, bildirim erişimi ister.
+• Kaydırmanın ekran kenarına uzaklığı: Android'in geri hareketiyle çakışmaz.
+• Arama hapının görünümü, animasyonlar, dört dil: Türkçe, İngilizce, Arapça, Rusça.
+
+İSTATİSTİKLER
+Haftalık, aylık ve yıllık olarak ne kadar konuştuğunu, kaç kişiyle konuştuğunu, rehberinde olmayanlarla ne kadar görüştüğünü ve en çok kiminle konuştuğunu gör. Veriler telefonda kalır ve en fazla bir yıl tutulur.
+
+GELEN ARAMADA
+• Telefon kullanılıyorsa tam ekran yerine küçük bir bildirim; işini yarıda kesmez.
+• Cevaplamak ve reddetmek için kaydırma, cepte yanlışlıkla açılmaz.
+• Cevapsız arama bildiriminden tek dokunuşla geri ara.
+
+KONUŞMA SIRASINDA
+• Bekletme, arama ekleme, aramalar arasında geçiş ve birleştirme.
+• Kişinin diğer numaraları, e-postası, iş bilgisi ve notu ismin altında sessizce görünür.
+• Telefonu kulağına götürünce ekran kapanır.
+
+REHBER
+• Google Kişiler'in tüm alanları: telefon, e-posta, adres, doğum günü, ilişkiler, özel alanlar, etiketler, not ve kamerayla fotoğraf.
+• Kaydederken Google hesapların arasından ya da telefondan seç; kişiyi hesaplar arasında taşı.
+• Çoklu seçip sil; silinenler 30 gün geri dönüşüm kutusunda bekler.
+• Var olan kişiye numara ekle, kişiyi kartvizit olarak paylaş.
+• Kartvizit QR kodunu tara, bilgiler yeni kişi ekranına dolsun.
+
+GİZLİLİK
+Rehberin ve arama geçmişin telefonunda kalır. Bulut spam sorgusu yalnızca rehberinde olmayan numaralar için yapılır ve kapatılabilir. Ayrıntılar gizlilik politikasında.
+
+Better Call Soul'u kullanmak için varsayılan telefon uygulaması yapman gerekir.

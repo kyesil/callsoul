@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="overlay_dialing">Aranıyor…</string>
+    <string name="overlay_open">Aramaya dön</string>
+    <string name="overlay_answer">Cevapla</string>
+    <string name="overlay_end">Aramayı bitir</string>
+    <string name="overlay_speaker">Hoparlör</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_answer">Cevapla</string>
+    <string name="notification_decline">Reddet</string>
+    <string name="notification_end">Aramayı bitir</string>
+</resources>

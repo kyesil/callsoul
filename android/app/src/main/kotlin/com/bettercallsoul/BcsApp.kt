@@ -1,0 +1,232 @@
+package com.bettercallsoul
+
+import com.bettercallsoul.diag.DebugLog
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import android.app.Application
+import android.content.Context
+import androidx.core.content.edit
+import androidx.compose.runtime.snapshotFlow
+import coil3.SingletonImageLoader
+import com.bettercallsoul.calllog.CallEntry
+import com.bettercallsoul.calllog.CallHistory
+import com.bettercallsoul.calllog.WhatsAppCallLog
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import com.bettercallsoul.calllog.CallLogRepository
+import com.bettercallsoul.calllog.ContactEditor
+import com.bettercallsoul.calllog.ContactTrash
+import com.bettercallsoul.calllog.ContactsRepository
+import com.bettercallsoul.calllog.LocalDatabase
+import com.bettercallsoul.calllog.withRingTimes
+import com.bettercallsoul.telecom.CallChannels
+import com.bettercallsoul.spam.SpamClient
+import com.bettercallsoul.telecom.CallManager
+import com.bettercallsoul.telecom.CallerDirectory
+import java.util.UUID
+
+/** A little wider than Android's back gesture zone at its default sensitivity. */
+const val DEFAULT_SWIPE_EDGE = 32
+const val MAX_SWIPE_EDGE = 80
+
+/** What a left swipe on a contact or call row opens. [key] is what Settings stores. */
+enum class SwipeMessage(val key: String) {
+    WhatsApp("whatsapp"),
+    Sms("sms"),
+}
+
+class AppContainer(context: Context) {
+    private val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+
+    val contacts = ContactsRepository(context)
+    val callLog = CallLogRepository(context)
+    val editor = ContactEditor(context) { deleted ->
+        // A contact's small photo keeps its address when the picture changes, so the old one has to go.
+        SingletonImageLoader.get(context).memoryCache?.clear()
+        contacts.refresh(deleted)
+        callLog.refresh()
+    }
+    val store = LocalDatabase.create(context).dao()
+    val trash = ContactTrash(context, store, editor)
+    val history = CallHistory(context, store)
+    val whatsApp = WhatsAppCallLog(store, callLog, contacts)
+    val spam = SpamClient(listOf(BuildConfig.API_URL) + BuildConfig.API_BACKUP_URLS.split(",").map { it.trim() })
+    val directory = CallerDirectory(contacts, callLog, store, spam) { spamLookupEnabled }
+
+    /** Everything the recents show: the phone's calls and, when switched on, the WhatsApp ones. */
+    fun observeCalls(limit: Int = 300): Flow<List<CallEntry>> = combine(
+        callLog.observe(limit),
+        whatsApp.observe(),
+        snapshotFlow { whatsAppCallsEnabled },
+        store.observeRingTimes(),
+    ) { phone, whatsApp, enabled, rings ->
+        val calls = phone.withRingTimes(rings)
+        if (enabled && whatsApp.isNotEmpty()) (calls + whatsApp).sortedByDescending { it.date } else calls
+    }
+
+    /** A number's calls for its own page: the phone's and, when switched on, the WhatsApp ones. */
+    suspend fun callHistory(numbers: Collection<String>, name: String? = null, limit: Int = 50): List<CallEntry> {
+        val rings = store.ringTimes()
+        val phone = numbers.flatMap { callLog.historyFor(it, limit) }.distinctBy { it.id }.withRingTimes(rings)
+        val calls = if (whatsAppCallsEnabled) phone + whatsApp.historyFor(numbers, name) else phone
+        return calls.sortedByDescending { it.date }.take(limit)
+    }
+
+    /** Removes calls from the phone's log and from the statistics; WhatsApp ones have negative ids. */
+    suspend fun deleteCalls(ids: Collection<Long>) {
+        val (fromWhatsApp, fromPhone) = ids.partition { it < 0 }
+        callLog.delete(fromPhone)
+        history.forget(fromPhone)
+        whatsApp.forget(fromWhatsApp)
+    }
+
+    /** What the user searched for and then picked a result of, newest first. It stays on the phone. */
+    var recentSearches by mutableStateOf(
+        prefs.getString(KEY_RECENT_SEARCHES, null)?.split('\n')?.filter(String::isNotBlank).orEmpty(),
+    )
+        private set
+
+    fun rememberSearch(text: String) {
+        saveRecentSearches((listOf(text) + recentSearches.filterNot { it.equals(text, ignoreCase = true) }).take(MAX_RECENT_SEARCHES))
+    }
+
+    fun forgetSearch(text: String) = saveRecentSearches(recentSearches - text)
+
+    private fun saveRecentSearches(searches: List<String>) {
+        recentSearches = searches
+        prefs.edit { putString(KEY_RECENT_SEARCHES, searches.joinToString("\n")) }
+    }
+
+    /** Off until the user turns it on, which also asks for notification access. */
+    var whatsAppCallsEnabled by mutableStateOf(prefs.getBoolean(KEY_WHATSAPP_CALLS, false))
+        private set
+
+    fun saveWhatsAppCalls(enabled: Boolean) {
+        whatsAppCallsEnabled = enabled
+        prefs.edit { putBoolean(KEY_WHATSAPP_CALLS, enabled) }
+    }
+
+    /** On by default; the user can turn it off in Settings. Contacts are never sent. */
+    var spamLookupEnabled: Boolean
+        get() = prefs.getBoolean(KEY_LOOKUP, true)
+        set(value) = prefs.edit { putBoolean(KEY_LOOKUP, value) }
+
+    /** The first-run question about being the default phone app has been answered, either way. */
+    var defaultPhoneAsked: Boolean
+        get() = prefs.getBoolean(KEY_DEFAULT_ASKED, false)
+        set(value) = prefs.edit { putBoolean(KEY_DEFAULT_ASKED, value) }
+
+    /** A call arriving on a phone lying on its face rings silently, with the screen on. */
+    var silentWhenFaceDown: Boolean
+        get() = prefs.getBoolean(KEY_FACE_DOWN, false)
+        set(value) = prefs.edit { putBoolean(KEY_FACE_DOWN, value) }
+
+    /** Compose state, so flipping the switch in Settings restyles the open screens at once. */
+    var animationsEnabled by mutableStateOf(prefs.getBoolean(KEY_ANIMATIONS, true))
+        private set
+
+    fun setAnimations(enabled: Boolean) {
+        animationsEnabled = enabled
+        prefs.edit { putBoolean(KEY_ANIMATIONS, enabled) }
+    }
+
+    /**
+     * How far from the screen's side edges a swipe on a list row has to start, in dp; closer than
+     * that it is left to Android's back gesture. Compose state, so the lists follow the slider.
+     */
+    var swipeEdgeDp by mutableIntStateOf(prefs.getInt(KEY_SWIPE_EDGE, DEFAULT_SWIPE_EDGE))
+        private set
+
+    fun setSwipeEdge(dp: Int) {
+        swipeEdgeDp = dp
+        prefs.edit { putInt(KEY_SWIPE_EDGE, dp) }
+    }
+
+    /** Compose state, so the rows take the chosen colour as soon as it changes. WhatsApp unless changed. */
+    var swipeMessage by mutableStateOf(
+        SwipeMessage.entries.firstOrNull { it.key == prefs.getString(KEY_SWIPE_MESSAGE, null) } ?: SwipeMessage.WhatsApp,
+    )
+        private set
+
+    fun saveSwipeMessage(choice: SwipeMessage) {
+        swipeMessage = choice
+        prefs.edit { putString(KEY_SWIPE_MESSAGE, choice.key) }
+    }
+
+    /** The account the last new contact went to, as "type|name", so the next one goes there too. */
+    var newContactAccount: String?
+        get() = prefs.getString(KEY_NEW_CONTACT_ACCOUNT, null)
+        set(value) = prefs.edit { putString(KEY_NEW_CONTACT_ACCOUNT, value) }
+
+    /** The source the contacts list is narrowed to, as [com.bettercallsoul.calllog.ContactSource.key]; null for all. */
+    /** The accounts the contact list is narrowed to; none means everyone. */
+    var contactsSources: Set<String>
+        get() = prefs.getStringSet(KEY_CONTACTS_SOURCES, null) ?: setOfNotNull(prefs.getString(KEY_CONTACTS_SOURCE, null))
+        set(value) = prefs.edit { putStringSet(KEY_CONTACTS_SOURCES, value) }
+
+    /** The ready-made texts for turning a call down with a message, editable in Settings. */
+    var quickReplies by mutableStateOf(
+        prefs.getString(KEY_QUICK_REPLIES, null)?.split(REPLY_SEPARATOR)?.filter(String::isNotBlank)
+            ?: context.resources.getStringArray(R.array.quick_replies).toList(),
+    )
+        private set
+
+    fun saveQuickReplies(replies: List<String>) {
+        quickReplies = replies.map(String::trim).filter(String::isNotEmpty)
+        prefs.edit { putString(KEY_QUICK_REPLIES, quickReplies.joinToString(REPLY_SEPARATOR)) }
+    }
+
+    /** On by default in debug and preview builds, which are the ones handed out for testing. */
+    var debugLogEnabled: Boolean
+        get() = prefs.getBoolean(KEY_DEBUG_LOG, BuildConfig.LOG_BY_DEFAULT)
+        set(value) = prefs.edit { putBoolean(KEY_DEBUG_LOG, value) }
+
+    var ownNumberSeeded: Boolean
+        get() = prefs.getBoolean(KEY_OWN_NUMBER, false)
+        set(value) = prefs.edit { putBoolean(KEY_OWN_NUMBER, value) }
+
+    /** Random per install, so one phone counts as one vote without identifying its owner. */
+    val deviceId: String
+        get() = prefs.getString(KEY_DEVICE_ID, null) ?: UUID.randomUUID().toString().also {
+            prefs.edit { putString(KEY_DEVICE_ID, it) }
+        }
+
+    private companion object {
+        const val KEY_LOOKUP = "spam_lookup"
+        const val KEY_DEFAULT_ASKED = "default_phone_asked"
+        const val KEY_FACE_DOWN = "silent_face_down"
+        const val KEY_ANIMATIONS = "animations"
+        const val KEY_DEBUG_LOG = "debug_log"
+        const val KEY_OWN_NUMBER = "own_number_seeded"
+        const val KEY_DEVICE_ID = "device_id"
+        const val KEY_SWIPE_EDGE = "swipe_edge_dp"
+        const val KEY_NEW_CONTACT_ACCOUNT = "new_contact_account"
+        const val KEY_CONTACTS_SOURCE = "contacts_source"
+        const val KEY_CONTACTS_SOURCES = "contacts_sources"
+        const val KEY_QUICK_REPLIES = "quick_replies"
+        const val KEY_SWIPE_MESSAGE = "swipe_message"
+        const val KEY_RECENT_SEARCHES = "recent_searches"
+        const val MAX_RECENT_SEARCHES = 10
+        const val KEY_WHATSAPP_CALLS = "whatsapp_calls"
+        const val REPLY_SEPARATOR = "\u001F"
+    }
+}
+
+class BcsApp : Application() {
+    lateinit var container: AppContainer
+        private set
+
+    override fun onCreate() {
+        super.onCreate()
+        container = AppContainer(this)
+        DebugLog.init(this) { container.debugLogEnabled }
+        DebugLog.i("App", "start ${BuildConfig.VERSION_NAME} (${BuildConfig.BUILD_TYPE})")
+        CallManager.init(container.directory) { container.silentWhenFaceDown }
+        CallChannels.create(this, getString(R.string.channel_incoming), getString(R.string.channel_ongoing))
+        MissedCallReceiver.createChannel(this)
+    }
+}
+
+val Context.container: AppContainer get() = (applicationContext as BcsApp).container

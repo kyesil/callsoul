@@ -1,0 +1,29 @@
+# Sırlar
+.env
+.env.*
+!.env.example
+*.keystore
+*.jks
+
+# Node
+node_modules/
+.vercel/
+dist/
+
+# Android
+.gradle/
+.kotlin/
+build/
+local.properties
+captures/
+.idea/
+*.iml
+*.apk
+*.aab
+
+# Sistem
+.DS_Store
+Thumbs.db
+
+# Ham emülatör görüntüleri (mockups.py girdisi)
+store/graphics/raw/

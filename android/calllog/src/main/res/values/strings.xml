@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="type_mobile">Mobile</string>
+    <string name="type_home">Home</string>
+    <string name="type_work">Work</string>
+    <string name="type_other">Other</string>
+    <string name="type_main">Main</string>
+    <string name="type_fax_work">Work fax</string>
+    <string name="type_fax_home">Home fax</string>
+    <string name="type_pager">Pager</string>
+    <string name="type_birthday">Birthday</string>
+    <string name="type_anniversary">Anniversary</string>
+    <string name="type_homepage">Website</string>
+    <string name="type_blog">Blog</string>
+    <string name="type_profile">Profile</string>
+    <string name="rel_assistant">Assistant</string>
+    <string name="rel_brother">Brother</string>
+    <string name="rel_child">Child</string>
+    <string name="rel_domestic_partner">Domestic partner</string>
+    <string name="rel_father">Father</string>
+    <string name="rel_friend">Friend</string>
+    <string name="rel_manager">Manager</string>
+    <string name="rel_mother">Mother</string>
+    <string name="rel_parent">Parent</string>
+    <string name="rel_partner">Partner</string>
+    <string name="rel_referred_by">Referred by</string>
+    <string name="rel_relative">Relative</string>
+    <string name="rel_sister">Sister</string>
+    <string name="rel_spouse">Spouse</string>
+    <string name="source_phone">Phone</string>
+    <string name="source_sim">SIM</string>
+</resources>

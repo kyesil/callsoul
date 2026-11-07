@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_answer">Answer</string>
+    <string name="notification_decline">Decline</string>
+    <string name="notification_end">End call</string>
+</resources>

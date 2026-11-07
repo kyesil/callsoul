@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="type_mobile">Cep</string>
+    <string name="type_home">Ev</string>
+    <string name="type_work">İş</string>
+    <string name="type_other">Diğer</string>
+    <string name="type_main">Ana</string>
+    <string name="type_fax_work">İş faksı</string>
+    <string name="type_fax_home">Ev faksı</string>
+    <string name="type_pager">Çağrı cihazı</string>
+    <string name="type_birthday">Doğum günü</string>
+    <string name="type_anniversary">Yıl dönümü</string>
+    <string name="type_homepage">Web sitesi</string>
+    <string name="type_blog">Blog</string>
+    <string name="type_profile">Profil</string>
+    <string name="rel_assistant">Asistan</string>
+    <string name="rel_brother">Erkek kardeş</string>
+    <string name="rel_child">Çocuk</string>
+    <string name="rel_domestic_partner">Birlikte yaşadığı kişi</string>
+    <string name="rel_father">Baba</string>
+    <string name="rel_friend">Arkadaş</string>
+    <string name="rel_manager">Yönetici</string>
+    <string name="rel_mother">Anne</string>
+    <string name="rel_parent">Ebeveyn</string>
+    <string name="rel_partner">Partner</string>
+    <string name="rel_referred_by">Tavsiye eden</string>
+    <string name="rel_relative">Akraba</string>
+    <string name="rel_sister">Kız kardeş</string>
+    <string name="rel_spouse">Eş</string>
+    <string name="source_phone">Telefon</string>
+    <string name="source_sim">SIM</string>
+</resources>

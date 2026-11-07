@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="type_mobile">Мобильный</string>
+    <string name="type_home">Домашний</string>
+    <string name="type_work">Рабочий</string>
+    <string name="type_other">Другой</string>
+    <string name="type_main">Основной</string>
+    <string name="type_fax_work">Рабочий факс</string>
+    <string name="type_fax_home">Домашний факс</string>
+    <string name="type_pager">Пейджер</string>
+    <string name="type_birthday">День рождения</string>
+    <string name="type_anniversary">Годовщина</string>
+    <string name="type_homepage">Сайт</string>
+    <string name="type_blog">Блог</string>
+    <string name="type_profile">Профиль</string>
+    <string name="rel_assistant">Ассистент</string>
+    <string name="rel_brother">Брат</string>
+    <string name="rel_child">Ребёнок</string>
+    <string name="rel_domestic_partner">Сожитель</string>
+    <string name="rel_father">Отец</string>
+    <string name="rel_friend">Друг</string>
+    <string name="rel_manager">Руководитель</string>
+    <string name="rel_mother">Мать</string>
+    <string name="rel_parent">Родитель</string>
+    <string name="rel_partner">Партнёр</string>
+    <string name="rel_referred_by">По рекомендации</string>
+    <string name="rel_relative">Родственник</string>
+    <string name="rel_sister">Сестра</string>
+    <string name="rel_spouse">Супруг(а)</string>
+    <string name="source_phone">Телефон</string>
+    <string name="source_sim">SIM</string>
+</resources>

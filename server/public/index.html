@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Better Call Soul</title>
+<meta name="description" content="Android için telefon ve rehber uygulaması. A phone and contacts app for Android.">
+<link rel="icon" href="assets/logo.png">
+<style>
+  :root {
+    --ink: #1c2126; --soft: #58606a; --line: #d6dbe0; --card: #ffffff; --accent: #2264d1;
+    --back: linear-gradient(150deg, #f7f9fb 0%, #e6e9ed 45%, #c9ced5 100%);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink: #eceef0; --soft: #a3a8ae; --line: #33383e; --card: #1f2327; --accent: #7fb2ff;
+      --back: linear-gradient(150deg, #2b3036 0%, #14181c 55%, #23282d 100%); }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; color: var(--ink); background: var(--back) fixed; font: 17px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 48px; }
+  nav { display: flex; justify-content: flex-end; }
+  nav button { font: inherit; font-size: 14px; color: var(--soft); background: none; border: 1px solid var(--line); border-radius: 999px; padding: 4px 14px; cursor: pointer; }
+  .hero { display: grid; grid-template-columns: 1fr 300px; gap: 48px; align-items: center; padding: 16px 0 44px; }
+  .tour { display: block; width: 100%; height: auto; border-radius: 22px; box-shadow: 0 24px 60px rgba(20, 26, 34, .35); background: #d6dbe0; }
+  .logo { width: 96px; height: 96px; border-radius: 24px; display: block; }
+  h1 { font-size: clamp(38px, 7vw, 60px); line-height: 1.08; letter-spacing: -0.02em; margin: 20px 0 12px; }
+  .lead { font-size: clamp(18px, 2.4vw, 21px); color: var(--soft); margin: 0 0 28px; max-width: 40em; }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .button { display: inline-block; padding: 12px 22px; border-radius: 999px; font-weight: 600; text-decoration: none; color: var(--ink); background: var(--card); border: 1px solid var(--line); }
+  .button.main { color: #fff; background: #16803c; border-color: #16803c; }
+  .button small { display: block; font-weight: 400; font-size: 12px; color: var(--soft); }
+  .button.main small { color: #d7f3e1; }
+  h2 { font-size: 28px; letter-spacing: -0.01em; margin: 0 0 20px; }
+  .shots { display: flex; gap: 14px; overflow-x: auto; padding: 4px 4px 18px; margin: 0 -4px 40px; scroll-snap-type: x proximity; }
+  .shots img { width: 240px; height: auto; aspect-ratio: 9 / 16; flex: none; border-radius: 16px; scroll-snap-align: start; box-shadow: 0 8px 22px rgba(20, 26, 34, .18); }
+  .features { columns: 2 420px; column-gap: 14px; margin-bottom: 28px; }
+  .features article { break-inside: avoid; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px 20px; margin: 0 0 14px; }
+  h3 { font-size: 18px; margin: 0 0 6px; }
+  .features p { margin: 0; color: var(--soft); font-size: 15.5px; }
+  .features ul { margin: 0; padding-left: 18px; color: var(--soft); font-size: 15.5px; }
+  .features li + li { margin-top: 4px; }
+  .closing { color: var(--soft); margin: 0 0 40px; }
+  .note { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 24px; margin-bottom: 32px; }
+  .note h2 { margin-bottom: 12px; }
+  .note ul { margin: 0; padding-left: 20px; }
+  .note li + li { margin-top: 10px; }
+  a { color: var(--accent); }
+  footer { color: var(--soft); font-size: 14px; display: flex; flex-wrap: wrap; gap: 8px 20px; }
+  @media (max-width: 760px) {
+    .hero { grid-template-columns: 1fr; gap: 32px; }
+    .tour { max-width: 300px; margin: 0 auto; }
+    .shots img { width: 200px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <nav><button id="lang" type="button">English</button></nav>
+
+  <section class="hero">
+    <div>
+    <img class="logo" src="assets/logo.png" alt="" width="96" height="96">
+    <h1>Better Call Soul</h1>
+    <p class="lead" data-tr="Better Call Soul, telefon ve rehberi tek uygulamada birleştiren, sade ve hızlı bir arama uygulaması. Reklam yok, gereksiz ekran yok. Büyük, sakin ekranları ve tek elle kullanıma uygun düzeniyle aradığını hemen bulursun, gelen aramayı bir bakışta tanırsın." data-en="Better Call Soul brings your phone and contacts together in one calm, fast app. No ads, no extra screens. Big, quiet layouts made for one hand: find who you want right away and know who&#x27;s calling at a glance.">Better Call Soul, telefon ve rehberi tek uygulamada birleştiren, sade ve hızlı bir arama uygulaması. Reklam yok, gereksiz ekran yok. Büyük, sakin ekranları ve tek elle kullanıma uygun düzeniyle aradığını hemen bulursun, gelen aramayı bir bakışta tanırsın.</p>
+    <div class="actions">
+      <a class="button main" href="https://github.com/kyesil/callsoul/releases/latest"><span data-tr="APK indir" data-en="Download APK">APK indir</span><small data-tr="Android 10 ve üzeri" data-en="Android 10 and up">Android 10 ve üzeri</small></a>
+      <a class="button" href="https://play.google.com/store/apps/details?id=dev.yesil.callsoul">Google Play<small data-tr="Mağazada aç" data-en="Open in the store">Mağazada aç</small></a>
+      <a class="button" href="https://github.com/kyesil/callsoul">GitHub<small data-tr="GPL-3.0 açık kaynak" data-en="GPL-3.0 open source">GPL-3.0 açık kaynak</small></a>
+    </div>
+    </div>
+    <video class="tour" id="tour" src="assets/tour.mp4" poster="assets/tour-poster.jpg" controls muted playsinline preload="metadata" width="1080" height="1920"></video>
+  </section>
+
+  <div class="shots" id="shots"></div>
+
+  <h2 data-tr="Özellikler" data-en="Features">Özellikler</h2>
+  <section class="features">
+    <article>
+      <h3 data-tr="Rehberi çöplüğe çevirme" data-en="Keep your contacts clean">Rehberi çöplüğe çevirme</h3>
+      <p data-tr="Kargocu, site yönetimi, tek seferlik usta... Bu numaraları rehbere kaydetmene gerek yok. Rehberinde olmayan numaralara kendi etiketini ver, bir dahaki aramada o adla görünsün. Etiketler rehbere eklenmez, listen temiz kalır." data-en="The courier, the building manager, that one-time plumber: they don&#x27;t belong in your address book. Give any number your own label and it shows by that name next time. Labels stay out of your contacts, so your list stays tidy.">Kargocu, site yönetimi, tek seferlik usta... Bu numaraları rehbere kaydetmene gerek yok. Rehberinde olmayan numaralara kendi etiketini ver, bir dahaki aramada o adla görünsün. Etiketler rehbere eklenmez, listen temiz kalır.</p>
+    </article>
+    <article>
+      <h3 data-tr="Kaydır ve ara" data-en="Swipe to call">Kaydır ve ara</h3>
+      <ul>
+        <li data-tr="Satırı sağa kaydır, arasın; sola kaydır, mesaj atsın. Sola kaydırma WhatsApp ya da SMS açar, seçim senin." data-en="Swipe a row right to call, left to message. Left opens WhatsApp or SMS, your choice.">Satırı sağa kaydır, arasın; sola kaydır, mesaj atsın. Sola kaydırma WhatsApp ya da SMS açar, seçim senin.</li>
+        <li data-tr="Ana sayfada kayan favoriler ve en çok konuştuğun kişiler: dokun profile git, çift dokun ara." data-en="Sliding rows of favourites and the people you talk to most: tap for the profile, double tap to call.">Ana sayfada kayan favoriler ve en çok konuştuğun kişiler: dokun profile git, çift dokun ara.</li>
+        <li data-tr="Uygulama simgesine uzun bas, favorilerin hemen orada." data-en="Long press the app icon and your favourites are right there.">Uygulama simgesine uzun bas, favorilerin hemen orada.</li>
+        <li data-tr="Ara sekmesi kişilerde ve aramalarda birden arar, eşleşen harfleri vurgular." data-en="The Search tab looks through contacts and calls at once and highlights the match.">Ara sekmesi kişilerde ve aramalarda birden arar, eşleşen harfleri vurgular.</li>
+        <li data-tr="Tuş takımında yazmaya başladığın anda isimle (T9) ve numarayla arama." data-en="On the keypad, names (T9) and numbers are found as you type.">Tuş takımında yazmaya başladığın anda isimle (T9) ve numarayla arama.</li>
+      </ul>
+    </article>
+    <article>
+      <h3 data-tr="Tek dokunuşla hoparlör" data-en="Speaker in one tap">Tek dokunuşla hoparlör</h3>
+      <p data-tr="Bluetooth bağlıyken bile tek dokunuşla hoparlöre geçer, ikinci dokunuşta geri döner. Kulaklık menülerinde kaybolmazsın." data-en="One tap switches to the speaker even with Bluetooth connected, and a second tap switches back. No digging through audio menus.">Bluetooth bağlıyken bile tek dokunuşla hoparlöre geçer, ikinci dokunuşta geri döner. Kulaklık menülerinde kaybolmazsın.</p>
+    </article>
+    <article>
+      <h3 data-tr="Arama hapı" data-en="The call pill">Arama hapı</h3>
+      <p data-tr="Konuşurken başka uygulamaya mı geçtin? Ekranın kenarındaki küçük arama hapı seninle gelir. Hoparlörü aç, aramayı kapat ya da tek dokunuşla aramaya dön. Yönü, boyutu, düğme sırası ve saydamlığı sana kalmış." data-en="Moved to another app during a call? A small call pill comes with you at the edge of the screen. Turn on the speaker, hang up, or jump back to the call in one tap. Its side, size, button order and transparency are up to you.">Konuşurken başka uygulamaya mı geçtin? Ekranın kenarındaki küçük arama hapı seninle gelir. Hoparlörü aç, aramayı kapat ya da tek dokunuşla aramaya dön. Yönü, boyutu, düğme sırası ve saydamlığı sana kalmış.</p>
+    </article>
+    <article>
+      <h3 data-tr="Spam&#x27;e karşı" data-en="Against spam">Spam&#x27;e karşı</h3>
+      <ul>
+        <li data-tr="Bilinmeyen bir numara aradığında spam bildirimleri ve varsa arayan adı görünür." data-en="When an unknown number calls, you see spam reports and the caller&#x27;s name if there is one.">Bilinmeyen bir numara aradığında spam bildirimleri ve varsa arayan adı görünür.</li>
+        <li data-tr="Konuşurken anladın mı? &quot;Spam olarak bildir ve kapat&quot; tek dokunuşla aramayı bitirir ve numarayı bildirir." data-en="Worked it out mid-call? &quot;Report spam and hang up&quot; ends the call and reports the number in one tap.">Konuşurken anladın mı? &quot;Spam olarak bildir ve kapat&quot; tek dokunuşla aramayı bitirir ve numarayı bildirir.</li>
+        <li data-tr="Arama sonunda &quot;spam mıydı?&quot; sorusuyla veri topluca büyür." data-en="A &quot;Was this spam?&quot; question after the call helps the data grow.">Arama sonunda &quot;spam mıydı?&quot; sorusuyla veri topluca büyür.</li>
+        <li data-tr="Rehberindeki numaralar hiçbir zaman gönderilmez; bu özelliği Ayarlar&#x27;dan kapatabilirsin." data-en="Numbers in your contacts are never sent, and you can turn the feature off in Settings.">Rehberindeki numaralar hiçbir zaman gönderilmez; bu özelliği Ayarlar&#x27;dan kapatabilirsin.</li>
+      </ul>
+    </article>
+    <article>
+      <h3 data-tr="Ayarlarda neler var" data-en="What&#x27;s in settings">Ayarlarda neler var</h3>
+      <ul>
+        <li data-tr="Yüzü kapalıyken sessiz çal: telefon ters duruyorsa zil çalmaz. Çalarken ters çevirince de susar." data-en="Silent when face down: a phone lying on its face doesn&#x27;t ring, and flipping it silences a ringing call.">Yüzü kapalıyken sessiz çal: telefon ters duruyorsa zil çalmaz. Çalarken ters çevirince de susar.</li>
+        <li data-tr="Mesajla reddet: hazır SMS listeni kendin yaz." data-en="Decline with a message: write your own quick SMS replies.">Mesajla reddet: hazır SMS listeni kendin yaz.</li>
+        <li data-tr="WhatsApp aramalarını son aramalarda gör: simge sesli mi görüntülü mü olduğunu söyler. İsteğe bağlıdır, bildirim erişimi ister." data-en="See WhatsApp calls in your recents, with an icon for voice or video. Optional; it needs notification access.">WhatsApp aramalarını son aramalarda gör: simge sesli mi görüntülü mü olduğunu söyler. İsteğe bağlıdır, bildirim erişimi ister.</li>
+        <li data-tr="Kaydırmanın ekran kenarına uzaklığı: Android&#x27;in geri hareketiyle çakışmaz." data-en="How far from the edge swipes start, so they never clash with Android&#x27;s back gesture.">Kaydırmanın ekran kenarına uzaklığı: Android&#x27;in geri hareketiyle çakışmaz.</li>
+        <li data-tr="Arama hapının görünümü, animasyonlar, dört dil: Türkçe, İngilizce, Arapça, Rusça." data-en="The call pill&#x27;s look, animations, and four languages: Turkish, English, Arabic and Russian.">Arama hapının görünümü, animasyonlar, dört dil: Türkçe, İngilizce, Arapça, Rusça.</li>
+      </ul>
+    </article>
+    <article>
+      <h3 data-tr="İstatistikler" data-en="Statistics">İstatistikler</h3>
+      <p data-tr="Haftalık, aylık ve yıllık olarak ne kadar konuştuğunu, kaç kişiyle konuştuğunu, rehberinde olmayanlarla ne kadar görüştüğünü ve en çok kiminle konuştuğunu gör. Veriler telefonda kalır ve en fazla bir yıl tutulur." data-en="See by week, month and year how long you talked, how many people you talked to, how much of it was with numbers outside your contacts, and who you talk to most. It stays on your phone and is kept for a year at most.">Haftalık, aylık ve yıllık olarak ne kadar konuştuğunu, kaç kişiyle konuştuğunu, rehberinde olmayanlarla ne kadar görüştüğünü ve en çok kiminle konuştuğunu gör. Veriler telefonda kalır ve en fazla bir yıl tutulur.</p>
+    </article>
+    <article>
+      <h3 data-tr="Gelen aramada" data-en="When a call comes in">Gelen aramada</h3>
+      <ul>
+        <li data-tr="Telefon kullanılıyorsa tam ekran yerine küçük bir bildirim; işini yarıda kesmez." data-en="If you&#x27;re using the phone, a small notification instead of a full screen, so nothing gets interrupted.">Telefon kullanılıyorsa tam ekran yerine küçük bir bildirim; işini yarıda kesmez.</li>
+        <li data-tr="Cevaplamak ve reddetmek için kaydırma, cepte yanlışlıkla açılmaz." data-en="Swipe to answer or decline, so it can&#x27;t happen by accident in your pocket.">Cevaplamak ve reddetmek için kaydırma, cepte yanlışlıkla açılmaz.</li>
+        <li data-tr="Cevapsız arama bildiriminden tek dokunuşla geri ara." data-en="Call back from the missed-call notification in one tap.">Cevapsız arama bildiriminden tek dokunuşla geri ara.</li>
+      </ul>
+    </article>
+    <article>
+      <h3 data-tr="Konuşma sırasında" data-en="During a call">Konuşma sırasında</h3>
+      <ul>
+        <li data-tr="Bekletme, arama ekleme, aramalar arasında geçiş ve birleştirme." data-en="Hold, add a call, swap between calls and merge them.">Bekletme, arama ekleme, aramalar arasında geçiş ve birleştirme.</li>
+        <li data-tr="Kişinin diğer numaraları, e-postası, iş bilgisi ve notu ismin altında sessizce görünür." data-en="The contact&#x27;s other numbers, e-mail, work details and note sit quietly under the name.">Kişinin diğer numaraları, e-postası, iş bilgisi ve notu ismin altında sessizce görünür.</li>
+        <li data-tr="Telefonu kulağına götürünce ekran kapanır." data-en="The screen turns off when you hold the phone to your ear.">Telefonu kulağına götürünce ekran kapanır.</li>
+      </ul>
+    </article>
+    <article>
+      <h3 data-tr="Rehber" data-en="Contacts">Rehber</h3>
+      <ul>
+        <li data-tr="Google Kişiler&#x27;in tüm alanları: telefon, e-posta, adres, doğum günü, ilişkiler, özel alanlar, etiketler, not ve kamerayla fotoğraf." data-en="Every Google Contacts field: phone, e-mail, address, birthday, relations, custom fields, labels, notes and a photo from the camera.">Google Kişiler&#x27;in tüm alanları: telefon, e-posta, adres, doğum günü, ilişkiler, özel alanlar, etiketler, not ve kamerayla fotoğraf.</li>
+        <li data-tr="Kaydederken Google hesapların arasından ya da telefondan seç; kişiyi hesaplar arasında taşı." data-en="Save to any of your Google accounts or to the phone, and move contacts between them.">Kaydederken Google hesapların arasından ya da telefondan seç; kişiyi hesaplar arasında taşı.</li>
+        <li data-tr="Çoklu seçip sil; silinenler 30 gün geri dönüşüm kutusunda bekler." data-en="Select several and delete; deleted contacts wait 30 days in a recycle bin.">Çoklu seçip sil; silinenler 30 gün geri dönüşüm kutusunda bekler.</li>
+        <li data-tr="Var olan kişiye numara ekle, kişiyi kartvizit olarak paylaş." data-en="Add a number to an existing contact, and share a contact as a card.">Var olan kişiye numara ekle, kişiyi kartvizit olarak paylaş.</li>
+        <li data-tr="Kartvizit QR kodunu tara, bilgiler yeni kişi ekranına dolsun." data-en="Scan a business card QR code and the new contact fills itself in.">Kartvizit QR kodunu tara, bilgiler yeni kişi ekranına dolsun.</li>
+      </ul>
+    </article>
+    <article>
+      <h3 data-tr="Gizlilik" data-en="Privacy">Gizlilik</h3>
+      <p data-tr="Rehberin ve arama geçmişin telefonunda kalır. Bulut spam sorgusu yalnızca rehberinde olmayan numaralar için yapılır ve kapatılabilir. Ayrıntılar gizlilik politikasında." data-en="Your contacts and call history stay on your phone. The cloud spam lookup only covers numbers outside your contacts and can be turned off. See the privacy policy for details.">Rehberin ve arama geçmişin telefonunda kalır. Bulut spam sorgusu yalnızca rehberinde olmayan numaralar için yapılır ve kapatılabilir. Ayrıntılar gizlilik politikasında.</p>
+    </article>
+    <article>
+      <h3 data-tr="Öne çıkan diğer özellikler" data-en="Other highlights">Öne çıkan diğer özellikler</h3>
+      <ul>
+        <li data-tr="Cevapsız aramalarda ne kadar çaldığı kırmızıyla, saniye olarak yazar." data-en="Missed calls show how long they rang, in red, in seconds.">Cevapsız aramalarda ne kadar çaldığı kırmızıyla, saniye olarak yazar.</li>
+        <li data-tr="WhatsApp aramaları kişinin arama geçmişinde de kendi simgesiyle görünür." data-en="WhatsApp calls also show in a contact&#x27;s call history, with their own icon.">WhatsApp aramaları kişinin arama geçmişinde de kendi simgesiyle görünür.</li>
+        <li data-tr="Ara sekmesinde son arananlar durur, çarpıyla silinir; sonuçlarda uzun basıp toplu silebilirsin." data-en="The Search tab keeps your recent searches, removed with a cross; long press results to delete several.">Ara sekmesinde son arananlar durur, çarpıyla silinir; sonuçlarda uzun basıp toplu silebilirsin.</li>
+        <li data-tr="Rehberi birden fazla kaynağa daraltabilirsin; seçimin kalıcıdır ve Ara sekmesi de aynı kaynakları kullanır." data-en="Narrow your contacts to several sources; the choice stays, and the Search tab follows it.">Rehberi birden fazla kaynağa daraltabilirsin; seçimin kalıcıdır ve Ara sekmesi de aynı kaynakları kullanır.</li>
+        <li data-tr="Bir kayda girip geri dönünce liste kaldığın yerde durur." data-en="Open an entry and come back: the list is where you left it.">Bir kayda girip geri dönünce liste kaldığın yerde durur.</li>
+        <li data-tr="Arama başlatırken ve cevaplarken yeşil daire büyüyüp arama ekranına dönüşür." data-en="Placing or answering a call grows a green circle into the call screen.">Arama başlatırken ve cevaplarken yeşil daire büyüyüp arama ekranına dönüşür.</li>
+        <li data-tr="Android 10 ve üzeri, koyu tema, reklamsız, GPL-3.0 ile açık kaynak." data-en="Android 10 and up, dark theme, no ads, open source under GPL-3.0.">Android 10 ve üzeri, koyu tema, reklamsız, GPL-3.0 ile açık kaynak.</li>
+      </ul>
+    </article>
+  </section>
+  <p class="closing" data-tr="Better Call Soul&#x27;u kullanmak için varsayılan telefon uygulaması yapman gerekir." data-en="To use Better Call Soul, make it your default phone app.">Better Call Soul&#x27;u kullanmak için varsayılan telefon uygulaması yapman gerekir.</p>
+
+  <section class="note">
+    <h2 data-tr="Geliştirici Notu" data-en="Developer&#x27;s note">Geliştirici Notu</h2>
+    <ul>
+      <li data-tr="Bu bir hobi projesi, kendim kullanmak için yaptım. Opus 5.5 sağ olsun." data-en="This is a hobby project; I built it for my own use. Thanks to Opus 5.5.">Bu bir hobi projesi, kendim kullanmak için yaptım. Opus 5.5 sağ olsun.</li>
+      <li data-tr="Rehberim çöplüğe dönmüştü; Android&#x27;de Samsung&#x27;unki dışında doğru düzgün arama uygulaması bulamadım." data-en="My contacts had turned into a dump, and apart from Samsung&#x27;s I couldn&#x27;t find a decent caller app on Android.">Rehberim çöplüğe dönmüştü; Android&#x27;de Samsung&#x27;unki dışında doğru düzgün arama uygulaması bulamadım.</li>
+      <li data-tr="Spam koruması ve akıllı arayan kimliği yapmayı çok istedim. Bunun için ücretsiz servis yok; bu yüzden değerlendirmeyi Supabase&#x27;in ücretsiz hesabıyla yapmaya çalışıyoruz, veri henüz az." data-en="I really wanted spam protection and smart caller ID. There&#x27;s no free service for that, so we&#x27;re trying to do the evaluation on a free Supabase account; there isn&#x27;t much data yet.">Spam koruması ve akıllı arayan kimliği yapmayı çok istedim. Bunun için ücretsiz servis yok; bu yüzden değerlendirmeyi Supabase&#x27;in ücretsiz hesabıyla yapmaya çalışıyoruz, veri henüz az.</li>
+      <li data-tr="Geliştirirken şunu fark ettim: her üretici Apple&#x27;ı kopyalayıp &quot;island&quot; yapmış; her işletim sisteminde ayrı bağımlılığı var. Bir standart koyamamışlar. Arama hapını bu yüzden ekledim." data-en="While building it I noticed that every manufacturer copied Apple and made an &quot;island&quot;, each tied to its own operating system. They never agreed on a standard. That&#x27;s why I added the call pill.">Geliştirirken şunu fark ettim: her üretici Apple&#x27;ı kopyalayıp &quot;island&quot; yapmış; her işletim sisteminde ayrı bağımlılığı var. Bir standart koyamamışlar. Arama hapını bu yüzden ekledim.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>© 2026 <a href="https://yesil.dev">yesil.dev</a></span>
+    <span data-tr="Birlikte geliştiren: Claude Opus 5.5" data-en="Co-Authored-By: Claude Opus 5.5">Birlikte geliştiren: Claude Opus 5.5</span>
+    <a href="/privacy" data-tr="Gizlilik politikası" data-en="Privacy policy">Gizlilik politikası</a>
+    <a href="/delete-data" data-tr="Veri silme" data-en="Data deletion">Veri silme</a>
+    <a href="https://www.gnu.org/licenses/gpl-3.0.html">GPL-3.0</a>
+  </footer>
+</main>
+<script>
+  const names = ['1-home', '2-contact', '3-labels', '4-call', '5-pill', '6-spam', '7-settings', '8-stats'];
+  const button = document.getElementById("lang");
+  const shots = document.getElementById("shots");
+  const tour = document.getElementById("tour");
+  function show(lang) {
+    document.documentElement.lang = lang;
+    document.querySelectorAll("[data-tr]").forEach(el => { el.textContent = el.dataset[lang]; });
+    button.textContent = lang === "tr" ? "English" : "Türkçe";
+    const film = lang === "tr" ? "tour" : "tour-en";
+    if (tour.getAttribute("src") !== `assets/${film}.mp4`) {
+      tour.poster = `assets/${film}-poster.jpg`;
+      tour.src = `assets/${film}.mp4`;
+    }
+    shots.replaceChildren(...names.map(name => {
+      const image = new Image(540, 960);
+      image.src = `assets/shots/${lang}-${name}.jpg`;
+      image.alt = "";
+      image.loading = "lazy";
+      return image;
+    }));
+    button.onclick = () => show(lang === "tr" ? "en" : "tr");
+  }
+  // The browser's own language; Turkish for Turkish, English for everything else.
+  show((navigator.language || "en").toLowerCase().startsWith("tr") ? "tr" : "en");
+</script>
+</body>
+</html>

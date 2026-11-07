@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- What may leave the app's storage: the exported log, a contact card being shared, and the file
+     the camera app writes a contact's photo to. -->
+<paths>
+    <files-path name="logs" path="logs/export/" />
+    <cache-path name="shared" path="shared/" />
+    <cache-path name="camera" path="camera/" />
+</paths>

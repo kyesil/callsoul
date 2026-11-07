@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_answer">رد</string>
+    <string name="notification_decline">رفض</string>
+    <string name="notification_end">إنهاء المكالمة</string>
+</resources>
