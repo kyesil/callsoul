@@ -98,8 +98,14 @@ class WhatsAppPill(context: Context) {
         return true
     }
 
+    /**
+     * Right away rather than through the flow: a phone that freezes idle apps may do so the moment this
+     * returns, and the pill would stay on the screen until something wakes the app.
+     */
     fun hide() {
         shown.value = null
+        overlay.hide()
+        letGoOfDevice()
     }
 
     fun close() {

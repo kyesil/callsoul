@@ -50,6 +50,7 @@ Moved to another app during a call? A small call pill comes with you at the edge
 - Your recents show how long a WhatsApp call lasted, and how long a missed one rang.
 - On phones where WhatsApp reports its calls to Android, such as the Galaxy S21, people who aren't in your contacts come with their number, so you can get back to them.
 - WhatsApp calls are on from the start, and the pill has a switch of its own in Settings. Both need notification access, given once; nothing read leaves the phone.
+- If the phone stops the app in the background, notifications come late; the app notices and Settings shows how to let it run.
 
 ### Against spam
 

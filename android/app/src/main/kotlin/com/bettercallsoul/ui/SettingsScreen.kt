@@ -1,5 +1,8 @@
 package com.bettercallsoul.ui
 
+import android.app.ActivityManager
+import android.content.Context
+
 import com.bettercallsoul.diag.DebugLog
 import android.text.format.Formatter
 import androidx.core.content.FileProvider
@@ -254,8 +257,10 @@ private fun WhatsAppCallSettings() {
     val context = LocalContext.current
     val app = context.container
     var access by remember { mutableStateOf(WhatsAppCallListener.hasAccess(context)) }
+    var heldBack by remember { mutableStateOf(heldBack(context)) }
     LifecycleResumeEffect(Unit) {
         access = WhatsAppCallListener.hasAccess(context)
+        heldBack = heldBack(context)
         onPauseOrDispose { }
     }
     Card {
@@ -298,9 +303,28 @@ private fun WhatsAppCallSettings() {
                 onCheckedChange = app::saveWhatsAppPill,
             )
         }
+        if (calls && (app.whatsAppLate || heldBack)) {
+            Column(Modifier.fillMaxWidth().padding(horizontal = 10.dp)) {
+                Text(stringResource(R.string.settings_whatsapp_late), fontSize = 13.sp, color = MaterialTheme.colorScheme.error)
+                TextButton(onClick = {
+                    app.forgetWhatsAppLate()
+                    context.startActivity(
+                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, "package:${context.packageName}".toUri()),
+                    )
+                }) { Text(stringResource(R.string.settings_whatsapp_late_open)) }
+            }
+        }
       }
     }
 }
+
+/**
+ * The user restricted the app's background use, so the phone stops it between calls and WhatsApp's
+ * notifications reach nobody. Whether battery optimization is off can't be told the same way on every
+ * phone (Samsung keeps "Unrestricted" elsewhere), so late notices tell the rest.
+ */
+private fun heldBack(context: Context): Boolean =
+    context.getSystemService(ActivityManager::class.java).isBackgroundRestricted
 
 /** The texts offered when a call is turned down with a message: edit, remove, add. */
 @Composable

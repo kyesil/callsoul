@@ -120,6 +120,24 @@ class AppContainer(context: Context) {
         prefs.edit { putBoolean(KEY_RING_IN_PILL, enabled) }
     }
 
+    /**
+     * The phone held a WhatsApp notification back from the app lately: it stops the app when idle.
+     * Forgotten after a few days without another one, or once the user goes to fix it.
+     */
+    var whatsAppLate by mutableStateOf(System.currentTimeMillis() - prefs.getLong(KEY_WHATSAPP_LATE_AT, 0) < LATE_FOR_MILLIS)
+        private set
+
+    fun noteWhatsAppLate() {
+        val now = System.currentTimeMillis()
+        whatsAppLate = true
+        if (now - prefs.getLong(KEY_WHATSAPP_LATE_AT, 0) > LATE_WRITE_MILLIS) prefs.edit { putLong(KEY_WHATSAPP_LATE_AT, now) }
+    }
+
+    fun forgetWhatsAppLate() {
+        whatsAppLate = false
+        prefs.edit { remove(KEY_WHATSAPP_LATE_AT) }
+    }
+
     /** The call pill in WhatsApp calls. On with the WhatsApp calls, unless turned off. */
     var whatsAppPillEnabled by mutableStateOf(prefs.getBoolean(KEY_WHATSAPP_PILL, true))
         private set
@@ -233,6 +251,9 @@ class AppContainer(context: Context) {
         const val KEY_WHATSAPP_CALLS = "whatsapp_calls"
         const val KEY_WHATSAPP_PILL = "whatsapp_pill"
         const val KEY_RING_IN_PILL = "ring_in_pill"
+        const val KEY_WHATSAPP_LATE_AT = "whatsapp_late_at"
+        const val LATE_FOR_MILLIS = 3 * 24 * 60 * 60 * 1000L
+        const val LATE_WRITE_MILLIS = 60 * 60 * 1000L
         const val REPLY_SEPARATOR = "\u001F"
     }
 }

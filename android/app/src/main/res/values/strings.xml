@@ -315,6 +315,8 @@
     <string name="settings_whatsapp_body">Adds WhatsApp calls to your recents from their notifications, with an icon for voice or video. Needs notification access; only WhatsApp\'s notifications are looked at and nothing leaves the phone.</string>
     <string name="settings_whatsapp_pill_title">Call pill in WhatsApp calls</string>
     <string name="settings_whatsapp_pill_body">Hang up and switch the speaker from the pill; tap the time to get back to the call. A small mark shows when the sound is on a headset.</string>
+    <string name="settings_whatsapp_late">Battery optimization can stop the app in the background, and then WhatsApp calls get no pill and aren\'t recorded. Turn it off for this app: in App info, under Battery, choose Unrestricted or Don\'t optimize. Power saving mode can still stop it.</string>
+    <string name="settings_whatsapp_late_open">Open app settings</string>
     <string name="call_end_spam">Report spam and hang up</string>
     <string name="spam_reported">Reported as spam</string>
 </resources>

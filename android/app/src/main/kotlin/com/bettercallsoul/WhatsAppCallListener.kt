@@ -49,11 +49,21 @@ class WhatsAppCallListener : NotificationListenerService() {
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification) {
+        // Any app's notification arriving long after it was posted means the phone stopped this app,
+        // which would cost WhatsApp's calls too: Settings then says how to let it run. Only the timing
+        // is looked at, never what a notification says.
+        if (sbn.packageName != packageName && container.whatsAppCallsEnabled &&
+            System.currentTimeMillis() - sbn.postTime > ANY_LATE_MILLIS
+        ) {
+            container.noteWhatsAppLate()
+        }
         val notice = notice(sbn) ?: return
         // Some phones hold an idle app's notifications back and hand them over together, so the time
         // of arrival says little: the time of posting is the one that counts.
         val late = System.currentTimeMillis() - sbn.postTime
         DebugLog.i(TAG, "notice ${notice.phase} video=${notice.video} category=${sbn.notification.category} late=${late}ms")
+        // Settings then tells the user how to let the app run in the background.
+        if (late > LATE_MILLIS) container.noteWhatsAppLate()
         tracker.onNotice(notice, sbn.postTime)?.let(::store)
         // A notification that arrives late may be of a call that is already over.
         if (container.whatsAppPillEnabled && callStillShown()) {
@@ -128,6 +138,8 @@ class WhatsAppCallListener : NotificationListenerService() {
         private const val GRACE_MILLIS = 3_000L
         private val WHATSAPP_PACKAGES = setOf("com.whatsapp", "com.whatsapp.w4b")
         private val PILL_PHASES = setOf(CallPhase.Dialing, CallPhase.Ongoing)
+        private const val LATE_MILLIS = 10_000L
+        private const val ANY_LATE_MILLIS = 30_000L
 
         @Volatile
         private var connected = false

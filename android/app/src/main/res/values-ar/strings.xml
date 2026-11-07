@@ -366,6 +366,8 @@
     <string name="settings_whatsapp_body">يضيف مكالمات WhatsApp إلى السجل من إشعاراتها مع رمز للصوت أو الفيديو. يتطلب الوصول إلى الإشعارات؛ تُقرأ إشعارات WhatsApp فقط ولا يغادر شيء الهاتف.</string>
     <string name="settings_whatsapp_pill_title">فقاعة المكالمة في مكالمات واتساب</string>
     <string name="settings_whatsapp_pill_body">أنهِ المكالمة وشغّل مكبّر الصوت من الفقاعة، والمس الوقت للعودة إلى المكالمة. تظهر علامة صغيرة عندما يكون الصوت في سماعة الرأس.</string>
+    <string name="settings_whatsapp_late">قد يوقف تحسين البطارية التطبيق في الخلفية، وعندها لا تظهر الفقاعة في مكالمات واتساب ولا تُسجَّل المكالمات. أوقفه لهذا التطبيق: في معلومات التطبيق، ضمن البطارية، اختر «غير مقيّد» أو «عدم التحسين». وقد يوقفه وضع توفير الطاقة رغم ذلك.</string>
+    <string name="settings_whatsapp_late_open">فتح إعدادات التطبيق</string>
     <string name="call_end_spam">الإبلاغ عن إزعاج وإنهاء المكالمة</string>
     <string name="spam_reported">تم الإبلاغ عن الرقم كمزعج</string>
 </resources>

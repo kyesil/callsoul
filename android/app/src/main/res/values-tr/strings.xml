@@ -314,6 +314,8 @@
     <string name="settings_whatsapp_body">WhatsApp aramalarını bildirimlerinden okuyup son aramalara ekler; simgesi sesli mi görüntülü mü olduğunu gösterir. Bildirim erişimi ister; yalnızca WhatsApp bildirimlerine bakılır, hiçbir şey telefondan çıkmaz.</string>
     <string name="settings_whatsapp_pill_title">WhatsApp aramalarında arama hapı</string>
     <string name="settings_whatsapp_pill_body">Aramayı haptan kapat, hoparlörü aç kapa; aramaya dönmek için süreye dokun. Ses kulaklıktaysa küçük bir işaret çıkar.</string>
+    <string name="settings_whatsapp_late">Pil optimizasyonu uygulamayı arka planda durdurabilir; o zaman WhatsApp aramalarında hap çıkmaz ve arama kaydedilmez. Bu uygulama için kapat: Uygulama bilgisi\'nde Pil bölümünden Kısıtlamasız ya da Optimize etme\'yi seç. Güç tasarrufu modu yine de durdurabilir.</string>
+    <string name="settings_whatsapp_late_open">Uygulama ayarlarını aç</string>
     <string name="call_end_spam">Spam olarak bildir ve kapat</string>
     <string name="spam_reported">Spam olarak bildirildi</string>
 </resources>
