@@ -44,11 +44,11 @@ Moved to another app during a call? A small call pill comes with you at the edge
 ### WhatsApp calls too
 
 - The call pill comes up in WhatsApp calls too, even where WhatsApp doesn't reach the phone's own island, such as Honor's Magic Capsule. Hang up or get back to the call in one tap, with the time running in WhatsApp green.
-- On phones where WhatsApp reports its calls to Android, the pill's speaker button works too. Where it doesn't, only WhatsApp can move the sound, so the button opens WhatsApp's call screen.
+- The pill's speaker button works in WhatsApp calls too; tap the time to get back to WhatsApp.
 - An incoming WhatsApp call rings in the pill too, with WhatsApp's own answer and decline. WhatsApp's notification still shows; hiding it isn't up to us.
 - When the sound is on a Bluetooth or wired headset, a small mark shows above the time. The speaker button switches to the speaker in one tap, and leaving the speaker goes back to the headset, not the earpiece.
 - Your recents show how long a WhatsApp call lasted, and how long a missed one rang.
-- On those phones, people who aren't in your contacts come with their number, so you can get back to them.
+- On phones where WhatsApp reports its calls to Android, such as the Galaxy S21, people who aren't in your contacts come with their number, so you can get back to them.
 - WhatsApp calls are on from the start, and the pill has a switch of its own in Settings. Both need notification access, given once; nothing read leaves the phone.
 
 ### Against spam

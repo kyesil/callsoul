@@ -365,7 +365,7 @@
     <string name="settings_whatsapp_title">مكالمات WhatsApp في السجل</string>
     <string name="settings_whatsapp_body">يضيف مكالمات WhatsApp إلى السجل من إشعاراتها مع رمز للصوت أو الفيديو. يتطلب الوصول إلى الإشعارات؛ تُقرأ إشعارات WhatsApp فقط ولا يغادر شيء الهاتف.</string>
     <string name="settings_whatsapp_pill_title">فقاعة المكالمة في مكالمات واتساب</string>
-    <string name="settings_whatsapp_pill_body">أنهِ مكالمة واتساب أو عُد إليها من الفقاعة. تُظهر مصدر الصوت، وتشغّل مكبّر الصوت على الهواتف التي يترك فيها واتساب مكالماته لنظام أندرويد.</string>
+    <string name="settings_whatsapp_pill_body">أنهِ المكالمة وشغّل مكبّر الصوت من الفقاعة، والمس الوقت للعودة إلى المكالمة. تظهر علامة صغيرة عندما يكون الصوت في سماعة الرأس.</string>
     <string name="call_end_spam">الإبلاغ عن إزعاج وإنهاء المكالمة</string>
     <string name="spam_reported">تم الإبلاغ عن الرقم كمزعج</string>
 </resources>

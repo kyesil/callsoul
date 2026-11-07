@@ -339,7 +339,7 @@
     <string name="settings_whatsapp_title">Вызовы WhatsApp в недавних</string>
     <string name="settings_whatsapp_body">Добавляет вызовы WhatsApp в недавние по их уведомлениям, значок показывает голос или видео. Нужен доступ к уведомлениям; читаются только уведомления WhatsApp, данные не покидают телефон.</string>
     <string name="settings_whatsapp_pill_title">Плашка вызова в звонках WhatsApp</string>
-    <string name="settings_whatsapp_pill_body">Завершите звонок WhatsApp или вернитесь к нему с плашки. Она показывает, куда идёт звук; там, где WhatsApp отдаёт звонки Android, включает и динамик.</string>
+    <string name="settings_whatsapp_pill_body">Завершайте звонок и включайте динамик с плашки; чтобы вернуться к звонку, нажмите на время. Маленький значок показывает, что звук в наушниках.</string>
     <string name="call_end_spam">Спам: сообщить и завершить</string>
     <string name="spam_reported">Отмечено как спам</string>
 </resources>

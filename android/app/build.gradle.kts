@@ -13,7 +13,7 @@ android {
         // Android 17 is the target; 35 keeps the Galaxy S21 test phone usable.
         minSdk = 29
         targetSdk = 37
-        versionCode = 20
+        versionCode = 21
         versionName = "0.3.8"
     }
 

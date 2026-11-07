@@ -20,9 +20,10 @@ import kotlinx.coroutines.launch
 
 /**
  * The floating pill during a WhatsApp call, the one the phone's calls have. WhatsApp's notification
- * gives it the way back to the call and the hang-up button. Moving the sound needs Telecom, so the
- * speaker switches only where WhatsApp reports its calls there; elsewhere the button just shows where
- * the sound goes, and a tap opens the call. A phone call takes the place over: it has a pill of its own.
+ * gives it the way back to the call and the hang-up button. Where WhatsApp reports the call to Telecom
+ * the speaker goes through Telecom; elsewhere the pill picks the phone's communication device itself,
+ * which Android lets the call follow, and lets go of it when the call ends. A phone call takes the place
+ * over: it has a pill of its own.
  */
 class WhatsAppPill(context: Context) {
     /** [ringing] with [title] while a call comes in, when [answer] takes it. */
@@ -42,11 +43,14 @@ class WhatsAppPill(context: Context) {
     private val device = MutableStateFlow(routeOf(currentDevice()))
     private val deviceListener = AudioManager.OnCommunicationDeviceChangedListener { device.value = routeOf(it) }
     private var switchable = false
+
+    /** The communication device was chosen here, and has to be given back. */
+    private var holdsDevice = false
     private val overlay = CallOverlay(
         context = this.context,
         onOpen = ::open,
         onAnswer = ::answer,
-        onSpeaker = { if (switchable) CallManager.toggleSpeaker() else open() },
+        onSpeaker = ::toggleSpeaker,
         onHangUp = ::hangUp,
         timerColor = WHATSAPP_GREEN,
     )
@@ -62,7 +66,10 @@ class WhatsAppPill(context: Context) {
             }.collect { (call, viaTelecom, route) ->
                 switchable = viaTelecom
                 when {
-                    call == null -> overlay.hide()
+                    call == null -> {
+                        overlay.hide()
+                        letGoOfDevice()
+                    }
                     call.ringing -> overlay.showRinging(call.title)
                     else -> overlay.show(call.connectedAt, route)
                 }
@@ -96,9 +103,51 @@ class WhatsAppPill(context: Context) {
     }
 
     fun close() {
+        letGoOfDevice()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) sound.removeOnCommunicationDeviceChangedListener(deviceListener)
         scope.cancel()
         overlay.hide()
+    }
+
+    /**
+     * To the speaker and back. Off the speaker, the sound goes where WhatsApp had it, a headset before
+     * the earpiece.
+     */
+    private fun toggleSpeaker() {
+        if (switchable) {
+            CallManager.toggleSpeaker()
+            return
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            open()
+            return
+        }
+        val devices = sound.availableCommunicationDevices
+        val target = if (device.value == PillRoute.Speaker) {
+            if (holdsDevice) {
+                letGoOfDevice()
+                return
+            }
+            devices.firstOrNull { routeOf(it) == PillRoute.Bluetooth }
+                ?: devices.firstOrNull { routeOf(it) == PillRoute.Wired }
+                ?: devices.firstOrNull { it.type == AudioDeviceInfo.TYPE_BUILTIN_EARPIECE }
+        } else {
+            devices.firstOrNull { it.type == AudioDeviceInfo.TYPE_BUILTIN_SPEAKER }
+        }
+        if (target == null) {
+            DebugLog.w(TAG, "no device to move the sound to")
+            return
+        }
+        val moved = sound.setCommunicationDevice(target)
+        holdsDevice = holdsDevice || moved
+        DebugLog.i(TAG, "sound to ${routeOf(target)}: $moved")
+    }
+
+    private fun letGoOfDevice() {
+        if (!holdsDevice || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+        sound.clearCommunicationDevice()
+        holdsDevice = false
+        DebugLog.i(TAG, "sound back to WhatsApp's choice")
     }
 
     /** The device the phone talks through, whoever chose it. Android 12 and up only. */

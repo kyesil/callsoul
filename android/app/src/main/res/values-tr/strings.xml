@@ -313,7 +313,7 @@
     <string name="settings_whatsapp_title">Son aramalarda WhatsApp</string>
     <string name="settings_whatsapp_body">WhatsApp aramalarını bildirimlerinden okuyup son aramalara ekler; simgesi sesli mi görüntülü mü olduğunu gösterir. Bildirim erişimi ister; yalnızca WhatsApp bildirimlerine bakılır, hiçbir şey telefondan çıkmaz.</string>
     <string name="settings_whatsapp_pill_title">WhatsApp aramalarında arama hapı</string>
-    <string name="settings_whatsapp_pill_body">WhatsApp aramasını haptan kapat ya da aramaya dön. Sesin nereden geldiğini gösterir; WhatsApp aramalarını Android\'e bırakan telefonlarda hoparlörü de açar.</string>
+    <string name="settings_whatsapp_pill_body">Aramayı haptan kapat, hoparlörü aç kapa; aramaya dönmek için süreye dokun. Ses kulaklıktaysa küçük bir işaret çıkar.</string>
     <string name="call_end_spam">Spam olarak bildir ve kapat</string>
     <string name="spam_reported">Spam olarak bildirildi</string>
 </resources>
