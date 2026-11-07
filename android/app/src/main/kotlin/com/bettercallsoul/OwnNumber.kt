@@ -49,3 +49,11 @@ suspend fun seedOwnNumber(context: Context) {
     }
     app.ownNumberSeeded = true
 }
+
+/** The first number a SIM in the phone reveals, if any; many SIMs don't store theirs. */
+@SuppressLint("MissingPermission")
+fun ownNumber(context: Context): String? {
+    if (context.checkSelfPermission(Manifest.permission.READ_PHONE_NUMBERS) != PackageManager.PERMISSION_GRANTED) return null
+    val subscriptions = context.getSystemService(SubscriptionManager::class.java)
+    return runCatching { subscriptions.activeSubscriptionInfoList.orEmpty().map { numberOf(subscriptions, it) }.firstOrNull(String::isNotBlank) }.getOrNull()
+}

@@ -55,6 +55,8 @@
     <string name="photo_add">إضافة صورة</string>
     <string name="photo_change">تغيير</string>
     <string name="photo_remove">إزالة</string>
+    <string name="photo_crop_hint">باعد إصبعين للتكبير واسحب للتحريك. ما داخل الدائرة يصبح الصورة.</string>
+    <string name="photo_use">استخدام</string>
     <string name="whatsapp">WhatsApp</string>
     <string name="whatsapp_voice">مكالمة صوتية عبر WhatsApp</string>
     <string name="whatsapp_video">مكالمة فيديو عبر WhatsApp</string>
@@ -137,6 +139,9 @@
     <string name="about_title">حول التطبيق</string>
     <string name="about_version">الإصدار %1$s</string>
     <string name="about_developer">المطوّر</string>
+    <string name="about_source">الشيفرة المصدرية</string>
+    <string name="about_license">الترخيص</string>
+    <string name="about_open_source">برنامج حر ومفتوح المصدر: يمكن لأي شخص قراءة الشيفرة وتعديلها ومشاركتها بموجب ترخيص GPL-3.0.</string>
     <string name="settings_default_held">تطبيق الهاتف الافتراضي</string>
     <plurals name="contacts_count">
         <item quantity="zero">لا توجد جهات اتصال</item>
@@ -195,6 +200,8 @@
     <string name="field_custom_value">القيمة</string>
     <string name="add_custom">إضافة حقل مخصص</string>
     <string name="section_labels">التصنيفات</string>
+    <string name="label_new">تصنيف جديد</string>
+    <string name="label_name">اسم التصنيف</string>
     <string name="section_add_field">إضافة حقل</string>
     <string name="chip_address">العنوان</string>
     <string name="chip_event">تاريخ مهم</string>
@@ -214,6 +221,7 @@
     <string name="scan_text">النص في الرمز</string>
     <string name="scan_open">فتح</string>
     <string name="scan_copy">نسخ</string>
+    <string name="number_copied">تم نسخ الرقم</string>
     <string name="scan_unavailable">تعذّر تشغيل ماسح QR على هذا الهاتف.</string>
     <string name="action_close">إغلاق</string>
     <string name="search_calls">البحث في المكالمات</string>
@@ -320,6 +328,8 @@
     <string name="search_all_hint">البحث في جهات الاتصال والمكالمات</string>
     <string name="search_none">لا توجد نتائج</string>
     <string name="search_recent">عمليات البحث الأخيرة</string>
+    <string name="search_opened">فُتحت مؤخرًا</string>
+    <string name="action_clear">مسح</string>
     <string name="search_delete_both">هل تريد نقل جهات الاتصال (%1$d) إلى سلة المحذوفات وحذف المكالمات (%2$d)؟</string>
     <plurals name="search_found">
         <item quantity="zero">لا نتائج</item>
@@ -370,4 +380,49 @@
     <string name="settings_whatsapp_late_open">فتح إعدادات التطبيق</string>
     <string name="call_end_spam">الإبلاغ عن إزعاج وإنهاء المكالمة</string>
     <string name="spam_reported">تم الإبلاغ عن الرقم كمزعج</string>
+    <string name="settings_group_calls">المكالمات</string>
+    <string name="settings_group_looks">المظهر والإيماءات</string>
+    <string name="settings_group_storage">السجل والتخزين</string>
+    <string name="settings_group_about">التشخيص وحول التطبيق</string>
+    <string name="settings_search_hint">البحث في الإعدادات</string>
+    <string name="settings_history_title">سجل المكالمات المحفوظ على الهاتف</string>
+    <string name="settings_history_body">يحفظ التطبيق نسخته الخاصة من المكالمات للإحصاءات، ومكالمات واتساب؛ ويُحذف ما هو أقدم من هذه المدة. سجل مكالمات أندرويد يحفظ نحو آخر 500 مكالمة فقط، لذا تمتلئ المدة الأطول من الآن فصاعدًا.</string>
+    <string name="settings_history_week">أسبوع واحد</string>
+    <string name="settings_history_month">شهر واحد</string>
+    <string name="settings_history_shrink">ستُحذف من التطبيق المكالمات الأقدم من المدة المختارة (%1$s)، ومنها مكالمات واتساب. لن يتغير سجل مكالمات الهاتف.</string>
+    <string name="settings_backup_title">نسخ Google الاحتياطي</string>
+    <string name="settings_backup_body">تدخل التصنيفات وسجل المكالمات ومكالمات واتساب وسلة المحذوفات والإعدادات في نسخة Google الاحتياطية للهاتف، مشفّرة بقفل الشاشة إن وُجد، وتعود عند تثبيت التطبيق على هاتف جديد. يُشغَّل النسخ الاحتياطي ويُوقف من إعدادات الهاتف، ضمن Google، النسخ الاحتياطي.</string>
+    <plurals name="settings_history_years">
+        <item quantity="zero">%d سنة</item>
+        <item quantity="one">سنة واحدة</item>
+        <item quantity="two">سنتان</item>
+        <item quantity="few">%d سنوات</item>
+        <item quantity="many">%d سنة</item>
+        <item quantity="other">%d سنة</item>
+    </plurals>
+    <plurals name="settings_history_used">
+        <item quantity="zero">%1$d مكالمة محفوظة · تشغل %2$s</item>
+        <item quantity="one">مكالمة واحدة محفوظة · تشغل %2$s</item>
+        <item quantity="two">مكالمتان محفوظتان · تشغل %2$s</item>
+        <item quantity="few">%1$d مكالمات محفوظة · تشغل %2$s</item>
+        <item quantity="many">%1$d مكالمة محفوظة · تشغل %2$s</item>
+        <item quantity="other">%1$d مكالمة محفوظة · تشغل %2$s</item>
+    </plurals>
+    <string name="my_card">بطاقتي</string>
+    <string name="my_card_create">أنشئ بطاقتك</string>
+    <string name="my_card_create_body">اسمك ورقمك لمشاركتهما كبطاقة</string>
+    <string name="birthday_today">عيد ميلاده اليوم</string>
+    <string name="birthday_tomorrow">عيد ميلاده غدًا</string>
+    <string name="widget_people_name">جهات الاتصال</string>
+    <string name="widget_people_description">المفضلة أو أكثر من تتحدث إليهم، بلمسة واحدة</string>
+    <string name="widget_person_name">شخص واحد</string>
+    <string name="widget_person_description">شخص واحد على الشاشة الرئيسية، ينفّذ ما تختاره عند اللمس</string>
+    <string name="widget_source">عرض</string>
+    <string name="widget_action">عند اللمس</string>
+    <string name="widget_action_whatsapp_call">مكالمة واتساب</string>
+    <string name="widget_action_whatsapp_message">رسالة واتساب</string>
+    <string name="widget_action_profile">فتح صفحته</string>
+    <string name="widget_pick_person">اختر شخصًا</string>
+    <string name="widget_add">تم</string>
+    <string name="widget_empty">لا أحد هنا بعد</string>
 </resources>

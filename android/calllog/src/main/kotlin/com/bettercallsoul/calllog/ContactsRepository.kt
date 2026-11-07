@@ -1,11 +1,16 @@
 package com.bettercallsoul.calllog
 
+import java.time.LocalDate
 import android.content.Context
 import android.database.ContentObserver
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
+import android.provider.ContactsContract
+import android.provider.ContactsContract.CommonDataKinds.Event
 import android.provider.ContactsContract.CommonDataKinds.GroupMembership
+import android.provider.ContactsContract.Profile
+import java.time.MonthDay
 import android.provider.ContactsContract.CommonDataKinds.Nickname
 import android.provider.ContactsContract.CommonDataKinds.StructuredName
 import android.provider.ContactsContract.CommonDataKinds.Email
@@ -39,9 +44,43 @@ data class ContactRow(
     val name: String,
     val photoUri: String?,
     val starred: Boolean,
+    /** The favourite's place set by dragging, from 1; 0 or less for one never placed. */
+    val pinned: Int = 0,
 )
 
+/**
+ * The favourites in the order the user dragged them into. Ones never placed come after, in the
+ * list's own order, so a new favourite goes to the end once the user has ordered them.
+ */
+fun List<ContactRow>.favoritesInOrder(): List<ContactRow> =
+    filter { it.starred }.sortedBy { if (it.pinned > 0) it.pinned else Int.MAX_VALUE }
+
 data class ContactPhone(val number: String, val label: String?)
+
+/** A contact whose birthday is today or tomorrow ([today] tells which), with the number to call. */
+data class Birthday(val contactId: Long, val name: String, val photoUri: String?, val number: String?, val today: Boolean)
+
+/** How near a birthday is: today, tomorrow, or neither (null). */
+enum class BirthdayNear { Today, Tomorrow }
+
+fun birthdayNear(birthday: MonthDay?, now: LocalDate = LocalDate.now()): BirthdayNear? = when (birthday) {
+    null -> null
+    MonthDay.from(now) -> BirthdayNear.Today
+    MonthDay.from(now.plusDays(1)) -> BirthdayNear.Tomorrow
+    else -> null
+}
+
+/**
+ * The day and month of a birthday as contacts apps store it: yyyy-MM-dd, --MM-dd (no year), or
+ * dd.MM.yyyy. Null when it can't be read.
+ */
+fun birthdayOf(value: String): MonthDay? {
+    val text = value.trim().substringBefore('T')
+    val (month, day) = Regex("(\\d{1,2})-(\\d{1,2})$").find(text)?.destructured?.let { (m, d) -> m to d }
+        ?: Regex("^(\\d{1,2})[./](\\d{1,2})[./]\\d{2,4}$").find(text)?.destructured?.let { (d, m) -> m to d }
+        ?: return null
+    return runCatching { MonthDay.of(month.toInt(), day.toInt()) }.getOrNull()
+}
 
 /** A value with what it is: "Doğum günü", "Eş", "İş". For a date the value is yyyy-MM-dd or --MM-dd. */
 data class DetailItem(val value: String, val label: String)
@@ -78,6 +117,7 @@ data class ContactDetail(
     val labels: List<String> = emptyList(),
     /** The accounts holding a copy of this contact, as names to show. */
     val sources: List<String> = emptyList(),
+    val birthday: MonthDay? = null,
 )
 
 enum class WhatsAppKind { Voice, Video }
@@ -148,6 +188,7 @@ class ContactsRepository(context: Context) {
             }
         }
         resolver.registerContentObserver(Contacts.CONTENT_URI, true, observer)
+        resolver.registerContentObserver(Profile.CONTENT_URI, true, observer)
         trySend(Unit)
         awaitClose { resolver.unregisterContentObserver(observer) }
     }
@@ -155,8 +196,9 @@ class ContactsRepository(context: Context) {
     private fun searchable(): List<SearchableContact> {
         val kinds = arrayOf(
             StructuredName.CONTENT_ITEM_TYPE, Phone.CONTENT_ITEM_TYPE, Email.CONTENT_ITEM_TYPE,
-            Organization.CONTENT_ITEM_TYPE, Nickname.CONTENT_ITEM_TYPE,
+            Organization.CONTENT_ITEM_TYPE, Nickname.CONTENT_ITEM_TYPE, GroupMembership.CONTENT_ITEM_TYPE,
         )
+        val labels = labelTitles()
         val projection = arrayOf(Data.CONTACT_ID, Data.DISPLAY_NAME_PRIMARY, Data.PHOTO_THUMBNAIL_URI, Data.MIMETYPE, Data.DATA1)
         val cursor = resolver.query(
             Data.CONTENT_URI, projection, "${Data.MIMETYPE} IN (${kinds.joinToString { "?" }})", kinds,
@@ -172,6 +214,10 @@ class ContactsRepository(context: Context) {
                 if (value.isEmpty()) continue
                 when (it.getString(3)) {
                     StructuredName.CONTENT_ITEM_TYPE -> Unit
+                    // A label is stored by its id; the search goes by its name.
+                    GroupMembership.CONTENT_ITEM_TYPE -> labels[value.toLongOrNull()]?.let { title ->
+                        if (title !in contact.details) contacts[id] = contact.copy(details = contact.details + title)
+                    }
                     // Each app that knows a contact repeats the number, in its own format.
                     Phone.CONTENT_ITEM_TYPE -> {
                         val tail = value.filter(Char::isDigit).takeLast(10)
@@ -186,10 +232,63 @@ class ContactsRepository(context: Context) {
         return contacts.values.filterNot { it.id in deleted }
     }
 
+    /** The user's own labels by id, leaving out the system ones (My Contacts, Starred). */
+    private fun labelTitles(): Map<Long, String> = resolver.query(
+        Groups.CONTENT_URI, arrayOf(Groups._ID, Groups.TITLE),
+        "${Groups.SYSTEM_ID} IS NULL AND ${Groups.AUTO_ADD} = 0 AND ${Groups.FAVORITES} = 0 AND ${Groups.DELETED} = 0", null, null,
+    )?.use { buildMap { while (it.moveToNext()) it.clean(1)?.let { title -> put(it.getLong(0), title) } } }.orEmpty()
+
+    /**
+     * The phone owner's own card, Android's "me" profile, which Samsung's and Google's contacts apps
+     * fill in too. Null until one is made.
+     */
+    fun observeProfile(): Flow<ContactRow?> = changes().map { profile() }.flowOn(Dispatchers.IO)
+
+    private fun profile(): ContactRow? = runCatching {
+        val projection = arrayOf(Contacts._ID, Contacts.LOOKUP_KEY, Contacts.DISPLAY_NAME_PRIMARY, Contacts.PHOTO_THUMBNAIL_URI)
+        resolver.query(Profile.CONTENT_URI, projection, null, null, null)?.use {
+            if (it.moveToFirst()) ContactRow(it.getLong(0), it.getStringOrNull(1).orEmpty(), it.getStringOrNull(2).orEmpty(), it.getStringOrNull(3), false) else null
+        }
+    }.getOrNull()
+
+    /** The contacts whose birthday is today or tomorrow, today's first, re-read when the address book changes. */
+    fun observeBirthdays(): Flow<List<Birthday>> = changes().map { birthdays(LocalDate.now()) }.flowOn(Dispatchers.IO)
+
+    private fun birthdays(now: LocalDate): List<Birthday> {
+        val projection = arrayOf(Data.CONTACT_ID, Data.DISPLAY_NAME_PRIMARY, Data.PHOTO_THUMBNAIL_URI, Event.START_DATE)
+        val found = resolver.query(
+            Data.CONTENT_URI, projection, "${Data.MIMETYPE} = ? AND ${Event.TYPE} = ?",
+            arrayOf(Event.CONTENT_ITEM_TYPE, Event.TYPE_BIRTHDAY.toString()), null,
+        )?.use {
+            buildList {
+                while (it.moveToNext()) {
+                    if (it.getLong(0) in deleted) continue
+                    val near = birthdayNear(birthdayOf(it.getStringOrNull(3).orEmpty()), now) ?: continue
+                    add(Birthday(it.getLong(0), it.getStringOrNull(1) ?: continue, it.getStringOrNull(2), null, near == BirthdayNear.Today))
+                }
+            }
+        }.orEmpty()
+        return found.distinctBy { it.contactId }.sortedByDescending { it.today }
+            .map { it.copy(number = phones(it.contactId).firstOrNull()?.number) }
+    }
+
+    private fun birthday(contactId: Long): MonthDay? = resolver.query(
+        dataUri(contactId), arrayOf(Event.START_DATE), "$DATA_OF_KIND AND ${Event.TYPE} = ?",
+        arrayOf(contactId.toString(), Event.CONTENT_ITEM_TYPE, Event.TYPE_BIRTHDAY.toString()), null,
+    )?.use { if (it.moveToFirst()) birthdayOf(it.getStringOrNull(0).orEmpty()) else null }
+
+    /** The phone's own card lives in a store of its own, reached by its own addresses. */
+    private fun contactsUri(contactId: Long): Uri = if (ContactsContract.isProfileId(contactId)) Profile.CONTENT_URI else Contacts.CONTENT_URI
+
+    private fun dataUri(contactId: Long): Uri =
+        if (ContactsContract.isProfileId(contactId)) Uri.withAppendedPath(Profile.CONTENT_URI, ContactsContract.Contacts.Data.CONTENT_DIRECTORY) else Data.CONTENT_URI
+
+    private fun rawUri(contactId: Long): Uri = if (ContactsContract.isProfileId(contactId)) Profile.CONTENT_RAW_CONTACTS_URI else RawContacts.CONTENT_URI
+
     private fun list(): List<ContactRow> {
         val projection = arrayOf(
             Contacts._ID, Contacts.LOOKUP_KEY, Contacts.DISPLAY_NAME_PRIMARY,
-            Contacts.PHOTO_THUMBNAIL_URI, Contacts.STARRED,
+            Contacts.PHOTO_THUMBNAIL_URI, Contacts.STARRED, Contacts.PINNED,
         )
         val cursor = resolver.query(
             Contacts.CONTENT_URI, projection, "${Contacts.HAS_PHONE_NUMBER} = 1", null,
@@ -200,7 +299,7 @@ class ContactsRepository(context: Context) {
                 while (it.moveToNext()) {
                     val name = it.getStringOrNull(2) ?: continue
                     if (it.getLong(0) in deleted) continue
-                    add(ContactRow(it.getLong(0), it.getString(1), name, it.getStringOrNull(3), it.getInt(4) == 1))
+                    add(ContactRow(it.getLong(0), it.getString(1), name, it.getStringOrNull(3), it.getInt(4) == 1, it.getInt(5)))
                 }
             }
         }
@@ -256,7 +355,7 @@ class ContactsRepository(context: Context) {
         val projection = arrayOf(Contacts.LOOKUP_KEY, Contacts.DISPLAY_NAME_PRIMARY, Contacts.PHOTO_URI, Contacts.STARRED)
         var starred = false
         val base = resolver.query(
-            Contacts.CONTENT_URI, projection, "${Contacts._ID} = ?", arrayOf(contactId.toString()), null,
+            contactsUri(contactId), projection, "${Contacts._ID} = ?", arrayOf(contactId.toString()), null,
         )?.use {
             if (!it.moveToFirst()) return@use null
             starred = it.getInt(3) == 1
@@ -284,6 +383,7 @@ class ContactsRepository(context: Context) {
             sips = items(contactId, ContactField.Sip),
             customFields = customFields(contactId),
             labels = labels(contactId),
+            birthday = birthday(contactId),
             sources = rawAccounts(contactId).map { (type, name) -> sourceLabel(type, name) }.distinct(),
         )
     }
@@ -311,7 +411,7 @@ class ContactsRepository(context: Context) {
     }
 
     private fun rawAccounts(contactId: Long): List<Pair<String?, String?>> = resolver.query(
-        RawContacts.CONTENT_URI, arrayOf(RawContacts.ACCOUNT_TYPE, RawContacts.ACCOUNT_NAME),
+        rawUri(contactId), arrayOf(RawContacts.ACCOUNT_TYPE, RawContacts.ACCOUNT_NAME),
         "${RawContacts.CONTACT_ID} = ? AND ${RawContacts.DELETED} = 0", arrayOf(contactId.toString()), null,
     )?.use { buildList { while (it.moveToNext()) add(it.getStringOrNull(0) to it.getStringOrNull(1)) } }.orEmpty()
 
@@ -333,7 +433,7 @@ class ContactsRepository(context: Context) {
     /** Values of a repeating kind with their type labels, one row per distinct value. */
     private fun items(contactId: Long, field: ContactField, valueColumn: String = Data.DATA1): List<DetailItem> {
         val cursor = resolver.query(
-            Data.CONTENT_URI, arrayOf(valueColumn, Data.DATA2, Data.DATA3), DATA_OF_KIND,
+            dataUri(contactId), arrayOf(valueColumn, Data.DATA2, Data.DATA3), DATA_OF_KIND,
             arrayOf(contactId.toString(), field.mimeType), "${Data._ID} ASC",
         ) ?: return emptyList()
         return cursor.use {
@@ -347,11 +447,11 @@ class ContactsRepository(context: Context) {
     }
 
     private fun single(contactId: Long, mimeType: String, column: String): String? = resolver.query(
-        Data.CONTENT_URI, arrayOf(column), DATA_OF_KIND, arrayOf(contactId.toString(), mimeType), null,
+        dataUri(contactId), arrayOf(column), DATA_OF_KIND, arrayOf(contactId.toString(), mimeType), null,
     )?.use { buildList { while (it.moveToNext()) it.clean(0)?.let(::add) }.firstOrNull() }
 
     private fun customFields(contactId: Long): List<DetailItem> = resolver.query(
-        Data.CONTENT_URI, arrayOf(Data.DATA1, Data.DATA2), DATA_OF_KIND, arrayOf(contactId.toString(), CUSTOM_FIELD), null,
+        dataUri(contactId), arrayOf(Data.DATA1, Data.DATA2), DATA_OF_KIND, arrayOf(contactId.toString(), CUSTOM_FIELD), null,
     )?.use {
         buildList {
             while (it.moveToNext()) {
@@ -363,7 +463,7 @@ class ContactsRepository(context: Context) {
 
     private fun labels(contactId: Long): List<String> {
         val groupIds = resolver.query(
-            Data.CONTENT_URI, arrayOf(GroupMembership.GROUP_ROW_ID), DATA_OF_KIND,
+            dataUri(contactId), arrayOf(GroupMembership.GROUP_ROW_ID), DATA_OF_KIND,
             arrayOf(contactId.toString(), GroupMembership.CONTENT_ITEM_TYPE), null,
         )?.use { buildSet { while (it.moveToNext()) add(it.getLong(0)) } }.orEmpty()
         if (groupIds.isEmpty()) return emptyList()
@@ -374,9 +474,27 @@ class ContactsRepository(context: Context) {
         )?.use { buildList { while (it.moveToNext()) it.clean(0)?.let(::add) } }.orEmpty().distinct()
     }
 
+    /** A new favourite has no place yet, so it goes after the ones the user ordered. */
     suspend fun setStarred(contactId: Long, starred: Boolean): Unit = withContext(Dispatchers.IO) {
-        val values = android.content.ContentValues().apply { put(Contacts.STARRED, if (starred) 1 else 0) }
+        val values = android.content.ContentValues().apply {
+            put(Contacts.STARRED, if (starred) 1 else 0)
+            put(Contacts.PINNED, ContactsContract.PinnedPositions.UNPINNED)
+        }
         resolver.update(android.content.ContentUris.withAppendedId(Contacts.CONTENT_URI, contactId), values, null, null)
+    }
+
+    /**
+     * Keeps the favourites in this order, in the address book's own pinned places, which the
+     * Google phone app uses for its favourites too.
+     */
+    suspend fun setFavoriteOrder(contactIds: List<Long>): Unit = withContext(Dispatchers.IO) {
+        val operations = contactIds.mapIndexed { place, id ->
+            android.content.ContentProviderOperation
+                .newUpdate(android.content.ContentUris.withAppendedId(Contacts.CONTENT_URI, id))
+                .withValue(Contacts.PINNED, place + 1)
+                .build()
+        }
+        resolver.applyBatch(ContactsContract.AUTHORITY, ArrayList(operations))
     }
 
     /** The default number first (the one the user marked), then the others in the order they were added. */
@@ -387,7 +505,7 @@ class ContactsRepository(context: Context) {
     private fun phones(contactId: Long): List<ContactPhone> {
         val projection = arrayOf(Phone.NUMBER, Phone.TYPE, Phone.LABEL)
         val cursor = resolver.query(
-            Phone.CONTENT_URI, projection, "${Phone.CONTACT_ID} = ?", arrayOf(contactId.toString()),
+            dataUri(contactId), projection, DATA_OF_KIND, arrayOf(contactId.toString(), Phone.CONTENT_ITEM_TYPE),
             "${Phone.IS_SUPER_PRIMARY} DESC, ${Phone.IS_PRIMARY} DESC, ${Phone._ID} ASC",
         ) ?: return emptyList()
         return cursor.use {
@@ -410,7 +528,7 @@ class ContactsRepository(context: Context) {
     private fun whatsApp(contactId: Long): List<WhatsAppAction> {
         val kinds = WHATSAPP_MIME_TYPES
         val cursor = resolver.query(
-            Data.CONTENT_URI, arrayOf(Data._ID, Data.MIMETYPE, Data.DATA1),
+            dataUri(contactId), arrayOf(Data._ID, Data.MIMETYPE, Data.DATA1),
             "${Data.CONTACT_ID} = ? AND ${Data.MIMETYPE} IN (${kinds.keys.joinToString { "?" }})",
             arrayOf(contactId.toString()) + kinds.keys, "${Data._ID} ASC",
         ) ?: return emptyList()
@@ -438,7 +556,7 @@ class ContactsRepository(context: Context) {
     private fun organization(contactId: Long): Work? {
         val projection = arrayOf(Organization.COMPANY, Organization.TITLE, Organization.DEPARTMENT)
         return resolver.query(
-            Data.CONTENT_URI, projection, DATA_OF_KIND,
+            dataUri(contactId), projection, DATA_OF_KIND,
             arrayOf(contactId.toString(), Organization.CONTENT_ITEM_TYPE), null,
         )?.use {
             if (!it.moveToFirst()) return@use null
@@ -447,7 +565,7 @@ class ContactsRepository(context: Context) {
     }
 
     private fun note(contactId: Long): String? = resolver.query(
-        Data.CONTENT_URI, arrayOf(Note.NOTE), DATA_OF_KIND,
+        dataUri(contactId), arrayOf(Note.NOTE), DATA_OF_KIND,
         arrayOf(contactId.toString(), Note.CONTENT_ITEM_TYPE), null,
     )?.use { if (it.moveToFirst()) it.clean(0) else null }
 

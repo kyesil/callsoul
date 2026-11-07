@@ -128,6 +128,15 @@ fun ScanResultBar(result: ScanResult, onDismiss: () -> Unit, modifier: Modifier 
 }
 
 /** The system shows its own note when something is copied, so there is no toast of ours. */
-private fun copy(context: Context, text: String) {
+private fun copy(context: Context, text: String) = copyText(context, text, null)
+
+/**
+ * Puts [text] on the clipboard. Android 13 and later say so themselves; before that [note], when
+ * given, shows as a toast.
+ */
+fun copyText(context: Context, text: String, note: String?) {
     context.getSystemService(ClipboardManager::class.java)?.setPrimaryClip(ClipData.newPlainText(null, text))
+    if (note != null && android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
+        android.widget.Toast.makeText(context, note, android.widget.Toast.LENGTH_SHORT).show()
+    }
 }

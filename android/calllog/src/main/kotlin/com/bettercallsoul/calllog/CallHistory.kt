@@ -13,16 +13,16 @@ import kotlinx.coroutines.withContext
 /**
  * The app's own copy of the call log, for the statistics. Android trims its log to about the last
  * 500 calls, too few for a year, so calls are copied here as they appear. Nothing older than
- * [KEEP_DAYS] days is kept. The phone's own call log is only read.
+ * [keepDays] days is kept, a time the user picks. The phone's own call log is only read.
  */
-class CallHistory(context: Context, private val dao: LocalDao) {
+class CallHistory(context: Context, private val dao: LocalDao, private val keepDays: () -> Int = { KEEP_DAYS }) {
     private val resolver = context.applicationContext.contentResolver
 
     fun observe(): Flow<List<CallRecord>> = dao.observeCallRecords()
 
     /** Drops what has grown too old and copies the log's last year; the log is small enough to read whole. */
     suspend fun sync(): Unit = withContext(Dispatchers.IO) {
-        val keepFrom = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(KEEP_DAYS.toLong())
+        val keepFrom = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(keepDays().toLong())
         dao.deleteCallRecordsBefore(keepFrom)
         dao.deleteRingTimesBefore(keepFrom)
         val projection = arrayOf(Calls._ID, Calls.NUMBER, Calls.TYPE, Calls.DATE, Calls.DURATION)
@@ -39,7 +39,10 @@ class CallHistory(context: Context, private val dao: LocalDao) {
         dao.saveCallRecords(calls)
     }
 
-    /** How long the calls with these numbers lasted, over the year kept here. */
+    /** How many calls are kept here: the phone's, and WhatsApp's. */
+    suspend fun counts(): Pair<Int, Int> = withContext(Dispatchers.IO) { dao.callRecordCount() to dao.whatsAppCallCount() }
+
+    /** How long the calls with these numbers lasted, over the time kept here. */
     suspend fun talkSeconds(numbers: Collection<String>): Long = withContext(Dispatchers.IO) {
         val tails = numbers.mapTo(HashSet()) { it.filter(Char::isDigit).takeLast(10) }
         dao.callRecords().filter { it.number.filter(Char::isDigit).takeLast(10) in tails }.sumOf { it.seconds }
@@ -52,6 +55,9 @@ class CallHistory(context: Context, private val dao: LocalDao) {
 
     companion object {
         const val KEEP_DAYS = 365
+
+        /** The times the user can choose from: a week, a month, a year, and up to five years. */
+        val KEEP_CHOICES = listOf(7, 30, 365, 730, 1095, 1460, 1825)
     }
 }
 

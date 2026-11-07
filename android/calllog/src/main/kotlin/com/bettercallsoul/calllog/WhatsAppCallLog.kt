@@ -13,7 +13,12 @@ import kotlinx.coroutines.withContext
  * The WhatsApp calls read from its notifications. They live in the app's own table and go into the
  * recents beside the phone's calls, with negative ids so the two can't clash. Kept for a year.
  */
-class WhatsAppCallLog(private val dao: LocalDao, private val callLog: CallLogRepository, private val contacts: ContactsRepository) {
+class WhatsAppCallLog(
+    private val dao: LocalDao,
+    private val callLog: CallLogRepository,
+    private val contacts: ContactsRepository,
+    private val keepDays: () -> Int = { CallHistory.KEEP_DAYS },
+) {
     fun observe(): Flow<List<CallEntry>> = dao.observeWhatsAppCalls()
         .map { rows ->
             val known = callLog.knownCallers(rows.mapTo(HashSet()) { it.number })
@@ -71,7 +76,12 @@ class WhatsAppCallLog(private val dao: LocalDao, private val callLog: CallLogRep
                 seconds = call.seconds,
             ),
         )
-        dao.deleteWhatsAppCallsBefore(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(CallHistory.KEEP_DAYS.toLong()))
+        prune()
+    }
+
+    /** Drops the calls older than the time kept. */
+    suspend fun prune(): Unit = withContext(Dispatchers.IO) {
+        dao.deleteWhatsAppCallsBefore(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(keepDays().toLong()))
     }
 
     /** [ids] as they are in the recents: negative. */

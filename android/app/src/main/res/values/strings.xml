@@ -56,6 +56,8 @@
     <string name="photo_add">Add photo</string>
     <string name="photo_change">Change</string>
     <string name="photo_remove">Remove</string>
+    <string name="photo_crop_hint">Pinch to zoom, drag to move. What is in the circle becomes the photo.</string>
+    <string name="photo_use">Use</string>
     <string name="whatsapp">WhatsApp</string>
     <string name="whatsapp_voice">WhatsApp voice call</string>
     <string name="whatsapp_video">WhatsApp video call</string>
@@ -138,6 +140,9 @@
     <string name="about_title">About</string>
     <string name="about_version">Version %1$s</string>
     <string name="about_developer">Developer</string>
+    <string name="about_source">Source code</string>
+    <string name="about_license">License</string>
+    <string name="about_open_source">Free and open source: anyone can read, change and share the code under the GPL-3.0.</string>
     <string name="settings_default_held">Default phone app</string>
     <plurals name="contacts_count">
         <item quantity="one">%1$d contact</item>
@@ -184,6 +189,8 @@
     <string name="field_custom_value">Value</string>
     <string name="add_custom">Add custom field</string>
     <string name="section_labels">Labels</string>
+    <string name="label_new">New label</string>
+    <string name="label_name">Label name</string>
     <string name="section_add_field">Add a field</string>
     <string name="chip_address">Address</string>
     <string name="chip_event">Significant date</string>
@@ -203,6 +210,7 @@
     <string name="scan_text">Text in the code</string>
     <string name="scan_open">Open</string>
     <string name="scan_copy">Copy</string>
+    <string name="number_copied">Number copied</string>
     <string name="scan_unavailable">The QR scanner couldn\'t start on this phone.</string>
     <string name="action_close">Close</string>
     <string name="search_calls">Search calls</string>
@@ -281,6 +289,8 @@
     <string name="search_all_hint">Search contacts and calls</string>
     <string name="search_none">No results</string>
     <string name="search_recent">Recent searches</string>
+    <string name="search_opened">Recently opened</string>
+    <string name="action_clear">Clear</string>
     <string name="search_delete_both">Move %1$d contacts to the recycle bin and delete %2$d calls?</string>
     <plurals name="search_found">
         <item quantity="one">%1$d found</item>
@@ -319,4 +329,41 @@
     <string name="settings_whatsapp_late_open">Open app settings</string>
     <string name="call_end_spam">Report spam and hang up</string>
     <string name="spam_reported">Reported as spam</string>
+    <string name="settings_group_calls">Calls</string>
+    <string name="settings_group_looks">Looks and gestures</string>
+    <string name="settings_group_storage">History and storage</string>
+    <string name="settings_group_about">Diagnostics and about</string>
+    <string name="settings_search_hint">Search settings</string>
+    <string name="settings_history_title">Call history kept on this phone</string>
+    <string name="settings_history_body">The app keeps its own copy of your calls for the statistics, and the WhatsApp calls; anything older than this is deleted. Android\'s own call log holds only about the last 500 calls, so a longer time fills up from now on.</string>
+    <string name="settings_history_week">1 week</string>
+    <string name="settings_history_month">1 month</string>
+    <string name="settings_history_shrink">Calls older than the chosen time (%1$s), WhatsApp calls included, will be deleted from the app. The phone\'s own call log isn\'t touched.</string>
+    <string name="settings_backup_title">Google backup</string>
+    <string name="settings_backup_body">Labels, call history, WhatsApp calls, the recycle bin and settings go into the phone\'s own Google backup, encrypted with your screen lock if you have one, and come back when the app is installed on a new phone. Backup is turned on and off in the phone\'s settings, under Google, Backup.</string>
+    <plurals name="settings_history_years">
+        <item quantity="one">%d year</item>
+        <item quantity="other">%d years</item>
+    </plurals>
+    <plurals name="settings_history_used">
+        <item quantity="one">%1$d call kept · takes %2$s</item>
+        <item quantity="other">%1$d calls kept · takes %2$s</item>
+    </plurals>
+    <string name="my_card">My card</string>
+    <string name="my_card_create">Create your card</string>
+    <string name="my_card_create_body">Your name and number, to share as a card</string>
+    <string name="birthday_today">Birthday today</string>
+    <string name="birthday_tomorrow">Birthday tomorrow</string>
+    <string name="widget_people_name">People</string>
+    <string name="widget_people_description">Your favourites or the people you talk to most, a tap away</string>
+    <string name="widget_person_name">One person</string>
+    <string name="widget_person_description">One person on the home screen, doing what you choose on a tap</string>
+    <string name="widget_source">Show</string>
+    <string name="widget_action">On a tap</string>
+    <string name="widget_action_whatsapp_call">WhatsApp call</string>
+    <string name="widget_action_whatsapp_message">WhatsApp message</string>
+    <string name="widget_action_profile">Open their page</string>
+    <string name="widget_pick_person">Choose a person</string>
+    <string name="widget_add">Done</string>
+    <string name="widget_empty">No one here yet</string>
 </resources>

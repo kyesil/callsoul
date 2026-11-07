@@ -1,5 +1,8 @@
 package com.bettercallsoul
 
+import com.bettercallsoul.ui.Route
+import com.bettercallsoul.widget.Widgets
+import com.bettercallsoul.widget.WidgetActionActivity
 import android.Manifest
 import android.app.role.RoleManager
 import android.content.Intent
@@ -24,6 +27,7 @@ import com.bettercallsoul.ui.SetupScreen
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 import com.bettercallsoul.calllog.ContactRow
+import com.bettercallsoul.calllog.favoritesInOrder
 import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -40,6 +44,9 @@ class MainActivity : ComponentActivity() {
 
     /** From the missed-call notification: a number to open, or empty for the recents list. */
     private var missedRequest by mutableStateOf<String?>(null)
+
+    /** From a widget: the person's page to open. */
+    private var openRequest by mutableStateOf<Route?>(null)
 
     /** Debug builds only: the text of a QR code, as if it had been scanned, for tests without a camera. */
     private var scanRequest by mutableStateOf<String?>(null)
@@ -75,6 +82,8 @@ class MainActivity : ComponentActivity() {
                         onRequestDefault = ::askForDialerRole,
                         scanRequest = scanRequest,
                         onScanRequestHandled = { scanRequest = null },
+                        openRequest = openRequest,
+                        onOpenRequestHandled = { openRequest = null },
                         lastTouch = { lastTouch },
                     )
                     if (askForDefault && !isDefaultDialer) {
@@ -104,6 +113,12 @@ class MainActivity : ComponentActivity() {
         refresh()
     }
 
+    /** Calls made and contacts changed while here show in the widgets once the app is left. */
+    override fun onStop() {
+        super.onStop()
+        if (permissionsGranted) Widgets.refresh(this)
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleDial(intent)
@@ -114,6 +129,11 @@ class MainActivity : ComponentActivity() {
         when (intent.action) {
             Intent.ACTION_DIAL, Intent.ACTION_VIEW -> dialRequest = intent.data?.schemeSpecificPart
             FavoriteShortcuts.ACTION_CALL -> callFavorite(intent)
+            WidgetActionActivity.ACTION_OPEN -> {
+                val contact = intent.getLongExtra(WidgetActionActivity.EXTRA_CONTACT, -1)
+                val number = intent.getStringExtra(WidgetActionActivity.EXTRA_NUMBER).orEmpty()
+                openRequest = if (contact >= 0) Route.Contact(contact) else number.takeIf(String::isNotBlank)?.let(Route::Number)
+            }
             MissedCallReceiver.ACTION_OPEN_MISSED -> {
                 MissedCallReceiver.clear(this)
                 missedRequest = intent.getStringExtra(MissedCallReceiver.EXTRA_NUMBER).orEmpty()
@@ -137,11 +157,12 @@ class MainActivity : ComponentActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 snapshotFlow { permissionsGranted }.first { it }
                 container.contacts.observe()
-                    .map { rows -> rows.filter { it.starred } }
+                    .map { rows -> rows.favoritesInOrder() }
                     .distinctUntilChanged()
                     .collect { favorites ->
                         if (favorites != shortcutFavorites) {
                             FavoriteShortcuts.update(this@MainActivity, favorites)
+                            Widgets.refresh(this@MainActivity)
                             shortcutFavorites = favorites
                         }
                     }

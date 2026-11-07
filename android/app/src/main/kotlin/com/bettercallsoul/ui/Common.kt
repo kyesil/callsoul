@@ -310,7 +310,7 @@ suspend fun callBack(context: Context, entry: CallEntry, onCall: (String) -> Uni
 
 private val WHATSAPP_APPS = listOf("com.whatsapp", "com.whatsapp.w4b")
 
-private fun openWhatsAppChat(context: Context, number: String): Boolean {
+internal fun openWhatsAppChat(context: Context, number: String): Boolean {
     val international = PhoneNumbers.toE164(number)?.removePrefix("+") ?: return false
     val chat = Intent(Intent.ACTION_VIEW, "https://wa.me/$international".toUri())
     return WHATSAPP_APPS.any { app ->

@@ -1,5 +1,7 @@
 package com.bettercallsoul.ui
 
+import com.bettercallsoul.container
+import com.bettercallsoul.ownNumber
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.EnterTransition
@@ -87,6 +89,12 @@ sealed interface Route {
     data class Number(val number: String) : Route
     data class NewContact(val number: String?) : Route
     data class EditContact(val id: Long) : Route
+
+    /** The owner's own card, made for the first time. */
+    data object NewProfile : Route
+
+    /** Not a page: the Search tab, searching for a contact label. */
+    data class SearchLabel(val label: String) : Route
     data object Settings : Route
     data object Trash : Route
     data object Stats : Route
@@ -104,6 +112,8 @@ private val RouteStackSaver = listSaver<SnapshotStateList<Route>, String>(
                 is Route.Number -> "number:${it.number}"
                 is Route.NewContact -> "new:${it.number.orEmpty()}"
                 is Route.EditContact -> "edit:${it.id}"
+                Route.NewProfile -> "profile"
+                is Route.SearchLabel -> "label:${it.label}"
                 Route.Settings -> "settings"
                 Route.Trash -> "trash"
                 Route.Stats -> "stats"
@@ -118,6 +128,7 @@ private val RouteStackSaver = listSaver<SnapshotStateList<Route>, String>(
                 "contact" -> value.toLongOrNull()?.let(Route::Contact)
                 "number" -> Route.Number(value)
                 "new" -> Route.NewContact(value.ifEmpty { null })
+                "profile" -> Route.NewProfile
                 "edit" -> value.toLongOrNull()?.let(Route::EditContact)
                 "settings" -> Route.Settings
                 "trash" -> Route.Trash
@@ -147,6 +158,8 @@ fun MainScreen(
     onRequestDefault: () -> Unit,
     scanRequest: String? = null,
     onScanRequestHandled: () -> Unit = {},
+    openRequest: Route? = null,
+    onOpenRequestHandled: () -> Unit = {},
     lastTouch: () -> Offset = { Offset.Zero },
 ) {
     val context = LocalContext.current
@@ -169,6 +182,14 @@ fun MainScreen(
     }
     LaunchedEffect(tab) {
         if (tab == Tab.Recents || tab == Tab.Home) com.bettercallsoul.MissedCallReceiver.clear(context)
+    }
+    // A person's page asked for from a widget opens over whatever was there.
+    LaunchedEffect(openRequest) {
+        if (openRequest != null) {
+            stack.clear()
+            stack.add(openRequest)
+            onOpenRequestHandled()
+        }
     }
 
     LaunchedEffect(dialRequest) {
@@ -205,7 +226,18 @@ fun MainScreen(
     val call: (String) -> Unit = { number ->
         if (animated) burst = CallBurst(number, lastTouch()) else CallManager.place(context, number)
     }
-    val open: (Route) -> Unit = { stack.add(it) }
+    val open: (Route) -> Unit = { route ->
+        if (route is Route.SearchLabel) {
+            context.container.rememberSearch(route.label, label = true)
+            if (tab != Tab.Search) beforeSearch = tab
+            searchQuery = route.label
+            searchFocus = false
+            tab = Tab.Search
+            stack.clear()
+        } else {
+            stack.add(route)
+        }
+    }
     val back: () -> Unit = { stack.removeLastOrNull() }
 
     // A page opens over the tabs, which stay composed: their lists are where they were on the way back.
@@ -280,6 +312,8 @@ fun MainScreen(
                     is Route.Contact -> ContactDetailScreen(route.id, onCall = call, onOpen = open, onBack = back)
                     is Route.Number -> NumberPage(route.number, onCall = call, onOpen = open, onBack = back)
                     is Route.NewContact -> ContactEditorScreen(null, route.number, onDone = back)
+                    is Route.SearchLabel -> Unit
+                    Route.NewProfile -> ContactEditorScreen(null, remember { ownNumber(context) }, profile = true, onDone = back)
                     is Route.EditContact -> ContactEditorScreen(route.id, null, onDone = back, onMoved = { newId ->
                         // Moved to another account it is a new contact: the profile under the editor follows it.
                         stack.removeLastOrNull()

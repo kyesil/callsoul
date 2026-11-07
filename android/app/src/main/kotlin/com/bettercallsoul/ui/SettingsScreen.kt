@@ -94,131 +94,314 @@ import com.bettercallsoul.R
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.bettercallsoul.container
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.Call
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Forum
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.SmartButton
+import androidx.compose.material.icons.outlined.TouchApp
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import com.bettercallsoul.calllog.CallHistory
+import com.bettercallsoul.calllog.LocalDatabase
+import com.bettercallsoul.spam.SearchText
+import java.io.File
+
+/** The groups the settings are sorted into: the first page lists them and each opens a page of its own. */
+private enum class SettingsGroup(val title: Int, val icon: ImageVector) {
+    Calls(R.string.settings_group_calls, Icons.Outlined.Call),
+    WhatsApp(R.string.whatsapp, Icons.Outlined.Forum),
+    Pill(R.string.settings_pill_title, Icons.Outlined.SmartButton),
+    Looks(R.string.settings_group_looks, Icons.Outlined.TouchApp),
+    Storage(R.string.settings_group_storage, Icons.Outlined.History),
+    About(R.string.settings_group_about, Icons.Outlined.Info),
+}
+
+/** One setting: its group, the texts a search finds it by (the first is its name), and how it is drawn. */
+private class SettingEntry(val group: SettingsGroup, val words: List<Int>, val content: @Composable () -> Unit)
 
 @Composable
 fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBack: () -> Unit) {
-    val app = LocalContext.current.container
     val context = LocalContext.current
-    var lookup by remember { mutableStateOf(app.spamLookupEnabled) }
-    var faceDown by remember { mutableStateOf(app.silentWhenFaceDown) }
     var overlayAllowed by remember { mutableStateOf(Settings.canDrawOverlays(context)) }
     LifecycleResumeEffect(Unit) {
         overlayAllowed = Settings.canDrawOverlays(context)
         onPauseOrDispose { }
     }
+    var groupName by rememberSaveable { mutableStateOf<String?>(null) }
+    val group = groupName?.let(SettingsGroup::valueOf)
+    var query by rememberSaveable { mutableStateOf("") }
+    BackHandler(enabled = group != null) { groupName = null }
 
-    Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState())) {
-        DetailToolbar(onBack)
-        LargeTitle(stringResource(R.string.action_settings), null)
-        Card {
-            Row(Modifier.fillMaxWidth().padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        stringResource(R.string.settings_lookup_title),
-                        fontSize = 17.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Text(
-                        stringResource(R.string.settings_lookup_body),
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+    val entries = listOf(
+        SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_lookup_title, R.string.settings_lookup_body)) { LookupSettings() },
+        SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_face_down_title, R.string.settings_face_down_body)) { FaceDownSettings() },
+        SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_replies_title, R.string.settings_replies_body)) { QuickReplySettings() },
+        SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_default_held)) { DefaultAppSettings(isDefaultDialer, onRequestDefault) },
+        SettingEntry(
+            SettingsGroup.WhatsApp,
+            listOf(R.string.settings_whatsapp_title, R.string.settings_whatsapp_body, R.string.settings_whatsapp_pill_title, R.string.settings_whatsapp_pill_body),
+        ) { WhatsAppCallSettings() },
+        SettingEntry(SettingsGroup.Pill, listOf(R.string.settings_overlay_title, R.string.settings_overlay_body)) { OverlaySettings(overlayAllowed) },
+        SettingEntry(
+            SettingsGroup.Pill,
+            listOf(
+                R.string.settings_pill_title, R.string.settings_pill_rings_title, R.string.settings_pill_rings_body,
+                R.string.settings_pill_orientation, R.string.settings_pill_size, R.string.settings_pill_order, R.string.settings_pill_opacity,
+            ),
+        ) { PillSettings(overlayAllowed) },
+        SettingEntry(SettingsGroup.Looks, listOf(R.string.settings_animations_title, R.string.settings_animations_body)) { AnimationSettings() },
+        SettingEntry(SettingsGroup.Looks, listOf(R.string.settings_swipe_title, R.string.settings_swipe_body, R.string.settings_swipe_message)) { SwipeSettings() },
+        SettingEntry(SettingsGroup.Storage, listOf(R.string.settings_history_title, R.string.settings_history_body)) { HistorySettings() },
+        SettingEntry(SettingsGroup.Storage, listOf(R.string.settings_backup_title, R.string.settings_backup_body)) { BackupSettings() },
+        SettingEntry(SettingsGroup.About, listOf(R.string.settings_log_title, R.string.settings_log_body)) { DebugLogSettings(isDefaultDialer) },
+        SettingEntry(SettingsGroup.About, listOf(R.string.about_title, R.string.about_developer, R.string.about_source, R.string.about_license, R.string.about_open_source)) { About() },
+    )
+
+    // Each page starts at its top.
+    key(groupName) {
+        Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState())) {
+            DetailToolbar(onBack = { if (group != null) groupName = null else onBack() })
+            LargeTitle(stringResource(group?.title ?: R.string.action_settings), null)
+            if (group != null) {
+                entries.filter { it.group == group }.forEach {
+                    it.content()
+                    Spacer(Modifier.height(6.dp))
                 }
-                Spacer(Modifier.width(6.dp))
-                Switch(
-                    checked = lookup,
-                    onCheckedChange = {
-                        lookup = it
-                        app.spamLookupEnabled = it
-                    },
+            } else {
+                CompactTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    placeholder = stringResource(R.string.settings_search_hint),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 4.dp),
                 )
-            }
-        }
-        Spacer(Modifier.height(6.dp))
-        Card {
-            Row(Modifier.fillMaxWidth().padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        stringResource(R.string.settings_face_down_title),
-                        fontSize = 17.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Text(
-                        stringResource(R.string.settings_face_down_body),
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                Spacer(Modifier.width(6.dp))
-                Switch(
-                    checked = faceDown,
-                    onCheckedChange = {
-                        faceDown = it
-                        app.silentWhenFaceDown = it
-                    },
-                )
-            }
-        }
-        Spacer(Modifier.height(6.dp))
-        Card {
-            Row(Modifier.fillMaxWidth().padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        stringResource(R.string.settings_overlay_title),
-                        fontSize = 17.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                    Text(
-                        stringResource(R.string.settings_overlay_body),
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                Spacer(Modifier.width(6.dp))
-                // Only the system page can change this, in either direction.
-                Switch(
-                    checked = overlayAllowed,
-                    onCheckedChange = {
-                        context.startActivity(
-                            Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, "package:${context.packageName}".toUri()),
-                        )
-                    },
-                )
-            }
-        }
-        Spacer(Modifier.height(6.dp))
-        WhatsAppCallSettings()
-        Spacer(Modifier.height(6.dp))
-        AnimationSettings()
-        Spacer(Modifier.height(6.dp))
-        SwipeSettings()
-        Spacer(Modifier.height(6.dp))
-        QuickReplySettings()
-        Spacer(Modifier.height(6.dp))
-        PillSettings(overlayAllowed)
-        Spacer(Modifier.height(6.dp))
-        Card {
-            Row(Modifier.fillMaxWidth().padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    stringResource(R.string.settings_default_held),
-                    fontSize = 17.sp,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.weight(1f),
-                )
-                if (isDefaultDialer) {
-                    Text("✓", fontSize = 20.sp, color = CallGreen)
+                Spacer(Modifier.height(8.dp))
+                val text = query.trim()
+                if (text.isEmpty()) {
+                    Card {
+                        Column {
+                            SettingsGroup.entries.forEachIndexed { index, each ->
+                                if (index > 0) {
+                                    HorizontalDivider(
+                                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                                        modifier = Modifier.padding(start = 62.dp),
+                                    )
+                                }
+                                val summary = entries.filter { it.group == each }.joinToString(", ") { context.getString(it.words.first()) }
+                                GroupRow(each, summary) { groupName = each.name }
+                            }
+                        }
+                    }
                 } else {
-                    TextButton(onClick = onRequestDefault) {
-                        Text(stringResource(R.string.setup_default_action))
+                    val found = entries.filter { entry ->
+                        (entry.words + entry.group.title).any { SearchText.find(context.getString(it), text) != null }
+                    }
+                    if (found.isEmpty()) {
+                        Text(
+                            stringResource(R.string.search_none),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.fillMaxWidth().padding(top = 32.dp),
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                    found.groupBy { it.group }.forEach { (each, list) ->
+                        Text(
+                            stringResource(each.title),
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 22.dp, top = 8.dp, bottom = 6.dp),
+                        )
+                        list.forEach {
+                            it.content()
+                            Spacer(Modifier.height(6.dp))
+                        }
                     }
                 }
             }
+            Spacer(Modifier.height(24.dp))
         }
-        Spacer(Modifier.height(6.dp))
-        DebugLogSettings(isDefaultDialer)
-        Spacer(Modifier.height(6.dp))
-        About()
-        Spacer(Modifier.height(24.dp))
+    }
+}
+
+/** A group on the first page: its icon, its name, and what is in it. */
+@Composable
+private fun GroupRow(group: SettingsGroup, summary: String, onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 12.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            Modifier.size(36.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(group.icon, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.size(20.dp))
+        }
+        Spacer(Modifier.width(14.dp))
+        Column(Modifier.weight(1f)) {
+            Text(stringResource(group.title), fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
+            Text(summary, fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+/** A setting that is one switch, with its name and a line on what it does. */
+@Composable
+private fun SwitchCard(title: Int, body: Int, checked: Boolean, enabled: Boolean = true, onChange: (Boolean) -> Unit) {
+    Card {
+        Row(Modifier.fillMaxWidth().padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(title), fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
+                Text(stringResource(body), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Spacer(Modifier.width(6.dp))
+            Switch(checked = checked, enabled = enabled, onCheckedChange = onChange)
+        }
+    }
+}
+
+@Composable
+private fun LookupSettings() {
+    val app = LocalContext.current.container
+    var lookup by remember { mutableStateOf(app.spamLookupEnabled) }
+    SwitchCard(R.string.settings_lookup_title, R.string.settings_lookup_body, lookup) {
+        lookup = it
+        app.spamLookupEnabled = it
+    }
+}
+
+@Composable
+private fun FaceDownSettings() {
+    val app = LocalContext.current.container
+    var faceDown by remember { mutableStateOf(app.silentWhenFaceDown) }
+    SwitchCard(R.string.settings_face_down_title, R.string.settings_face_down_body, faceDown) {
+        faceDown = it
+        app.silentWhenFaceDown = it
+    }
+}
+
+/** Only the system page can change this, in either direction. */
+@Composable
+private fun OverlaySettings(overlayAllowed: Boolean) {
+    val context = LocalContext.current
+    SwitchCard(R.string.settings_overlay_title, R.string.settings_overlay_body, overlayAllowed) {
+        context.startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, "package:${context.packageName}".toUri()))
+    }
+}
+
+@Composable
+private fun DefaultAppSettings(isDefaultDialer: Boolean, onRequestDefault: () -> Unit) {
+    Card {
+        Row(Modifier.fillMaxWidth().padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                stringResource(R.string.settings_default_held),
+                fontSize = 17.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f),
+            )
+            if (isDefaultDialer) {
+                Text("✓", fontSize = 20.sp, color = CallGreen)
+            } else {
+                TextButton(onClick = onRequestDefault) {
+                    Text(stringResource(R.string.setup_default_action))
+                }
+            }
+        }
+    }
+}
+
+/**
+ * How long the app keeps calls on the phone, and how much room it takes. A shorter time deletes
+ * what falls outside it, so that is asked first.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun HistorySettings() {
+    val context = LocalContext.current
+    val app = context.container
+    val scope = rememberCoroutineScope()
+    var usage by remember { mutableStateOf<Pair<Int, Long>?>(null) }
+    var measured by remember { mutableIntStateOf(0) }
+    var asking by remember { mutableStateOf<Int?>(null) }
+    LaunchedEffect(measured) {
+        val (phone, whatsApp) = app.history.counts()
+        usage = (phone + whatsApp) to databaseSize(context)
+    }
+    fun choose(days: Int) {
+        scope.launch {
+            app.saveHistoryDays(days)
+            measured++
+        }
+    }
+    Card {
+        Column(Modifier.fillMaxWidth().padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(stringResource(R.string.settings_history_title), fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
+            Text(stringResource(R.string.settings_history_body), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                CallHistory.KEEP_CHOICES.forEach { days ->
+                    FilterChip(
+                        selected = app.historyDays == days,
+                        onClick = { if (days < app.historyDays) asking = days else if (days != app.historyDays) choose(days) },
+                        label = { Text(keepLabel(days)) },
+                    )
+                }
+            }
+            usage?.let { (calls, bytes) ->
+                Text(
+                    pluralStringResource(R.plurals.settings_history_used, calls, calls, Formatter.formatShortFileSize(context, bytes)),
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+    val days = asking ?: return
+    ConfirmDialog(
+        message = stringResource(R.string.settings_history_shrink, keepLabel(days)),
+        icon = Icons.Outlined.Delete,
+        action = stringResource(R.string.action_delete),
+        onConfirm = {
+            asking = null
+            choose(days)
+        },
+        onDismiss = { asking = null },
+    )
+}
+
+@Composable
+private fun keepLabel(days: Int): String = when (days) {
+    7 -> stringResource(R.string.settings_history_week)
+    30 -> stringResource(R.string.settings_history_month)
+    else -> pluralStringResource(R.plurals.settings_history_years, days / 365, days / 365)
+}
+
+/** The app's database with its journal files: tags, the spam cache and the calls kept. */
+private suspend fun databaseSize(context: Context): Long = withContext(Dispatchers.IO) {
+    val db = context.getDatabasePath(LocalDatabase.FILE)
+    listOf("", "-wal", "-shm", "-journal").sumOf { File(db.path + it).length() }
+}
+
+/** What the phone's Google backup takes along; Android itself turns it on and off. */
+@Composable
+private fun BackupSettings() {
+    Card {
+        Column(Modifier.fillMaxWidth().padding(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(stringResource(R.string.settings_backup_title), fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
+            Text(stringResource(R.string.settings_backup_body), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
     }
 }
 
@@ -507,21 +690,34 @@ private fun About() {
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.about_developer), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    "yesil.dev",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.primary,
-                    textDecoration = TextDecoration.Underline,
-                    modifier = Modifier
-                        .clickable { context.startActivity(Intent(Intent.ACTION_VIEW, "https://yesil.dev".toUri())) }
-                        .padding(vertical = 4.dp),
-                )
-            }
+            LinkRow(stringResource(R.string.about_developer), "yesil.dev", "https://yesil.dev")
+            LinkRow(stringResource(R.string.about_source), "github.com/kyesil/callsoul", SOURCE_URL)
+            LinkRow(stringResource(R.string.about_license), "GPL-3.0", "$SOURCE_URL/blob/main/LICENSE")
+            Text(stringResource(R.string.about_open_source), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Text(stringResource(R.string.about_coauthor, "Claude Opus 5.5"), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+    }
+}
+
+/** Where the app's code is published, under the GPL. */
+private const val SOURCE_URL = "https://github.com/kyesil/callsoul"
+
+/** A label and an underlined address that opens in the browser. */
+@Composable
+private fun LinkRow(label: String, text: String, url: String) {
+    val context = LocalContext.current
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(label, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text,
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.primary,
+            textDecoration = TextDecoration.Underline,
+            modifier = Modifier
+                .clickable { context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
+                .padding(vertical = 4.dp),
+        )
     }
 }
 

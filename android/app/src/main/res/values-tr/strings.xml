@@ -55,6 +55,8 @@
     <string name="photo_add">Fotoğraf ekle</string>
     <string name="photo_change">Değiştir</string>
     <string name="photo_remove">Kaldır</string>
+    <string name="photo_crop_hint">Yakınlaştırmak için iki parmakla aç, kaydırmak için sürükle. Daireye giren kısım fotoğraf olur.</string>
+    <string name="photo_use">Kullan</string>
     <string name="whatsapp">WhatsApp</string>
     <string name="whatsapp_voice">WhatsApp sesli arama</string>
     <string name="whatsapp_video">WhatsApp görüntülü arama</string>
@@ -137,6 +139,9 @@
     <string name="about_title">Hakkında</string>
     <string name="about_version">Sürüm %1$s</string>
     <string name="about_developer">Geliştirici</string>
+    <string name="about_source">Kaynak kodu</string>
+    <string name="about_license">Lisans</string>
+    <string name="about_open_source">Özgür ve açık kaynak: kodu herkes GPL-3.0 lisansıyla okuyabilir, değiştirebilir ve paylaşabilir.</string>
     <string name="settings_default_held">Varsayılan telefon uygulaması</string>
     <plurals name="contacts_count">
         <item quantity="one">%1$d kişi</item>
@@ -183,6 +188,8 @@
     <string name="field_custom_value">Değer</string>
     <string name="add_custom">Özel alan ekle</string>
     <string name="section_labels">Etiketler</string>
+    <string name="label_new">Yeni etiket</string>
+    <string name="label_name">Etiket adı</string>
     <string name="section_add_field">Alan ekle</string>
     <string name="chip_address">Adres</string>
     <string name="chip_event">Önemli tarih</string>
@@ -202,6 +209,7 @@
     <string name="scan_text">Koddaki metin</string>
     <string name="scan_open">Aç</string>
     <string name="scan_copy">Kopyala</string>
+    <string name="number_copied">Numara kopyalandı</string>
     <string name="scan_unavailable">QR tarayıcı bu telefonda açılamadı.</string>
     <string name="action_close">Kapat</string>
     <string name="search_calls">Aramalarda ara</string>
@@ -280,6 +288,8 @@
     <string name="search_all_hint">Kişilerde ve aramalarda ara</string>
     <string name="search_none">Sonuç yok</string>
     <string name="search_recent">Son arananlar</string>
+    <string name="search_opened">Son açtıkların</string>
+    <string name="action_clear">Temizle</string>
     <string name="search_delete_both">%1$d kişi geri dönüşüm kutusuna taşınsın ve %2$d arama silinsin mi?</string>
     <plurals name="search_found">
         <item quantity="one">%1$d bulundu</item>
@@ -318,4 +328,41 @@
     <string name="settings_whatsapp_late_open">Uygulama ayarlarını aç</string>
     <string name="call_end_spam">Spam olarak bildir ve kapat</string>
     <string name="spam_reported">Spam olarak bildirildi</string>
+    <string name="settings_group_calls">Aramalar</string>
+    <string name="settings_group_looks">Görünüm ve hareketler</string>
+    <string name="settings_group_storage">Geçmiş ve depolama</string>
+    <string name="settings_group_about">Tanılama ve hakkında</string>
+    <string name="settings_search_hint">Ayarlarda ara</string>
+    <string name="settings_history_title">Telefonda tutulan arama geçmişi</string>
+    <string name="settings_history_body">Uygulama istatistikler için aramaların kendi kopyasını ve WhatsApp aramalarını tutar; bu süreden eskiler silinir. Android\'in kendi arama kaydı yalnızca son 500 kadar aramayı tuttuğu için daha uzun bir süre bundan sonra dolar.</string>
+    <string name="settings_history_week">1 hafta</string>
+    <string name="settings_history_month">1 ay</string>
+    <string name="settings_history_shrink">Seçilen süreden (%1$s) eski aramalar, WhatsApp aramaları dahil, uygulamadan silinecek. Telefonun kendi arama kaydına dokunulmaz.</string>
+    <string name="settings_backup_title">Google yedeği</string>
+    <string name="settings_backup_body">Etiketler, arama geçmişi, WhatsApp aramaları, geri dönüşüm kutusu ve ayarlar telefonun kendi Google yedeğine girer; ekran kilidin varsa onunla şifrelenir ve uygulama yeni telefona kurulunca geri gelir. Yedekleme telefonun ayarlarında, Google, Yedekleme bölümünden açılıp kapatılır.</string>
+    <plurals name="settings_history_years">
+        <item quantity="one">%d yıl</item>
+        <item quantity="other">%d yıl</item>
+    </plurals>
+    <plurals name="settings_history_used">
+        <item quantity="one">%1$d arama saklı · %2$s yer kaplıyor</item>
+        <item quantity="other">%1$d arama saklı · %2$s yer kaplıyor</item>
+    </plurals>
+    <string name="my_card">Kartım</string>
+    <string name="my_card_create">Kartını oluştur</string>
+    <string name="my_card_create_body">Adın ve numaran, kart olarak paylaşmak için</string>
+    <string name="birthday_today">Bugün doğum günü</string>
+    <string name="birthday_tomorrow">Yarın doğum günü</string>
+    <string name="widget_people_name">Kişiler</string>
+    <string name="widget_people_description">Favorilerin ya da en çok konuştuğun kişiler, bir dokunuş uzağında</string>
+    <string name="widget_person_name">Tek kişi</string>
+    <string name="widget_person_description">Ana ekranda bir kişi; dokununca seçtiğin işi yapar</string>
+    <string name="widget_source">Göster</string>
+    <string name="widget_action">Dokununca</string>
+    <string name="widget_action_whatsapp_call">WhatsApp araması</string>
+    <string name="widget_action_whatsapp_message">WhatsApp mesajı</string>
+    <string name="widget_action_profile">Kişi sayfasını aç</string>
+    <string name="widget_pick_person">Bir kişi seç</string>
+    <string name="widget_add">Tamam</string>
+    <string name="widget_empty">Henüz kimse yok</string>
 </resources>

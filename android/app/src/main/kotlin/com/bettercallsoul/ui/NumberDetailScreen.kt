@@ -1,5 +1,8 @@
 package com.bettercallsoul.ui
 
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.material.icons.automirrored.outlined.Label
 import android.content.ContentValues
 import android.provider.BlockedNumberContract.BlockedNumbers
@@ -102,7 +105,16 @@ private fun NumberDetailScreen(number: String, onCall: (String) -> Unit, onOpen:
             Column(Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Avatar(info.title, info.photoUri, 96.dp)
                 Spacer(Modifier.height(7.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                // A long press on the name or number copies the number.
+                val haptics = LocalHapticFeedback.current
+                val copiedNote = stringResource(R.string.number_copied)
+                Row(
+                    Modifier.combinedClickable(onClick = {}, onLongClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        copyText(context, number, copiedNote)
+                    }),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Text(info.title, fontSize = 24.sp, color = MaterialTheme.colorScheme.onBackground)
                     if (info.isTagged) {
                         Spacer(Modifier.width(6.dp))

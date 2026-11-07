@@ -1,5 +1,15 @@
 package com.bettercallsoul.ui
 
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import com.bettercallsoul.calllog.birthdayNear
+import com.bettercallsoul.calllog.BirthdayNear
+import androidx.compose.ui.draw.clip
+import androidx.compose.material.icons.outlined.PersonAdd
+import androidx.compose.foundation.shape.CircleShape
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -91,6 +101,7 @@ import com.bettercallsoul.R
 import com.bettercallsoul.calllog.CallEntry
 import com.bettercallsoul.calllog.ContactDetail
 import com.bettercallsoul.calllog.ContactRow
+import com.bettercallsoul.calllog.favoritesInOrder
 import com.bettercallsoul.calllog.ContactSource
 import com.bettercallsoul.calllog.WhatsAppAction
 import com.bettercallsoul.calllog.WhatsAppKind
@@ -130,12 +141,14 @@ fun ContactsScreen(
         inSource = if (chosen.isEmpty()) null else chosen.flatMapTo(HashSet()) { app.contacts.contactIdsIn(it) }
     }
 
+    val profile by remember { app.contacts.observeProfile() }.collectAsStateWithLifecycle(null)
+
     val pool = remember(contacts, inSource) { inSource?.let { ids -> contacts.filter { it.id in ids } } ?: contacts }
     val shown = remember(pool, query) {
         val text = query.trim()
         if (text.isEmpty()) pool else pool.filter { it.name.contains(text, ignoreCase = true) }
     }
-    val favorites = remember(shown, query) { if (query.isBlank()) shown.filter { it.starred } else emptyList() }
+    val favorites = remember(shown, query) { if (query.isBlank()) shown.favoritesInOrder() else emptyList() }
     val groups = remember(shown) {
         shown.groupBy { it.name.firstOrNull()?.uppercase() ?: "#" }.toList()
     }
@@ -179,6 +192,14 @@ fun ContactsScreen(
             MoreMenu(onScan = onScan, onTrash = { onOpen(Route.Trash) }, onSettings = { onOpen(Route.Settings) })
         }
         LazyColumn(Modifier.fillMaxSize(), state = list) {
+            if (query.isBlank() && picked.isEmpty()) {
+                item(key = "my-card") {
+                    Spacer(Modifier.height(8.dp))
+                    Card {
+                        MyCardRow(profile) { onOpen(profile?.let { Route.Contact(it.id) } ?: Route.NewProfile) }
+                    }
+                }
+            }
             if (favorites.isNotEmpty()) {
                 item(key = "favorites-header") { DayHeader(stringResource(R.string.favorites)) }
                 item(key = "favorites") {
@@ -311,6 +332,58 @@ private fun MoreMenu(onScan: () -> Unit, onTrash: () -> Unit, onSettings: () -> 
     }
 }
 
+/** A contact label as a chip with a label's icon. */
+@Composable
+private fun LabelChip(label: String, onClick: () -> Unit) {
+    Row(
+        Modifier
+            .clip(RoundedCornerShape(50))
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(Icons.AutoMirrored.Outlined.Label, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(16.dp))
+        Spacer(Modifier.width(6.dp))
+        Text(label, fontSize = 15.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurface)
+    }
+}
+
+/** The owner's own card at the top of the list, or a way to make one. */
+@Composable
+private fun MyCardRow(profile: ContactRow?, onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (profile != null) {
+            Avatar(profile.name.ifBlank { stringResource(R.string.my_card) }, profile.photoUri, 48.dp)
+        } else {
+            Box(
+                Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(Icons.Outlined.PersonAdd, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
+            }
+        }
+        Spacer(Modifier.width(14.dp))
+        Column(Modifier.weight(1f)) {
+            Text(
+                profile?.name?.ifBlank { null } ?: stringResource(if (profile == null) R.string.my_card_create else R.string.my_card),
+                fontSize = 17.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                stringResource(if (profile == null) R.string.my_card_create_body else R.string.my_card),
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ContactListRow(row: ContactRow, selected: Boolean = false, onLongClick: (() -> Unit)? = null, onClick: () -> Unit) {
@@ -366,8 +439,9 @@ fun ContactDetailScreen(contactId: Long, onCall: (String) -> Unit, onOpen: (Rout
     val detail = contact ?: return
 
     Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState())) {
+        val own = ContactsContract.isProfileId(detail.id)
         DetailToolbar(onBack) {
-            ToolbarIcon(
+            if (!own) ToolbarIcon(
                 if (detail.starred) Icons.Filled.Star else Icons.Filled.StarBorder,
                 stringResource(if (detail.starred) R.string.action_unfavorite else R.string.action_favorite),
             ) {
@@ -383,7 +457,7 @@ fun ContactDetailScreen(contactId: Long, onCall: (String) -> Unit, onOpen: (Rout
                     }
                 }
             }
-            ToolbarIcon(Icons.Outlined.Delete, stringResource(R.string.contact_delete)) { confirmDelete = true }
+            if (!own) ToolbarIcon(Icons.Outlined.Delete, stringResource(R.string.contact_delete)) { confirmDelete = true }
             ToolbarIcon(Icons.Filled.Edit, stringResource(R.string.action_edit)) {
                 scope.launch {
                     if (app.editor.load(detail.id) != null) {
@@ -407,6 +481,18 @@ fun ContactDetailScreen(contactId: Long, onCall: (String) -> Unit, onOpen: (Rout
             if (work.isNotEmpty()) {
                 Text(work, fontSize = 15.sp, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 16.dp))
             }
+            birthdayNear(detail.birthday)?.let { near ->
+                Spacer(Modifier.height(6.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    BirthdayCake(near, Modifier.size(17.dp))
+                    Spacer(Modifier.width(5.dp))
+                    Text(
+                        stringResource(if (near == BirthdayNear.Today) R.string.birthday_today else R.string.birthday_tomorrow),
+                        fontSize = 15.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            }
             if (talked > 0) {
                 Spacer(Modifier.height(6.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -428,13 +514,24 @@ fun ContactDetailScreen(contactId: Long, onCall: (String) -> Unit, onOpen: (Rout
             }
         }
         if (detail.phones.isNotEmpty()) {
+            val haptics = LocalHapticFeedback.current
+            val copiedNote = stringResource(R.string.number_copied)
             Card {
                 detail.phones.forEach { phone ->
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 2.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Column(Modifier.weight(1f)) {
+                        // A long press copies the number.
+                        Column(
+                            Modifier
+                                .weight(1f)
+                                .combinedClickable(onClick = {}, onLongClick = {
+                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    copyText(context, phone.number, copiedNote)
+                                })
+                                .padding(vertical = 6.dp),
+                        ) {
                             Text(phone.number, fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
                             phone.label?.let {
                                 Text(it, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -478,6 +575,18 @@ fun ContactDetailScreen(contactId: Long, onCall: (String) -> Unit, onOpen: (Rout
             }
         }
 
+        if (detail.labels.isNotEmpty()) {
+            // Each label a chip; a tap searches for everyone with it.
+            FlowRow(
+                Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                detail.labels.forEach { label ->
+                    LabelChip(label) { onOpen(Route.SearchLabel(label)) }
+                }
+            }
+        }
         val info = buildList<@Composable () -> Unit> {
             detail.emails.forEach { add { InfoRow(Icons.Outlined.Email, it.value, it.label) { open(context, "mailto:${it.value}") } } }
             detail.addresses.forEach { add { InfoRow(Icons.Outlined.Place, it.value, it.label) { open(context, "geo:0,0?q=${Uri.encode(it.value)}") } } }
@@ -488,9 +597,6 @@ fun ContactDetailScreen(contactId: Long, onCall: (String) -> Unit, onOpen: (Rout
             }
             detail.sips.forEach { add { InfoRow(Icons.Outlined.DialerSip, it.value, it.label) } }
             detail.customFields.forEach { add { InfoRow(Icons.Outlined.Tune, it.value, it.label) } }
-            if (detail.labels.isNotEmpty()) {
-                add { InfoRow(Icons.AutoMirrored.Outlined.Label, detail.labels.joinToString(", "), stringResource(R.string.section_labels)) }
-            }
             detail.note?.let { add { InfoRow(Icons.Outlined.Notes, it, stringResource(R.string.field_note)) } }
         }
         if (info.isNotEmpty()) {

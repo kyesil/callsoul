@@ -1,5 +1,7 @@
 package com.bettercallsoul.ui
 
+import androidx.compose.material3.OutlinedTextField
+import android.provider.ContactsContract
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -162,9 +164,12 @@ fun ContactEditorScreen(
     contactId: Long?,
     number: String?,
     scanned: String? = null,
+    profile: Boolean = false,
     onDone: () -> Unit,
     onMoved: (newContactId: Long) -> Unit = { onDone() },
 ) {
+    // The owner's own card lives in Android's profile, on the phone: no account, no labels.
+    val isProfile = profile || (contactId != null && ContactsContract.isProfileId(contactId))
     val context = LocalContext.current
     val app = context.container
     val editor = app.editor
@@ -190,6 +195,8 @@ fun ContactEditorScreen(
     var confirmDelete by remember { mutableStateOf(false) }
     var opened by remember { mutableStateOf(emptySet<Section>()) }
     var groups by remember { mutableStateOf(emptyList<ContactGroup>()) }
+    // Typing the name of a new label.
+    var naming by remember { mutableStateOf(false) }
 
     LaunchedEffect(contactId) {
         if (contactId == null) return@LaunchedEffect
@@ -205,6 +212,39 @@ fun ContactEditorScreen(
     LaunchedEffect(target) { groups = editor.groups(target) }
 
     val current = draft ?: return
+    if (naming) {
+        var title by remember { mutableStateOf("") }
+        AlertDialog(
+            onDismissRequest = { naming = false },
+            title = { Text(stringResource(R.string.label_new)) },
+            text = {
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text(stringResource(R.string.label_name)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                    modifier = Modifier.fillMaxWidth().focusOnOpen(),
+                )
+            },
+            confirmButton = {
+                TextButton(enabled = title.isNotBlank(), onClick = {
+                    naming = false
+                    val name = title.trim()
+                    val account = target
+                    scope.launch {
+                        // One with that name already: it is picked rather than made twice.
+                        val id = groups.firstOrNull { it.title.equals(name, ignoreCase = true) }?.id
+                            ?: runCatching { editor.createGroup(account, name) }.getOrNull()
+                        groups = editor.groups(account)
+                        val latest = draft
+                        if (id != null && latest != null) draft = latest.copy(groups = latest.groups + id)
+                    }
+                }) { Text(stringResource(R.string.action_save)) }
+            },
+            dismissButton = { TextButton(onClick = { naming = false }) { Text(stringResource(R.string.action_cancel)) } },
+        )
+    }
     // A scanned card counts as unsaved work from the start; a new contact can be saved as it came.
     val changed = (scanned != null && stored == null) || current != (stored?.draft ?: blank) || photo != PhotoEdit.Keep || moveTo != null
     val canSave = !saving && (changed || stored == null) && (
@@ -234,6 +274,10 @@ fun ContactEditorScreen(
         val destination = moveTo
         run {
             when {
+                existing == null && isProfile -> {
+                    editor.create(current, account, photo, profile = true)
+                    onDone
+                }
                 existing == null -> {
                     app.newContactAccount = accountKey(account)
                     editor.create(current, account, photo)
@@ -257,8 +301,10 @@ fun ContactEditorScreen(
     BackHandler(enabled = changed) { confirmDiscard = true }
 
     fun shown(section: Section) = section in opened || current.has(section)
-    val sections = Section.entries.filter { it != Section.Labels || groups.isNotEmpty() }
-        .filter { it != Section.Custom || target.isGoogle }
+    // A Google account can take new labels, so its label section shows even before it has any.
+    val labelsOffered = (groups.isNotEmpty() || target.isGoogle) && !isProfile
+    val sections = Section.entries.filter { it != Section.Labels || labelsOffered }
+        .filter { it != Section.Custom || (target.isGoogle && !isProfile) }
 
     CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
         Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding().imePadding()) {
@@ -271,11 +317,17 @@ fun ContactEditorScreen(
                 }
                 Column(Modifier.weight(1f).padding(start = 4.dp)) {
                     Text(
-                        stringResource(if (stored == null) R.string.contact_new else R.string.contact_edit),
+                        stringResource(
+                            when {
+                                isProfile -> R.string.my_card
+                                stored == null -> R.string.contact_new
+                                else -> R.string.contact_edit
+                            },
+                        ),
                         fontSize = 19.sp,
                         color = MaterialTheme.colorScheme.onBackground,
                     )
-                    AccountPicker(
+                    if (!isProfile) AccountPicker(
                         accounts = accounts,
                         selected = if (target.isGoogle) target else accounts.firstOrNull { !it.isGoogle } ?: target,
                         editable = true,
@@ -324,7 +376,7 @@ fun ContactEditorScreen(
                 modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                if (stored == null && contactId == null) {
+                if (stored == null && contactId == null && !isProfile) {
                     AssistChip(
                         onClick = { choosingExisting = true },
                         label = { Text(stringResource(R.string.contact_add_to_existing)) },
@@ -390,7 +442,7 @@ fun ContactEditorScreen(
                         }
                     }
                 }
-                if (shown(Section.Labels) && groups.isNotEmpty()) {
+                if (shown(Section.Labels) && labelsOffered) {
                     EditorSection(Icons.AutoMirrored.Outlined.Label) {
                         Text(stringResource(R.string.section_labels), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -407,6 +459,11 @@ fun ContactEditorScreen(
                                     },
                                 )
                             }
+                            AssistChip(
+                                onClick = { naming = true },
+                                label = { Text(stringResource(R.string.label_new)) },
+                                leadingIcon = { Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                            )
                         }
                     }
                 }
@@ -644,15 +701,17 @@ private fun NameFields(draft: ContactDraft, onChange: (ContactDraft) -> Unit) {
 
 @Composable
 private fun PhotoPicker(name: String, savedPhoto: String?, edit: PhotoEdit, onEdit: (PhotoEdit) -> Unit) {
+    // A picked or taken photo goes through the round crop first.
+    var cropping by rememberSaveable { mutableStateOf<String?>(null) }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        if (uri != null) onEdit(PhotoEdit.Replace(uri))
+        if (uri != null) cropping = uri.toString()
     }
     val pick = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
     // The camera app takes the picture, so this app needs no camera permission.
     val context = LocalContext.current
     var photoFile by rememberSaveable { mutableStateOf<String?>(null) }
     val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { taken ->
-        if (taken) photoFile?.let { onEdit(PhotoEdit.Replace(it.toUri())) }
+        if (taken) cropping = photoFile
     }
     val takePhoto = {
         val folder = File(context.cacheDir, "camera").apply { mkdirs() }
@@ -663,6 +722,16 @@ private fun PhotoPicker(name: String, savedPhoto: String?, edit: PhotoEdit, onEd
         } catch (_: ActivityNotFoundException) {
             pick()
         }
+    }
+    cropping?.let { source ->
+        PhotoCropDialog(
+            source.toUri(),
+            onCropped = {
+                cropping = null
+                onEdit(PhotoEdit.Replace(it))
+            },
+            onDismiss = { cropping = null },
+        )
     }
     var choosing by remember { mutableStateOf(false) }
     val shown = when (edit) {

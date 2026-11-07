@@ -53,8 +53,20 @@ class AppContainer(context: Context) {
     }
     val store = LocalDatabase.create(context).dao()
     val trash = ContactTrash(context, store, editor)
-    val history = CallHistory(context, store)
-    val whatsApp = WhatsAppCallLog(store, callLog, contacts)
+    val history = CallHistory(context, store) { historyDays }
+    val whatsApp = WhatsAppCallLog(store, callLog, contacts) { historyDays }
+
+    /** How many days of calls the app keeps on the phone; a year unless the user picks otherwise. */
+    var historyDays by mutableStateOf(prefs.getInt(KEY_HISTORY_DAYS, CallHistory.KEEP_DAYS))
+        private set
+
+    /** A shorter time deletes what falls outside it right away. */
+    suspend fun saveHistoryDays(days: Int) {
+        historyDays = days
+        prefs.edit { putInt(KEY_HISTORY_DAYS, days) }
+        history.sync()
+        whatsApp.prune()
+    }
     val spam = SpamClient(listOf(BuildConfig.API_URL) + BuildConfig.API_BACKUP_URLS.split(",").map { it.trim() })
     val directory = CallerDirectory(contacts, callLog, store, spam) { spamLookupEnabled }
 
@@ -91,15 +103,51 @@ class AppContainer(context: Context) {
     )
         private set
 
-    fun rememberSearch(text: String) {
+    /** The recent searches that were a contact label, shown with a label's icon. */
+    var labelSearches by mutableStateOf(prefs.getStringSet(KEY_LABEL_SEARCHES, null).orEmpty().toSet())
+        private set
+
+    fun rememberSearch(text: String, label: Boolean = false) {
         saveRecentSearches((listOf(text) + recentSearches.filterNot { it.equals(text, ignoreCase = true) }).take(MAX_RECENT_SEARCHES))
+        if (label && text !in labelSearches) saveLabelSearches(labelSearches + text)
     }
 
-    fun forgetSearch(text: String) = saveRecentSearches(recentSearches - text)
+    fun forgetSearch(text: String) {
+        saveRecentSearches(recentSearches - text)
+        if (text in labelSearches) saveLabelSearches(labelSearches - text)
+    }
+
+    private fun saveLabelSearches(labels: Set<String>) {
+        // Only those still among the recent searches are worth keeping.
+        labelSearches = labels.filterTo(HashSet()) { it in recentSearches }
+        prefs.edit { putStringSet(KEY_LABEL_SEARCHES, labelSearches) }
+    }
 
     private fun saveRecentSearches(searches: List<String>) {
         recentSearches = searches
         prefs.edit { putString(KEY_RECENT_SEARCHES, searches.joinToString("\n")) }
+    }
+
+    /**
+     * The contacts and numbers the user opened or called from a search, newest first, as
+     * [OPENED_CONTACT] or [OPENED_NUMBER] keys. It stays on the phone.
+     */
+    var openedFromSearch by mutableStateOf(
+        prefs.getString(KEY_SEARCH_OPENED, null)?.split('\n')?.filter(String::isNotBlank).orEmpty(),
+    )
+        private set
+
+    fun rememberOpenedContact(contactId: Long) = rememberOpened(OPENED_CONTACT + contactId)
+
+    fun rememberOpenedNumber(number: String) = rememberOpened(OPENED_NUMBER + number)
+
+    private fun rememberOpened(key: String) = saveOpened((listOf(key) + openedFromSearch.filterNot { it == key }).take(MAX_SEARCH_OPENED))
+
+    fun forgetOpened() = saveOpened(emptyList())
+
+    private fun saveOpened(keys: List<String>) {
+        openedFromSearch = keys
+        prefs.edit { putString(KEY_SEARCH_OPENED, keys.joinToString("\n")) }
     }
 
     /** On unless turned off; it works once the user gives notification access, which Android asks for. */
@@ -247,7 +295,10 @@ class AppContainer(context: Context) {
         const val KEY_QUICK_REPLIES = "quick_replies"
         const val KEY_SWIPE_MESSAGE = "swipe_message"
         const val KEY_RECENT_SEARCHES = "recent_searches"
-        const val MAX_RECENT_SEARCHES = 10
+        const val KEY_HISTORY_DAYS = "history_days"
+        const val KEY_LABEL_SEARCHES = "label_searches"
+        const val KEY_SEARCH_OPENED = "search_opened"
+        const val MAX_SEARCH_OPENED = 20
         const val KEY_WHATSAPP_CALLS = "whatsapp_calls"
         const val KEY_WHATSAPP_PILL = "whatsapp_pill"
         const val KEY_RING_IN_PILL = "ring_in_pill"
@@ -257,6 +308,13 @@ class AppContainer(context: Context) {
         const val REPLY_SEPARATOR = "\u001F"
     }
 }
+
+/** How many past searches the search page keeps and shows. */
+const val MAX_RECENT_SEARCHES = 4
+
+/** Keys of what was opened from a search: a contact by id, or a number. */
+const val OPENED_CONTACT = "contact:"
+const val OPENED_NUMBER = "number:"
 
 class BcsApp : Application() {
     lateinit var container: AppContainer

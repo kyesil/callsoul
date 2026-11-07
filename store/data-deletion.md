@@ -13,7 +13,7 @@ Better Call Soul'da hesap yoktur. Sunucuda tutulan tek kişisel veri, gönderdi�
 
 **Ne kalır.** Başka kullanıcıların aynı numara için gönderdiği bildirimler ve bir kimlikle ilişkilendirilemeyen toplam oy sayıları kalır.
 
-**Telefondaki veriler.** Etiketler, istatistikler, geri dönüşüm kutusu, WhatsApp arama kayıtları, ayarlar ve günlük yalnızca telefonundadır; uygulamayı kaldırınca silinir.
+**Telefondaki veriler.** Etiketler, istatistikler, geri dönüşüm kutusu, WhatsApp arama kayıtları, ayarlar ve günlük telefonundadır; uygulamayı kaldırınca silinir. Telefonunun Google yedeklemesi açıksa günlük dışındakilerin bir kopyası Google hesabındaki yedektedir ve telefonun yedekleme ayarlarından silinebilir.
 
 ## English
 
@@ -25,4 +25,4 @@ Better Call Soul has no accounts. The only personal data kept on the server is t
 
 **What stays.** Reports other users sent about the same number, and vote totals that can't be tied to an ID, stay.
 
-**Data on the phone.** Labels, statistics, the recycle bin, WhatsApp call records, settings and the log exist only on your phone and are removed when you uninstall the app.
+**Data on the phone.** Labels, statistics, the recycle bin, WhatsApp call records, settings and the log are on your phone and are removed when you uninstall the app. If your phone's Google backup is on, a copy of all but the log is in the backup in your Google account and can be deleted from the phone's backup settings.

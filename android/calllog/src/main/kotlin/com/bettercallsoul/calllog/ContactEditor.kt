@@ -1,5 +1,7 @@
 package com.bettercallsoul.calllog
 
+import android.content.ContentValues
+import android.provider.ContactsContract.Profile
 import android.accounts.Account
 import android.accounts.AccountManager
 import android.content.ContentProviderOperation
@@ -354,6 +356,19 @@ class ContactEditor(
         }.getOrNull()
     }
 
+    /** Makes a label in [account], as Google Contacts does; it syncs with the account. Returns its id. */
+    suspend fun createGroup(account: ContactAccount, title: String): Long? = withContext(Dispatchers.IO) {
+        val values = ContentValues().apply {
+            put(Groups.ACCOUNT_NAME, account.name)
+            put(Groups.ACCOUNT_TYPE, account.type)
+            put(Groups.TITLE, title.trim())
+            put(Groups.GROUP_VISIBLE, 1)
+        }
+        val id = resolver.insert(Groups.CONTENT_URI, values)?.let(ContentUris::parseId)
+        uploadSoon(account)
+        id
+    }
+
     /** The labels an account offers, leaving out the system ones (My Contacts, Starred). */
     suspend fun groups(account: ContactAccount): List<ContactGroup> = withContext(Dispatchers.IO) {
         if (account.name == null || account.type == null) return@withContext emptyList()
@@ -448,22 +463,30 @@ class ContactEditor(
         account: ContactAccount,
         photo: PhotoEdit = PhotoEdit.Keep,
         starred: Boolean = false,
+        profile: Boolean = false,
     ): Long? = withContext(Dispatchers.IO) {
             val encoded = encoded(photo)
             val batch = Batch(rawContactId = null)
-            batch.operations += ContentProviderOperation.newInsert(RawContacts.CONTENT_URI)
-                .withValue(RawContacts.ACCOUNT_NAME, account.name)
-                .withValue(RawContacts.ACCOUNT_TYPE, account.type)
-                .withValue(RawContacts.STARRED, if (starred) 1 else 0)
-                .build()
+            // The owner's own card goes into Android's profile, which stays on the phone.
+            batch.operations += if (profile) {
+                ContentProviderOperation.newInsert(Profile.CONTENT_RAW_CONTACTS_URI).withValues(ContentValues()).build()
+            } else {
+                ContentProviderOperation.newInsert(RawContacts.CONTENT_URI)
+                    .withValue(RawContacts.ACCOUNT_NAME, account.name)
+                    .withValue(RawContacts.ACCOUNT_TYPE, account.type)
+                    .withValue(RawContacts.STARRED, if (starred) 1 else 0)
+                    .build()
+            }
             if (draft.nameParts.any(String::isNotEmpty)) batch.insert(StructuredName.CONTENT_ITEM_TYPE, *nameColumns(draft))
             batch.syncSingle(Nickname.CONTENT_ITEM_TYPE, Nickname.NAME, null, draft.nickname)
             ContactField.entries.forEach { batch.syncValues(it, emptyList(), draft.values(it)) }
             batch.syncWork(null, draft)
             batch.syncSingle(Note.CONTENT_ITEM_TYPE, Note.NOTE, null, draft.note)
-            if (account.isGoogle) batch.syncCustom(emptyList(), draft.customFields)
-            defaultGroup(account)?.let { batch.insert(GroupMembership.CONTENT_ITEM_TYPE, GroupMembership.GROUP_ROW_ID to it) }
-            draft.groups.forEach { batch.insert(GroupMembership.CONTENT_ITEM_TYPE, GroupMembership.GROUP_ROW_ID to it) }
+            if (account.isGoogle && !profile) batch.syncCustom(emptyList(), draft.customFields)
+            if (!profile) {
+                defaultGroup(account)?.let { batch.insert(GroupMembership.CONTENT_ITEM_TYPE, GroupMembership.GROUP_ROW_ID to it) }
+                draft.groups.forEach { batch.insert(GroupMembership.CONTENT_ITEM_TYPE, GroupMembership.GROUP_ROW_ID to it) }
+            }
             encoded?.let(batch::insertPhoto)
 
             val results = resolver.applyBatch(ContactsContract.AUTHORITY, batch.operations)
@@ -511,7 +534,8 @@ class ContactEditor(
     }
 
     private fun contactIdOf(rawContactId: Long): Long? = resolver.query(
-        ContentUris.withAppendedId(RawContacts.CONTENT_URI, rawContactId), arrayOf(RawContacts.CONTACT_ID), null, null, null,
+        ContentUris.withAppendedId(if (ContactsContract.isProfileId(rawContactId)) Profile.CONTENT_RAW_CONTACTS_URI else RawContacts.CONTENT_URI, rawContactId),
+        arrayOf(RawContacts.CONTACT_ID), null, null, null,
     )?.use { if (it.moveToFirst()) it.getLong(0) else null }
 
     private fun starred(contactId: Long): Boolean = resolver.query(
@@ -592,8 +616,9 @@ class ContactEditor(
 
     private fun writableRawContacts(contactId: Long): List<RawContact> {
         val projection = arrayOf(RawContacts._ID, RawContacts.ACCOUNT_NAME, RawContacts.ACCOUNT_TYPE)
+        val raws = if (ContactsContract.isProfileId(contactId)) Profile.CONTENT_RAW_CONTACTS_URI else RawContacts.CONTENT_URI
         val cursor = resolver.query(
-            RawContacts.CONTENT_URI, projection,
+            raws, projection,
             "${RawContacts.CONTACT_ID} = ? AND ${RawContacts.DELETED} = 0", arrayOf(contactId.toString()), null,
         ) ?: return emptyList()
         return cursor.use {
@@ -614,8 +639,10 @@ class ContactEditor(
     private fun rows(rawContactIds: List<Long>): List<Row> {
         val dataColumns = listOf(Data.DATA1, Data.DATA2, Data.DATA3, Data.DATA4, Data.DATA5, Data.DATA6, Data.DATA7, Data.DATA8, Data.DATA9)
         val projection = arrayOf(Data._ID, Data.RAW_CONTACT_ID, Data.MIMETYPE) + dataColumns
+        val profile = rawContactIds.any(ContactsContract::isProfileId)
         val cursor = resolver.query(
-            Data.CONTENT_URI, projection, "${Data.RAW_CONTACT_ID} IN (${rawContactIds.joinToString()})", null, null,
+            if (profile) Uri.withAppendedPath(Profile.CONTENT_URI, ContactsContract.Contacts.Data.CONTENT_DIRECTORY) else Data.CONTENT_URI,
+            projection, "${Data.RAW_CONTACT_ID} IN (${rawContactIds.joinToString()})", null, null,
         ) ?: return emptyList()
         return cursor.use {
             buildList {

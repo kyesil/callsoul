@@ -1,5 +1,6 @@
 package com.bettercallsoul.ui
 
+import androidx.compose.material.icons.automirrored.outlined.Label
 import android.content.Context
 import android.widget.Toast
 import android.text.format.DateUtils
@@ -74,7 +75,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.bettercallsoul.MAX_RECENT_SEARCHES
+import com.bettercallsoul.OPENED_CONTACT
+import com.bettercallsoul.OPENED_NUMBER
 import com.bettercallsoul.R
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.TextButton
 import com.bettercallsoul.calllog.CallEntry
 import com.bettercallsoul.calllog.SearchableContact
 import com.bettercallsoul.container
@@ -162,6 +172,15 @@ fun SearchScreen(
             )
         }
     }
+    val opened = remember(app.openedFromSearch, contacts, calls, labels) {
+        openedResults(app.openedFromSearch, contacts, calls, labels) { key ->
+            if (key.startsWith(OPENED_CONTACT)) {
+                app.rememberOpenedContact(key.removePrefix(OPENED_CONTACT).toLong())
+            } else {
+                app.rememberOpenedNumber(key.removePrefix(OPENED_NUMBER))
+            }
+        }
+    }
     var peopleOpen by rememberSaveable { mutableStateOf(true) }
     var callsOpen by rememberSaveable { mutableStateOf(true) }
 
@@ -235,9 +254,52 @@ fun SearchScreen(
                         modifier = Modifier.padding(start = 22.dp, end = 18.dp, top = 12.dp, bottom = 8.dp),
                     )
                 }
-                itemsIndexed(app.recentSearches, key = { _, it -> "recent-$it" }) { index, search ->
-                    Grouped(index, app.recentSearches.size) {
-                        RecentSearchRow(search, onClick = { onQueryChange(search) }, onRemove = { app.forgetSearch(search) })
+                item(key = "recent-chips") {
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        items(app.recentSearches.take(MAX_RECENT_SEARCHES), key = { it }) { search ->
+                            SearchChip(
+                                search,
+                                label = search in app.labelSearches,
+                                onClick = { onQueryChange(search) },
+                                onRemove = { app.forgetSearch(search) },
+                            )
+                        }
+                    }
+                }
+            }
+            if (text.isEmpty() && opened.isNotEmpty()) {
+                item(key = "opened") {
+                    Row(
+                        Modifier.fillMaxWidth().padding(start = 22.dp, end = 8.dp, top = 16.dp, bottom = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            stringResource(R.string.search_opened),
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f),
+                        )
+                        TextButton(onClick = { app.forgetOpened() }) { Text(stringResource(R.string.action_clear)) }
+                    }
+                }
+                itemsIndexed(opened, key = { _, it -> "opened-${it.key}" }) { index, item ->
+                    Grouped(index, opened.size) {
+                        SwipeRow(
+                            onCall = {
+                                item.remember()
+                                item.number?.let(onCall)
+                            },
+                            onMessage = { item.number?.let { sendSwipeMessage(context, it) } },
+                            enabled = item.number != null,
+                        ) {
+                            OpenedRow(item) {
+                                item.remember()
+                                onOpen(item.route)
+                            }
+                        }
                     }
                 }
             }
@@ -262,6 +324,7 @@ fun SearchScreen(
                             SwipeRow(
                                 onCall = {
                                     app.rememberSearch(text)
+                                    app.rememberOpenedContact(result.contact.id)
                                     number?.let(onCall)
                                 },
                                 onMessage = { number?.let { sendSwipeMessage(context, it) } },
@@ -276,6 +339,7 @@ fun SearchScreen(
                                         pickContact(result.contact.id)
                                     } else {
                                         app.rememberSearch(text)
+                                        app.rememberOpenedContact(result.contact.id)
                                         onOpen(Route.Contact(result.contact.id))
                                     }
                                 }
@@ -295,6 +359,7 @@ fun SearchScreen(
                             SwipeRow(
                                 onCall = {
                                     app.rememberSearch(text)
+                                    if (hasNumber) app.rememberOpenedNumber(row.entry.number)
                                     scope.launch { callBack(context, row.entry, onCall) }
                                 },
                                 onMessage = { sendSwipeMessage(context, row.entry.number) },
@@ -309,6 +374,7 @@ fun SearchScreen(
                                         pickCall(row.key)
                                     } else if (hasNumber) {
                                         app.rememberSearch(text)
+                                        app.rememberOpenedNumber(row.entry.number)
                                         onOpen(Route.Number(row.entry.number))
                                     }
                                 }
@@ -359,29 +425,92 @@ private fun DeleteResultsDialog(contacts: Set<Long>, calls: List<Long>, onDismis
     )
 }
 
-/** A past search: tapping it searches again, the cross drops it from the list. */
+/** A past search as a chip: tapping it searches again, the cross drops it. */
 @Composable
-private fun RecentSearchRow(search: String, onClick: () -> Unit, onRemove: () -> Unit) {
+private fun SearchChip(search: String, label: Boolean, onClick: () -> Unit, onRemove: () -> Unit) {
     val ink = MaterialTheme.colorScheme.onSurfaceVariant
     Row(
         modifier = Modifier
-            .fillMaxWidth()
+            .height(36.dp)
+            .clip(RoundedCornerShape(50))
+            .background(MaterialTheme.colorScheme.surfaceContainer)
             .clickable(onClick = onClick)
-            .padding(start = 16.dp, end = 4.dp),
+            .padding(start = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(Icons.Outlined.History, contentDescription = null, tint = ink, modifier = Modifier.size(20.dp))
-        Spacer(Modifier.width(14.dp))
+        // A label searched from a profile shows a label; anything typed, the history clock.
+        Icon(if (label) Icons.AutoMirrored.Outlined.Label else Icons.Outlined.History, contentDescription = null, tint = ink, modifier = Modifier.size(16.dp))
+        Spacer(Modifier.width(6.dp))
         Text(
             search,
-            fontSize = 17.sp,
+            fontSize = 15.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.widthIn(max = 180.dp),
         )
-        IconButton(onClick = onRemove) {
-            Icon(Icons.Filled.Close, stringResource(R.string.action_remove_row), tint = ink, modifier = Modifier.size(18.dp))
+        Box(
+            Modifier.size(36.dp).clip(CircleShape).clickable(onClick = onRemove),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(Icons.Filled.Close, stringResource(R.string.action_remove_row), tint = ink, modifier = Modifier.size(16.dp))
+        }
+    }
+}
+
+/** A contact or number opened from a search before; [remember] moves it back to the top. */
+private class OpenedResult(
+    val key: String,
+    val name: String,
+    val photoUri: String?,
+    val number: String?,
+    val route: Route,
+    val remember: () -> Unit,
+)
+
+/** The opened keys as rows; a contact deleted since is left out. A number takes its name from its latest call or label. */
+private fun openedResults(
+    keys: List<String>,
+    contacts: List<SearchableContact>,
+    calls: List<CallEntry>,
+    labels: Map<String, String>,
+    remember: (String) -> Unit,
+): List<OpenedResult> {
+    val byId = contacts.associateBy { it.id }
+    return keys.mapNotNull { key ->
+        when {
+            key.startsWith(OPENED_CONTACT) -> {
+                val contact = key.removePrefix(OPENED_CONTACT).toLongOrNull()?.let(byId::get) ?: return@mapNotNull null
+                OpenedResult(key, contact.name, contact.photoUri, contact.numbers.firstOrNull(), Route.Contact(contact.id)) { remember(key) }
+            }
+            key.startsWith(OPENED_NUMBER) -> {
+                val number = key.removePrefix(OPENED_NUMBER)
+                val call = calls.firstOrNull { CallerDirectory.keyOf(it.number) == CallerDirectory.keyOf(number) }
+                val name = call?.name ?: labels[CallerDirectory.keyOf(number)] ?: number
+                OpenedResult(key, name, call?.photoUri, number, Route.Number(number)) { remember(key) }
+            }
+            else -> null
+        }
+    }
+}
+
+@Composable
+private fun OpenedRow(item: OpenedResult, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Avatar(item.name, item.photoUri, 44.dp)
+        Spacer(Modifier.width(14.dp))
+        Column(Modifier.weight(1f)) {
+            Text(item.name, fontSize = 17.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurface)
+            item.number?.takeIf { it != item.name }?.let {
+                Text(it, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
         }
     }
 }

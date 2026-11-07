@@ -137,6 +137,12 @@ interface LocalDao {
     @Query("DELETE FROM call_records WHERE date < :before")
     suspend fun deleteCallRecordsBefore(before: Long)
 
+    @Query("SELECT COUNT(*) FROM call_records")
+    suspend fun callRecordCount(): Int
+
+    @Query("SELECT COUNT(*) FROM whatsapp_calls")
+    suspend fun whatsAppCallCount(): Int
+
     @Query("DELETE FROM call_records WHERE id IN (:ids)")
     suspend fun deleteCallRecords(ids: List<Long>)
 
@@ -177,8 +183,10 @@ abstract class LocalDatabase : RoomDatabase() {
     abstract fun dao(): LocalDao
 
     companion object {
+        const val FILE = "better-call-soul.db"
+
         fun create(context: Context): LocalDatabase =
-            Room.databaseBuilder(context, LocalDatabase::class.java, "better-call-soul.db")
+            Room.databaseBuilder(context, LocalDatabase::class.java, FILE)
                 .addMigrations(ADD_TRASH, ADD_CALL_RECORDS, ADD_WHATSAPP_CALLS, ADD_RING_TIMES)
                 .build()
 

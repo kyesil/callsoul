@@ -55,6 +55,8 @@
     <string name="photo_add">Добавить фото</string>
     <string name="photo_change">Изменить</string>
     <string name="photo_remove">Удалить</string>
+    <string name="photo_crop_hint">Разведите пальцы, чтобы увеличить, перетащите, чтобы сдвинуть. Фото станет то, что в круге.</string>
+    <string name="photo_use">Готово</string>
     <string name="whatsapp">WhatsApp</string>
     <string name="whatsapp_voice">Аудиозвонок WhatsApp</string>
     <string name="whatsapp_video">Видеозвонок WhatsApp</string>
@@ -137,6 +139,9 @@
     <string name="about_title">О приложении</string>
     <string name="about_version">Версия %1$s</string>
     <string name="about_developer">Разработчик</string>
+    <string name="about_source">Исходный код</string>
+    <string name="about_license">Лицензия</string>
+    <string name="about_open_source">Свободное ПО с открытым кодом: любой может читать, изменять и распространять код по лицензии GPL-3.0.</string>
     <string name="settings_default_held">Приложение для звонков по умолчанию</string>
     <plurals name="contacts_count">
         <item quantity="one">%1$d контакт</item>
@@ -189,6 +194,8 @@
     <string name="field_custom_value">Значение</string>
     <string name="add_custom">Добавить своё поле</string>
     <string name="section_labels">Ярлыки</string>
+    <string name="label_new">Новая метка</string>
+    <string name="label_name">Название метки</string>
     <string name="section_add_field">Добавить поле</string>
     <string name="chip_address">Адрес</string>
     <string name="chip_event">Важная дата</string>
@@ -208,6 +215,7 @@
     <string name="scan_text">Текст в коде</string>
     <string name="scan_open">Открыть</string>
     <string name="scan_copy">Копировать</string>
+    <string name="number_copied">Номер скопирован</string>
     <string name="scan_unavailable">Не удалось запустить сканер QR-кодов.</string>
     <string name="action_close">Закрыть</string>
     <string name="search_calls">Поиск по вызовам</string>
@@ -300,6 +308,8 @@
     <string name="search_all_hint">Поиск контактов и вызовов</string>
     <string name="search_none">Ничего не найдено</string>
     <string name="search_recent">Недавние запросы</string>
+    <string name="search_opened">Недавно открытые</string>
+    <string name="action_clear">Очистить</string>
     <string name="search_delete_both">Переместить контакты (%1$d) в корзину и удалить вызовы (%2$d)?</string>
     <plurals name="search_found">
         <item quantity="one">Найдено: %1$d</item>
@@ -344,4 +354,45 @@
     <string name="settings_whatsapp_late_open">Открыть настройки приложения</string>
     <string name="call_end_spam">Спам: сообщить и завершить</string>
     <string name="spam_reported">Отмечено как спам</string>
+    <string name="settings_group_calls">Звонки</string>
+    <string name="settings_group_looks">Вид и жесты</string>
+    <string name="settings_group_storage">История и хранилище</string>
+    <string name="settings_group_about">Диагностика и о приложении</string>
+    <string name="settings_search_hint">Поиск настроек</string>
+    <string name="settings_history_title">История звонков на телефоне</string>
+    <string name="settings_history_body">Приложение хранит свою копию звонков для статистики и звонки WhatsApp; всё, что старше этого срока, удаляется. Журнал звонков Android хранит только около 500 последних звонков, поэтому более долгий срок заполняется с этого момента.</string>
+    <string name="settings_history_week">1 неделя</string>
+    <string name="settings_history_month">1 месяц</string>
+    <string name="settings_history_shrink">Звонки старше выбранного срока (%1$s), включая звонки WhatsApp, будут удалены из приложения. Журнал звонков телефона не изменится.</string>
+    <string name="settings_backup_title">Резервная копия Google</string>
+    <string name="settings_backup_body">Метки, история звонков, звонки WhatsApp, корзина и настройки попадают в резервную копию Google на телефоне, зашифрованную блокировкой экрана, если она есть, и возвращаются при установке приложения на новый телефон. Резервное копирование включается и выключается в настройках телефона, в разделе Google, «Резервное копирование».</string>
+    <plurals name="settings_history_years">
+        <item quantity="one">%d год</item>
+        <item quantity="few">%d года</item>
+        <item quantity="many">%d лет</item>
+        <item quantity="other">%d года</item>
+    </plurals>
+    <plurals name="settings_history_used">
+        <item quantity="one">Хранится %1$d звонок · занимает %2$s</item>
+        <item quantity="few">Хранится %1$d звонка · занимает %2$s</item>
+        <item quantity="many">Хранится %1$d звонков · занимает %2$s</item>
+        <item quantity="other">Хранится %1$d звонка · занимает %2$s</item>
+    </plurals>
+    <string name="my_card">Моя карточка</string>
+    <string name="my_card_create">Создать свою карточку</string>
+    <string name="my_card_create_body">Ваше имя и номер, чтобы делиться ими как карточкой</string>
+    <string name="birthday_today">Сегодня день рождения</string>
+    <string name="birthday_tomorrow">Завтра день рождения</string>
+    <string name="widget_people_name">Контакты</string>
+    <string name="widget_people_description">Избранные или те, с кем вы говорите чаще всего, в одно касание</string>
+    <string name="widget_person_name">Один контакт</string>
+    <string name="widget_person_description">Один человек на главном экране; по касанию делает то, что вы выберете</string>
+    <string name="widget_source">Показывать</string>
+    <string name="widget_action">По касанию</string>
+    <string name="widget_action_whatsapp_call">Звонок WhatsApp</string>
+    <string name="widget_action_whatsapp_message">Сообщение WhatsApp</string>
+    <string name="widget_action_profile">Открыть страницу</string>
+    <string name="widget_pick_person">Выберите контакт</string>
+    <string name="widget_add">Готово</string>
+    <string name="widget_empty">Пока никого нет</string>
 </resources>

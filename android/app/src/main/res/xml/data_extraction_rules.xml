@@ -1,18 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Nothing leaves the phone: tags, the spam cache and settings stay out of cloud backups and transfers. -->
+<!-- The phone's own Google backup and a move to a new phone take the app's data along: tags, call
+     history, WhatsApp calls, the recycle bin and settings. The debug log and the spot the call pill
+     was dragged to on this screen stay behind. -->
 <data-extraction-rules>
     <cloud-backup>
-        <exclude domain="root" />
-        <exclude domain="file" />
-        <exclude domain="database" />
-        <exclude domain="sharedpref" />
-        <exclude domain="external" />
+        <exclude domain="file" path="logs/" />
+        <exclude domain="sharedpref" path="call_overlay.xml" />
     </cloud-backup>
     <device-transfer>
-        <exclude domain="root" />
-        <exclude domain="file" />
-        <exclude domain="database" />
-        <exclude domain="sharedpref" />
-        <exclude domain="external" />
+        <exclude domain="file" path="logs/" />
+        <exclude domain="sharedpref" path="call_overlay.xml" />
     </device-transfer>
 </data-extraction-rules>

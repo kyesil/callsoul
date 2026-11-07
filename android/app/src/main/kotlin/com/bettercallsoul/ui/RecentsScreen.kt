@@ -1,5 +1,7 @@
 package com.bettercallsoul.ui
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -109,11 +111,17 @@ fun RecentsScreen(onCall: (String) -> Unit, onOpen: (Route) -> Unit) {
             }
         }
         LazyColumn(Modifier.fillMaxSize()) {
-            if (!searching) item { LargeTitle(stringResource(R.string.title_phone), null) }
+            if (!searching) item { LargeTitle(stringResource(R.string.tab_recents), null) }
             item {
-                // Narrow to one kind of call; tapping the chosen chip again shows them all.
-                Row(Modifier.padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    CallFilter.entries.filter { it != CallFilter.All }.forEach { filter ->
+                // Narrow to one kind of call; tapping the chosen chip again shows them all. The row
+                // slides sideways when the chips don't fit.
+                Row(
+                    Modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    CallFilter.entries
+                        .filter { it != CallFilter.All && (it != CallFilter.WhatsApp || app.whatsAppCallsEnabled || kind == it) }
+                        .forEach { filter ->
                         FilterChip(
                             selected = kind == filter,
                             onClick = { kind = if (kind == filter) CallFilter.All else filter },
@@ -154,13 +162,15 @@ enum class CallFilter(val label: Int) {
     Missed(R.string.filter_missed),
     Incoming(R.string.filter_incoming),
     Outgoing(R.string.filter_outgoing),
+    WhatsApp(R.string.whatsapp),
     ;
 
-    fun matches(type: CallType): Boolean = when (this) {
+    fun matches(call: CallEntry): Boolean = when (this) {
         All -> true
-        Missed -> type == CallType.Missed || type == CallType.Rejected
-        Incoming -> type == CallType.Incoming
-        Outgoing -> type == CallType.Outgoing
+        Missed -> call.type == CallType.Missed || call.type == CallType.Rejected
+        Incoming -> call.type == CallType.Incoming
+        Outgoing -> call.type == CallType.Outgoing
+        WhatsApp -> call.whatsApp != null
     }
 }
 
@@ -190,7 +200,7 @@ fun rememberRecents(limit: Int? = null, query: String = "", kind: CallFilter = C
         val text = query.trim()
         val digits = text.filter(Char::isDigit)
         val shown = calls.filter { entry ->
-            kind.matches(entry.type) && (
+            kind.matches(entry) && (
                 text.isEmpty() ||
                     entry.name?.contains(text, ignoreCase = true) == true ||
                     labels[CallerDirectory.keyOf(entry.number)]?.contains(text, ignoreCase = true) == true ||
