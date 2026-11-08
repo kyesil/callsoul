@@ -5,7 +5,7 @@ import androidx.core.content.edit
 
 /** How the floating call pill looks. Stored beside its position, read each time the pill appears. */
 data class PillStyle(
-    val vertical: Boolean = false,
+    val vertical: Boolean = true,
     /** 1 is the normal size; the settings slider runs from [MIN_SCALE] to [MAX_SCALE]. */
     val scale: Float = 1f,
     /** Hang-up button first (left, or top when vertical) instead of the speaker / answer button. */
@@ -33,7 +33,7 @@ data class PillStyle(
                 else -> 1f
             }
             return PillStyle(
-                vertical = prefs.getBoolean(KEY_VERTICAL, false),
+                vertical = prefs.getBoolean(KEY_VERTICAL, true),
                 scale = prefs.getFloat(KEY_SCALE, old).coerceIn(MIN_SCALE, MAX_SCALE),
                 endFirst = prefs.getBoolean(KEY_END_FIRST, false),
                 opacity = prefs.getFloat(KEY_OPACITY, 1f).coerceIn(MIN_OPACITY, 1f),

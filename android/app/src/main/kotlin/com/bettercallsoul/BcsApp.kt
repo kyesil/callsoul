@@ -231,6 +231,37 @@ class AppContainer(context: Context) {
         get() = prefs.getBoolean(KEY_FACE_DOWN, false)
         set(value) = prefs.edit { putBoolean(KEY_FACE_DOWN, value) }
 
+    /** A short beep when a call connects. */
+    var toneOnConnect: Boolean
+        get() = prefs.getBoolean(KEY_TONE_CONNECT, false)
+        set(value) = prefs.edit { putBoolean(KEY_TONE_CONNECT, value) }
+
+    /** Two short beeps when a call ends. */
+    var toneOnEnd: Boolean
+        get() = prefs.getBoolean(KEY_TONE_END, false)
+        set(value) = prefs.edit { putBoolean(KEY_TONE_END, value) }
+
+    /** A volume key pressed while a call rings turns it down, instead of only quieting it. */
+    var declineOnKey: Boolean
+        get() = prefs.getBoolean(KEY_DECLINE_ON_KEY, false)
+        set(value) = prefs.edit { putBoolean(KEY_DECLINE_ON_KEY, value) }
+
+    /** Groups of contacts the user said are different people, by their sorted contact ids. */
+    var keptApart: Set<String>
+        get() = prefs.getStringSet(KEY_KEPT_APART, null).orEmpty().toSet()
+        set(value) = prefs.edit { putStringSet(KEY_KEPT_APART, value) }
+
+    /** Light, dark or the phone's; Compose state, so the open screens follow at once. */
+    var themeChoice by mutableStateOf(
+        runCatching { ThemeChoice.valueOf(prefs.getString(KEY_THEME, null) ?: "") }.getOrDefault(ThemeChoice.System),
+    )
+        private set
+
+    fun saveTheme(choice: ThemeChoice) {
+        themeChoice = choice
+        prefs.edit { putString(KEY_THEME, choice.name) }
+    }
+
     /** Compose state, so flipping the switch in Settings restyles the open screens at once. */
     var animationsEnabled by mutableStateOf(prefs.getBoolean(KEY_ANIMATIONS, true))
         private set
@@ -305,6 +336,11 @@ class AppContainer(context: Context) {
         const val KEY_LOOKUP = "spam_lookup"
         const val KEY_DEFAULT_ASKED = "default_phone_asked"
         const val KEY_FACE_DOWN = "silent_face_down"
+        const val KEY_TONE_CONNECT = "tone_on_connect"
+        const val KEY_THEME = "theme"
+        const val KEY_TONE_END = "tone_on_end"
+        const val KEY_DECLINE_ON_KEY = "decline_on_key"
+        const val KEY_KEPT_APART = "duplicates_kept_apart"
         const val KEY_ANIMATIONS = "animations"
         const val KEY_DEBUG_LOG = "debug_log"
         const val KEY_OWN_NUMBER = "own_number_seeded"
@@ -347,7 +383,14 @@ class BcsApp : Application() {
         container = AppContainer(this)
         DebugLog.init(this) { container.debugLogEnabled }
         DebugLog.i("App", "start ${BuildConfig.VERSION_NAME} (${BuildConfig.BUILD_TYPE})")
-        CallManager.init(container.directory, { container.silentWhenFaceDown }, { container.ringInPill })
+        CallManager.init(
+            container.directory,
+            silentWhenFaceDown = { container.silentWhenFaceDown },
+            ringInPill = { container.ringInPill },
+            toneOnConnect = { container.toneOnConnect },
+            toneOnEnd = { container.toneOnEnd },
+            declineOnKey = { container.declineOnKey },
+        )
         WhatsAppTelecomCalls.init { call -> if (container.whatsAppCallsEnabled) container.whatsApp.save(call) }
         CallChannels.create(this, getString(R.string.channel_incoming), getString(R.string.channel_ongoing))
         MissedCallReceiver.createChannel(this)

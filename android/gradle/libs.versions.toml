@@ -1,4 +1,5 @@
 [versions]
+zxing = "3.5.3"
 agp = "9.5.0"
 kotlin = "2.4.21"
 ksp = "2.3.13"
@@ -15,6 +16,7 @@ materialIcons = "1.7.8"
 fragment = "1.8.9"
 
 [libraries]
+zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }

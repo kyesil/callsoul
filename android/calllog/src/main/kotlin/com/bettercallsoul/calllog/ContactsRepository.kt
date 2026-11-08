@@ -118,6 +118,8 @@ data class ContactDetail(
     /** The accounts holding a copy of this contact, as names to show. */
     val sources: List<String> = emptyList(),
     val birthday: MonthDay? = null,
+    /** The contact's own ringtone, which Telecom plays for their calls; null rings the phone's default. */
+    val ringtone: String? = null,
 )
 
 enum class WhatsAppKind { Voice, Video }
@@ -352,13 +354,15 @@ class ContactsRepository(context: Context) {
 
     suspend fun detail(contactId: Long): ContactDetail? = withContext(Dispatchers.IO) {
         if (contactId in deleted) return@withContext null
-        val projection = arrayOf(Contacts.LOOKUP_KEY, Contacts.DISPLAY_NAME_PRIMARY, Contacts.PHOTO_URI, Contacts.STARRED)
+        val projection = arrayOf(Contacts.LOOKUP_KEY, Contacts.DISPLAY_NAME_PRIMARY, Contacts.PHOTO_URI, Contacts.STARRED, Contacts.CUSTOM_RINGTONE)
         var starred = false
+        var ringtone: String? = null
         val base = resolver.query(
             contactsUri(contactId), projection, "${Contacts._ID} = ?", arrayOf(contactId.toString()), null,
         )?.use {
             if (!it.moveToFirst()) return@use null
             starred = it.getInt(3) == 1
+            ringtone = it.getStringOrNull(4)?.takeIf(String::isNotBlank)
             Triple(it.getString(0), it.getStringOrNull(1).orEmpty(), it.getStringOrNull(2))
         } ?: return@withContext null
         val work = organization(contactId)
@@ -384,6 +388,7 @@ class ContactsRepository(context: Context) {
             customFields = customFields(contactId),
             labels = labels(contactId),
             birthday = birthday(contactId),
+            ringtone = ringtone,
             sources = rawAccounts(contactId).map { (type, name) -> sourceLabel(type, name) }.distinct(),
         )
     }
@@ -479,6 +484,14 @@ class ContactsRepository(context: Context) {
         val values = android.content.ContentValues().apply {
             put(Contacts.STARRED, if (starred) 1 else 0)
             put(Contacts.PINNED, ContactsContract.PinnedPositions.UNPINNED)
+        }
+        resolver.update(android.content.ContentUris.withAppendedId(Contacts.CONTENT_URI, contactId), values, null, null)
+    }
+
+    /** Gives the contact their own ringtone, or with null takes it away so the phone's default rings. */
+    suspend fun setRingtone(contactId: Long, ringtone: String?): Unit = withContext(Dispatchers.IO) {
+        val values = android.content.ContentValues().apply {
+            if (ringtone == null) putNull(Contacts.CUSTOM_RINGTONE) else put(Contacts.CUSTOM_RINGTONE, ringtone)
         }
         resolver.update(android.content.ContentUris.withAppendedId(Contacts.CONTENT_URI, contactId), values, null, null)
     }

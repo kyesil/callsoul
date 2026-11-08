@@ -1,5 +1,10 @@
 package com.bettercallsoul.call
 
+import com.bettercallsoul.ui.systemAnimationsOn
+import com.bettercallsoul.container
+import android.os.Build
+import com.bettercallsoul.AppLook
+import android.content.Context
 import com.bettercallsoul.diag.DebugLog
 import android.os.Bundle
 import android.view.WindowManager
@@ -16,8 +21,23 @@ import android.graphics.Color
 import androidx.activity.SystemBarStyle
 
 class InCallActivity : ComponentActivity() {
+    override fun attachBaseContext(newBase: Context) = super.attachBaseContext(AppLook.wrap(newBase))
+
+    /** The app's animations switch, with the phone's own; off, the call screen opens and closes at once. */
+    private val motion: Boolean get() = container.animationsEnabled && systemAnimationsOn(this)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!motion) {
+            // The call screen is a task of its own, so Android would slide it in like an app.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, 0, 0)
+                overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, 0, 0)
+            } else {
+                @Suppress("DEPRECATION")
+                overridePendingTransition(0, 0)
+            }
+        }
         // The call screens are dark on every theme, and so is everything that opens over them.
         val bars = SystemBarStyle.dark(Color.TRANSPARENT)
         enableEdgeToEdge(statusBarStyle = bars, navigationBarStyle = bars)
@@ -45,6 +65,14 @@ class InCallActivity : ComponentActivity() {
                     else -> LaunchedEffect(Unit) { finish() }
                 }
             }
+        }
+    }
+
+    override fun finish() {
+        super.finish()
+        if (!motion && Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            @Suppress("DEPRECATION")
+            overridePendingTransition(0, 0)
         }
     }
 

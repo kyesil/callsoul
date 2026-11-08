@@ -101,6 +101,8 @@ sealed interface Route {
     data object Trash : Route
     data object Stats : Route
     data object Labels : Route
+    data object Blocked : Route
+    data object Duplicates : Route
 
     /** A new contact filled from the business card in a scanned QR code; [raw] is the code's text. */
     data class ScannedContact(val raw: String) : Route
@@ -121,6 +123,8 @@ private val RouteStackSaver = listSaver<SnapshotStateList<Route>, String>(
                 Route.Trash -> "trash"
                 Route.Stats -> "stats"
                 Route.Labels -> "labels"
+                Route.Blocked -> "blocked"
+                Route.Duplicates -> "duplicates"
                 is Route.ScannedContact -> "scan:${it.raw}"
             }
         }
@@ -138,6 +142,8 @@ private val RouteStackSaver = listSaver<SnapshotStateList<Route>, String>(
                 "trash" -> Route.Trash
                 "stats" -> Route.Stats
                 "labels" -> Route.Labels
+                "blocked" -> Route.Blocked
+                "duplicates" -> Route.Duplicates
                 "scan" -> Route.ScannedContact(value)
                 else -> null
             }
@@ -318,15 +324,17 @@ fun MainScreen(
         AnimatedContent(
             targetState = stack.size to stack.lastOrNull(),
             transitionSpec = {
+                // No size change is animated: with no page open this is empty, and growing it to the
+                // full screen showed as a page unrolling even with animations off.
                 if (!motion) {
-                    EnterTransition.None togetherWith ExitTransition.None
+                    (EnterTransition.None togetherWith ExitTransition.None) using null
                 } else {
                     // Deeper pages come in from the trailing edge, going back reverses it.
                     val forward = targetState.first > initialState.first
                     val sign = (if (forward) 1 else -1) * (if (rtl) -1 else 1)
-                    (slideInHorizontally(spring(dampingRatio = 0.86f, stiffness = Spring.StiffnessMediumLow)) { it * sign / 3 } +
+                    ((slideInHorizontally(spring(dampingRatio = 0.86f, stiffness = Spring.StiffnessMediumLow)) { it * sign / 3 } +
                         fadeIn(tween(220))) togetherWith
-                        (slideOutHorizontally(tween(220)) { -it * sign / 8 } + fadeOut(tween(160)))
+                        (slideOutHorizontally(tween(220)) { -it * sign / 8 } + fadeOut(tween(160)))) using null
                 }
             },
             label = "route",
@@ -346,10 +354,12 @@ fun MainScreen(
                         val below = stack.lastIndex
                         if (below >= 0 && stack[below] == Route.Contact(route.id)) stack[below] = Route.Contact(newId)
                     })
-                    Route.Settings -> SettingsScreen(isDefaultDialer, onRequestDefault, onBack = back)
+                    Route.Settings -> SettingsScreen(isDefaultDialer, onRequestDefault, onOpen = open, onBack = back)
                     Route.Trash -> TrashScreen(onBack = back)
                     Route.Stats -> StatsScreen(onOpen = open, onBack = back)
                     Route.Labels -> LabelsScreen(onOpen = open, onBack = back)
+                    Route.Blocked -> BlockedScreen(onOpen = open, onBack = back)
+                    Route.Duplicates -> DuplicatesScreen(onOpen = open, onBack = back)
                     is Route.ScannedContact -> ContactEditorScreen(null, null, scanned = route.raw, onDone = back)
                     }
                 }

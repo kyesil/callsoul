@@ -1,5 +1,7 @@
 package com.bettercallsoul
 
+import com.bettercallsoul.AppLook
+import android.content.Context
 import com.bettercallsoul.ui.Route
 import com.bettercallsoul.widget.Widgets
 import com.bettercallsoul.widget.WidgetActionActivity
@@ -59,6 +61,8 @@ class MainActivity : ComponentActivity() {
 
     private val requestRole =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { refresh() }
+
+    override fun attachBaseContext(newBase: Context) = super.attachBaseContext(AppLook.wrap(newBase))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

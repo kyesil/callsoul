@@ -43,6 +43,38 @@ object T9 {
         return words.indices.any { start -> words.drop(start).joinToString("").startsWith(digits) }
     }
 
+    /**
+     * Where in [name] the digits match, as character positions, for showing the match in bold:
+     * from the start of the word they begin at to the last letter they reach. Null when they don't.
+     */
+    fun nameMatch(digits: String, name: String): IntRange? {
+        if (digits.isEmpty() || !digits.all(Char::isDigit)) return null
+        val starts = Regex("[\\p{L}\\p{N}]+").findAll(name).map { it.range.first }
+        for (start in starts) {
+            var matched = 0
+            for (i in start until name.length) {
+                val key = encode(name[i].toString())
+                if (key.isEmpty()) continue
+                if (key[0] != digits[matched]) break
+                matched++
+                if (matched == digits.length) return start..i
+            }
+        }
+        return null
+    }
+
+    /** Where in [number] the typed digits are, as character positions, for showing them in bold. */
+    fun numberMatch(typed: String, number: String): IntRange? {
+        val digits = typed.filter(Char::isDigit)
+        if (digits.isEmpty()) return null
+        val places = number.indices.filter { number[it].isDigit() }
+        val stored = places.joinToString("") { number[it].toString() }
+        val (found, length) = stored.indexOf(digits).takeIf { it >= 0 }?.let { it to digits.length }
+            ?: digits.takeIf { it.startsWith("0") && it.length > 1 }?.drop(1)?.let { rest -> stored.indexOf(rest).takeIf { it >= 0 }?.let { it to rest.length } }
+            ?: return null
+        return places[found]..places[found + length - 1]
+    }
+
     /** True when the typed digits appear in the number, also across the 0 / +90 prefixes. */
     fun matchesNumber(typed: String, number: String): Boolean {
         val digits = typed.filter(Char::isDigit)

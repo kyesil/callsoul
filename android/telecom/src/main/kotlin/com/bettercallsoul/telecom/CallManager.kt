@@ -80,6 +80,7 @@ object CallManager {
 
     private const val TAG = "Call"
     private const val AUDIO = "Audio"
+    private const val QUIET_ECHO_MILLIS = 1_500L
 
     private lateinit var directory: CallerDirectory
     internal var silentWhenFaceDown: () -> Boolean = { false }
@@ -89,12 +90,28 @@ object CallManager {
     internal var ringInPill: () -> Boolean = { false }
         private set
 
+    /** The user's choices for a short tone when a call connects and when it ends. */
+    private var toneOnConnect: () -> Boolean = { false }
+    private var toneOnEnd: () -> Boolean = { false }
+
+    /** The user's choice that a volume key pressed while a call rings turns it down, not only quiets it. */
+    internal var declineOnKey: () -> Boolean = { false }
+        private set
+
+    /** Set while the app itself quiets the ringer, so Telecom's echo of it is not taken for a key. */
+    private var quietingItself = false
+
+    /** Calls that have connected, so a call taken off hold doesn't sound the tone again. */
+    private val connected = mutableSetOf<Call>()
+
     private var service: InCallService? = null
     private val calls = mutableListOf<Call>()
     private val callers = mutableMapOf<Call, CallerInfo>()
     private val callback = object : Call.Callback() {
         override fun onStateChanged(call: Call, state: Int) {
             DebugLog.i(TAG, "state ${DebugLog.mask(numberOf(call))} -> ${stateName(state)}")
+            if (state == Call.STATE_ACTIVE && connected.add(call) && call.parent == null && toneOnConnect()) CallTones.connected()
+            if (state == Call.STATE_DISCONNECTED && connected.remove(call) && call.parent == null && toneOnEnd()) CallTones.ended()
             publish()
         }
         override fun onDetailsChanged(call: Call, details: Call.Details) = publish()
@@ -122,10 +139,20 @@ object CallManager {
     private val _ended = MutableStateFlow<EndedCall?>(null)
     val ended: StateFlow<EndedCall?> = _ended.asStateFlow()
 
-    fun init(directory: CallerDirectory, silentWhenFaceDown: () -> Boolean, ringInPill: () -> Boolean = { false }) {
+    fun init(
+        directory: CallerDirectory,
+        silentWhenFaceDown: () -> Boolean,
+        ringInPill: () -> Boolean = { false },
+        toneOnConnect: () -> Boolean = { false },
+        toneOnEnd: () -> Boolean = { false },
+        declineOnKey: () -> Boolean = { false },
+    ) {
         this.directory = directory
         this.silentWhenFaceDown = silentWhenFaceDown
         this.ringInPill = ringInPill
+        this.toneOnConnect = toneOnConnect
+        this.toneOnEnd = toneOnEnd
+        this.declineOnKey = declineOnKey
     }
 
     @SuppressLint("MissingPermission") // The app opens only once the phone permission is granted.
@@ -171,6 +198,7 @@ object CallManager {
         val cause = call.details.disconnectCause
         DebugLog.i(TAG, "removed ${DebugLog.mask(numberOf(call))} cause=${cause?.code} ${cause?.reason.orEmpty()}, left=${calls.size - 1}")
         noteRingTime(call)
+        connected -= call
         val caller = callers.remove(call)
         calls -= call
         if (calls.isEmpty() && caller != null && !isConference(call)) _ended.value = endedOf(call, caller)
@@ -224,7 +252,24 @@ object CallManager {
     @SuppressLint("MissingPermission")
     internal fun silenceRinger() {
         DebugLog.i(TAG, "silence ringer")
+        quietingItself = true
         service?.getSystemService(TelecomManager::class.java)?.silenceRinger()
+        scope.launch {
+            kotlinx.coroutines.delay(QUIET_ECHO_MILLIS)
+            quietingItself = false
+        }
+    }
+
+    /**
+     * Telecom quieted the ringing: Android does that for a volume key (and the power key) pressed
+     * while a call rings, before any app sees the key. With the user's choice it declines instead.
+     */
+    internal fun onSilenceRinger() {
+        val call = primary()?.takeIf { it.currentState == Call.STATE_RINGING }
+        DebugLog.i(TAG, "ringer silenced by the system, self=$quietingItself, decline=${declineOnKey()}")
+        if (call == null || quietingItself || !declineOnKey()) return
+        DebugLog.i(TAG, "reject on key")
+        call.reject(false, null)
     }
 
     /** Going to the waiting call puts the current one on hold; Telecom takes care of that. */

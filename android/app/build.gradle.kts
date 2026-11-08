@@ -13,8 +13,8 @@ android {
         // Android 17 is the target; 35 keeps the Galaxy S21 test phone usable.
         minSdk = 29
         targetSdk = 37
-        versionCode = 30
-        versionName = "0.4.2"
+        versionCode = 32
+        versionName = "0.4.4"
     }
 
     // The Play upload key lives outside the repo; its path and password are in ~/.gradle/gradle.properties.
@@ -81,6 +81,7 @@ dependencies {
 
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
+    implementation(libs.zxing.core)
     implementation(libs.compose.foundation)
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons)

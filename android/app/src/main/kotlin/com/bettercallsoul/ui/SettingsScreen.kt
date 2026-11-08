@@ -1,5 +1,12 @@
 package com.bettercallsoul.ui
 
+import com.bettercallsoul.ThemeChoice
+import com.bettercallsoul.AppLook
+import androidx.compose.material.icons.automirrored.outlined.Label
+import androidx.compose.material.icons.outlined.People
+import androidx.compose.material.icons.outlined.JoinInner
+import androidx.compose.material.icons.outlined.Block
+import android.app.NotificationManager
 import android.app.ActivityManager
 import android.content.Context
 
@@ -122,6 +129,7 @@ import java.io.File
 /** The groups the settings are sorted into: the first page lists them and each opens a page of its own. */
 private enum class SettingsGroup(val title: Int, val icon: ImageVector) {
     Calls(R.string.settings_group_calls, Icons.Outlined.Call),
+    Contacts(R.string.settings_group_contacts, Icons.Outlined.People),
     WhatsApp(R.string.whatsapp, Icons.Outlined.Forum),
     Pill(R.string.settings_pill_title, Icons.Outlined.SmartButton),
     Looks(R.string.settings_group_looks, Icons.Outlined.TouchApp),
@@ -133,7 +141,7 @@ private enum class SettingsGroup(val title: Int, val icon: ImageVector) {
 private class SettingEntry(val group: SettingsGroup, val words: List<Int>, val content: @Composable () -> Unit)
 
 @Composable
-fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBack: () -> Unit) {
+fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBack: () -> Unit, onOpen: (Route) -> Unit = {}) {
     val context = LocalContext.current
     var overlayAllowed by remember { mutableStateOf(Settings.canDrawOverlays(context)) }
     LifecycleResumeEffect(Unit) {
@@ -149,6 +157,18 @@ fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBac
         SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_lookup_title, R.string.settings_lookup_body)) { LookupSettings() },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_face_down_title, R.string.settings_face_down_body)) { FaceDownSettings() },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_replies_title, R.string.settings_replies_body)) { QuickReplySettings() },
+        SettingEntry(SettingsGroup.Calls, listOf(R.string.key_decline_title, R.string.key_decline_body)) { KeySettings() },
+        SettingEntry(SettingsGroup.Calls, listOf(R.string.tone_connect_title, R.string.tone_connect_body, R.string.tone_end_title, R.string.tone_end_body)) { ToneSettings() },
+        SettingEntry(SettingsGroup.Calls, listOf(R.string.dnd_title, R.string.dnd_body)) { DndSettings() },
+        SettingEntry(SettingsGroup.Calls, listOf(R.string.blocked_title, R.string.blocked_body)) {
+            LinkCard(Icons.Outlined.Block, R.string.blocked_title, R.string.blocked_body) { onOpen(Route.Blocked) }
+        },
+        SettingEntry(SettingsGroup.Contacts, listOf(R.string.dup_title, R.string.dup_body)) {
+            LinkCard(Icons.Outlined.JoinInner, R.string.dup_title, R.string.dup_body) { onOpen(Route.Duplicates) }
+        },
+        SettingEntry(SettingsGroup.Contacts, listOf(R.string.section_labels, R.string.labels_body)) {
+            LinkCard(Icons.AutoMirrored.Outlined.Label, R.string.section_labels, R.string.labels_body) { onOpen(Route.Labels) }
+        },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_default_held)) { DefaultAppSettings(isDefaultDialer, onRequestDefault) },
         SettingEntry(
             SettingsGroup.WhatsApp,
@@ -162,6 +182,8 @@ fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBac
                 R.string.settings_pill_orientation, R.string.settings_pill_size, R.string.settings_pill_order, R.string.settings_pill_opacity,
             ),
         ) { PillSettings(overlayAllowed) },
+        SettingEntry(SettingsGroup.Looks, listOf(R.string.settings_theme_title, R.string.theme_system, R.string.theme_light, R.string.theme_dark)) { ThemeSettings() },
+        SettingEntry(SettingsGroup.Looks, listOf(R.string.settings_language_title)) { LanguageSettings() },
         SettingEntry(SettingsGroup.Looks, listOf(R.string.settings_animations_title, R.string.settings_animations_body)) { AnimationSettings() },
         SettingEntry(SettingsGroup.Looks, listOf(R.string.settings_swipe_title, R.string.settings_swipe_body, R.string.settings_swipe_message)) { SwipeSettings() },
         SettingEntry(SettingsGroup.Storage, listOf(R.string.settings_history_title, R.string.settings_history_body)) { HistorySettings() },
@@ -269,6 +291,159 @@ private fun SwitchCard(title: Int, body: Int, checked: Boolean, enabled: Boolean
             }
             Spacer(Modifier.width(6.dp))
             Switch(checked = checked, enabled = enabled, onCheckedChange = onChange)
+        }
+    }
+}
+
+/** A setting that is a page of its own. */
+@Composable
+private fun LinkCard(icon: ImageVector, title: Int, body: Int, onClick: () -> Unit) {
+    Card {
+        Row(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(22.dp))
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(title), fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
+                Text(stringResource(body), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+@Composable
+private fun ThemeSettings() {
+    val context = LocalContext.current
+    val app = context.container
+    Card {
+        Column(Modifier.fillMaxWidth().padding(10.dp)) {
+            Text(stringResource(R.string.settings_theme_title), fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
+            Spacer(Modifier.height(6.dp))
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                val options = listOf(ThemeChoice.System to R.string.theme_system, ThemeChoice.Light to R.string.theme_light, ThemeChoice.Dark to R.string.theme_dark)
+                options.forEachIndexed { index, (choice, label) ->
+                    SegmentedButton(
+                        selected = app.themeChoice == choice,
+                        onClick = {
+                            app.saveTheme(choice)
+                            AppLook.applyTheme(context, choice)
+                        },
+                        shape = SegmentedButtonDefaults.itemShape(index, options.size),
+                        label = { Text(stringResource(label), maxLines = 1, fontSize = 13.sp) },
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** The app's own language, each named in itself, the phone's first. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun LanguageSettings() {
+    val context = LocalContext.current
+    val current = remember { AppLook.language(context) }
+    val system = stringResource(R.string.theme_system)
+    Card {
+        Column(Modifier.fillMaxWidth().padding(10.dp)) {
+            Text(stringResource(R.string.settings_language_title), fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
+            Spacer(Modifier.height(6.dp))
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                AppLook.LANGUAGES.forEach { tag ->
+                    FilterChip(
+                        selected = tag == current,
+                        onClick = { if (tag != current) (context as? android.app.Activity)?.let { AppLook.setLanguage(it, tag) } },
+                        label = { Text(AppLook.languageName(tag, system)) },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun KeySettings() {
+    val app = LocalContext.current.container
+    var decline by remember { mutableStateOf(app.declineOnKey) }
+    SwitchCard(R.string.key_decline_title, R.string.key_decline_body, decline) {
+        decline = it
+        app.declineOnKey = it
+    }
+}
+
+@Composable
+private fun ToneSettings() {
+    val app = LocalContext.current.container
+    var connect by remember { mutableStateOf(app.toneOnConnect) }
+    var end by remember { mutableStateOf(app.toneOnEnd) }
+    SwitchCard(R.string.tone_connect_title, R.string.tone_connect_body, connect) {
+        connect = it
+        app.toneOnConnect = it
+    }
+    Spacer(Modifier.height(6.dp))
+    SwitchCard(R.string.tone_end_title, R.string.tone_end_body, end) {
+        end = it
+        app.toneOnEnd = it
+    }
+}
+
+/** Who may still call through Do Not Disturb: 0 nobody, 1 starred, 2 contacts, 3 anyone; and repeat callers. */
+private data class CallsThrough(val who: Int, val repeatCallers: Boolean)
+
+private fun callsThrough(context: Context): CallsThrough? = runCatching {
+    val policy = context.getSystemService(NotificationManager::class.java).notificationPolicy
+    val calls = policy.priorityCategories and NotificationManager.Policy.PRIORITY_CATEGORY_CALLS != 0
+    val who = if (!calls) 0 else when (policy.priorityCallSenders) {
+        NotificationManager.Policy.PRIORITY_SENDERS_ANY -> 3
+        NotificationManager.Policy.PRIORITY_SENDERS_CONTACTS -> 2
+        NotificationManager.Policy.PRIORITY_SENDERS_STARRED -> 1
+        else -> 0
+    }
+    CallsThrough(who, policy.priorityCategories and NotificationManager.Policy.PRIORITY_CATEGORY_REPEAT_CALLERS != 0)
+}.getOrNull()
+
+/** The system page where the user picks who gets through; its name differs between Android versions and makers. */
+private fun openDndSettings(context: Context) {
+    val pages = listOf("android.settings.ZEN_MODE_PRIORITY_SETTINGS", "android.settings.ZEN_MODE_SETTINGS", Settings.ACTION_SOUND_SETTINGS)
+    pages.firstOrNull { page -> runCatching { context.startActivity(Intent(page).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }.isSuccess }
+}
+
+/**
+ * Do Not Disturb belongs to Android: Telecom asks it whether a call may ring, and since Android 15
+ * an app can no longer change the user's own rules. This shows the rule and leads to the system page.
+ */
+@Composable
+private fun DndSettings() {
+    val context = LocalContext.current
+    var through by remember { mutableStateOf(callsThrough(context)) }
+    LifecycleResumeEffect(Unit) {
+        through = callsThrough(context)
+        onPauseOrDispose { }
+    }
+    Card {
+        Column(Modifier.fillMaxWidth().padding(10.dp)) {
+            Text(stringResource(R.string.dnd_title), fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
+            Text(stringResource(R.string.dnd_body), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            through?.let { now ->
+                Spacer(Modifier.height(8.dp))
+                val who = stringResource(
+                    when (now.who) {
+                        3 -> R.string.dnd_anyone
+                        2 -> R.string.dnd_contacts
+                        1 -> R.string.dnd_starred
+                        else -> R.string.dnd_none
+                    },
+                )
+                val line = stringResource(R.string.dnd_now, who) + if (now.repeatCallers) " " + stringResource(R.string.dnd_repeat) else ""
+                Text(line, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurface)
+                if (now.who == 0) {
+                    Spacer(Modifier.height(4.dp))
+                    Text(stringResource(R.string.dnd_hint_favourites), fontSize = 13.sp, color = EndRed)
+                }
+            }
+            TextButton(onClick = { openDndSettings(context) }, modifier = Modifier.align(Alignment.End)) {
+                Text(stringResource(R.string.dnd_change))
+            }
         }
     }
 }
@@ -694,6 +869,10 @@ private fun About() {
             LinkRow(stringResource(R.string.about_source), "github.com/kyesil/callsoul", SOURCE_URL)
             LinkRow(stringResource(R.string.about_license), "GPL-3.0", "$SOURCE_URL/blob/main/LICENSE")
             Text(stringResource(R.string.about_open_source), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            // A missing feature: a review on Play, or an issue on GitHub.
+            Text(stringResource(R.string.about_feedback), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            LinkRow("Google Play", stringResource(R.string.about_review), PLAY_URL)
+            LinkRow("GitHub", stringResource(R.string.about_issue), "$SOURCE_URL/issues/new")
             Text(stringResource(R.string.about_coauthor, "Claude Opus 5.5"), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
@@ -701,6 +880,9 @@ private fun About() {
 
 /** Where the app's code is published, under the GPL. */
 private const val SOURCE_URL = "https://github.com/kyesil/callsoul"
+
+/** The app's page on Google Play, where reviews are written. */
+private const val PLAY_URL = "https://play.google.com/store/apps/details?id=dev.yesil.callsoul"
 
 /** A label and an underlined address that opens in the browser. */
 @Composable

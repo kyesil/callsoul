@@ -1,5 +1,12 @@
 package com.bettercallsoul.call
 
+import com.bettercallsoul.ui.copyText
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.activity.compose.BackHandler
 import androidx.compose.material.icons.automirrored.outlined.Label
 import android.Manifest
 import android.content.pm.PackageManager
@@ -490,6 +497,9 @@ private fun EndAsSpam(number: String, modifier: Modifier) {
 private fun BoxScope.OngoingCall(state: CallUiState) {
     val audio by CallManager.audio.collectAsStateWithLifecycle()
     var showKeypad by remember { mutableStateOf(false) }
+    // The digits sent during this call, shown over the keys so a code or extension can be read back and copied.
+    var typed by rememberSaveable { mutableStateOf("") }
+    BackHandler(enabled = showKeypad) { showKeypad = false }
     // The proximity lock lets go while the keypad is open, so the screen stays usable for digits.
     LaunchedEffect(showKeypad) { CallManager.setKeypadOpen(showKeypad) }
     DisposableEffect(Unit) { onDispose { CallManager.setKeypadOpen(false) } }
@@ -525,10 +535,14 @@ private fun BoxScope.OngoingCall(state: CallUiState) {
     ) {
         Column(Modifier.padding(vertical = 18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             if (showKeypad) {
-                Dialpad(onDigit = CallManager::playDtmf, tint = Color.White)
-                IconButton(onClick = { showKeypad = false }) {
-                    Icon(Icons.Filled.KeyboardArrowDown, stringResource(R.string.call_keypad_hide), tint = Color.White, modifier = Modifier.size(30.dp))
-                }
+                TypedDigits(typed)
+                Dialpad(
+                    onDigit = {
+                        typed += it
+                        CallManager.playDtmf(it)
+                    },
+                    tint = Color.White,
+                )
             } else {
                 ControlGrid(
                     state = state,
@@ -540,7 +554,14 @@ private fun BoxScope.OngoingCall(state: CallUiState) {
                 )
             }
             Spacer(Modifier.height(16.dp))
-            CircleButton(Icons.Filled.CallEnd, R.string.call_end, Color.White, EndRed) { CallManager.hangUp() }
+            // With the keypad open, the way back to the call sits just left of the end button.
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    if (showKeypad) BackToCall { showKeypad = false }
+                }
+                CircleButton(Icons.Filled.CallEnd, R.string.call_end, Color.White, EndRed) { CallManager.hangUp() }
+                Spacer(Modifier.weight(1f))
+            }
         }
     }
     }
@@ -607,6 +628,50 @@ private fun elapsed(connectedAt: Long): String {
         }
     }
     return formatDuration(((now - connectedAt) / 1000).coerceAtLeast(0))
+}
+
+/** A back arrow over its words, beside the end button, that closes the keypad. */
+@Composable
+private fun BackToCall(onClick: () -> Unit) {
+    Column(
+        Modifier.clip(RoundedCornerShape(16.dp)).clickable(onClick = onClick).padding(horizontal = 8.dp, vertical = 6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White, modifier = Modifier.size(26.dp))
+        Spacer(Modifier.height(4.dp))
+        Text(stringResource(R.string.call_back_to_call), color = Color.White, fontSize = 12.sp, textAlign = TextAlign.Center, maxLines = 2)
+    }
+}
+
+/** What was typed on the keypad during the call: selectable, with a button that copies it all. */
+@Composable
+private fun TypedDigits(typed: String) {
+    val context = LocalContext.current
+    val copied = stringResource(R.string.number_copied)
+    Row(
+        Modifier.fillMaxWidth().height(52.dp).padding(horizontal = 20.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Spacer(Modifier.width(48.dp))
+        SelectionContainer(Modifier.weight(1f)) {
+            // The latest digits stay in view when there are more than fit.
+            Text(
+                typed,
+                color = Color.White,
+                fontSize = 30.sp,
+                maxLines = 1,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState(), reverseScrolling = true),
+            )
+        }
+        if (typed.isNotEmpty()) {
+            IconButton(onClick = { copyText(context, typed, copied) }) {
+                Icon(Icons.Outlined.ContentCopy, stringResource(R.string.action_copy), tint = Color.White.copy(alpha = 0.8f))
+            }
+        } else {
+            Spacer(Modifier.width(48.dp))
+        }
+    }
 }
 
 @Composable

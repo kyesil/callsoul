@@ -26,12 +26,21 @@ object WhatsAppTelecomCalls {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val coverage = TelecomCoverage()
     private val withVideo = mutableSetOf<Call>()
+    private val live = mutableSetOf<Call>()
     private var save: suspend (FinishedCall) -> Unit = {}
 
     private val _inCall = MutableStateFlow(false)
 
     /** A WhatsApp call is going on and Telecom knows of it, so its sound can be moved from here. */
     val inCall: StateFlow<Boolean> = _inCall.asStateFlow()
+
+    private val _video = MutableStateFlow(false)
+
+    /**
+     * A WhatsApp call going on right now is a video call. WhatsApp tells Telecom so, while its
+     * notification text says only "Calling" on some phones.
+     */
+    val video: StateFlow<Boolean> = _video.asStateFlow()
 
     private val callback = object : Call.Callback() {
         override fun onDetailsChanged(call: Call, details: Call.Details) = noteVideo(call)
@@ -52,6 +61,7 @@ object WhatsAppTelecomCalls {
         DebugLog.i(TAG, "telecom added, incoming=${isIncoming(call)}")
         coverage.opened()
         _inCall.value = coverage.active
+        live += call
         noteVideo(call)
         call.registerCallback(callback)
     }
@@ -60,6 +70,8 @@ object WhatsAppTelecomCalls {
         if (!isWhatsApp(call)) return
         call.unregisterCallback(callback)
         noteVideo(call)
+        live -= call
+        _video.value = live.any { VideoProfile.isVideo(it.details.videoState) }
         val details = call.details
         val end = System.currentTimeMillis()
         coverage.closed(end)
@@ -86,5 +98,6 @@ object WhatsAppTelecomCalls {
     /** A voice call can turn into a video call on the way. */
     private fun noteVideo(call: Call) {
         if (VideoProfile.isVideo(call.details.videoState)) withVideo += call
+        _video.value = live.any { VideoProfile.isVideo(it.details.videoState) }
     }
 }

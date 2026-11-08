@@ -1,5 +1,25 @@
 package com.bettercallsoul.ui
 
+import androidx.compose.material.icons.outlined.PersonAddAlt
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.AnnotatedString
+import com.bettercallsoul.spam.T9
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.delay
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -106,7 +126,7 @@ fun KeypadScreen(
 
     LaunchedEffect(digits) {
         // One digit matches half the address book, so the list starts at two.
-        hits = if (digits.length >= 2) context.container.contacts.keypadSearch(digits) else emptyList()
+        hits = if (digits.length >= 2) context.container.contacts.keypadSearch(digits, limit = MAX_MATCHES) else emptyList()
     }
 
     // On a short screen the keys get smaller, so the banner or a few matching contacts still fit
@@ -121,32 +141,34 @@ fun KeypadScreen(
             MainToolbarActions(onOpen)
         }
 
-        // The banner and the matching contacts share the room above the number. While digits are
-        // typed the banner steps aside for them; more matches than fit scroll in that room.
+        // The matching contacts get the room above the number; more than fit scroll in it.
         Box(Modifier.weight(1f).fillMaxWidth().clipToBounds()) {
-            if (!isDefaultDialer && digits.isEmpty()) {
-                Box(Modifier.align(Alignment.TopCenter)) { DefaultDialerBanner(onRequestDefault, onClose = onCloseDefault, short = compact) }
-            }
             if (hits.isNotEmpty()) {
                 Card(Modifier.align(Alignment.BottomCenter).padding(bottom = 4.dp)) {
                     // More matches than fit scroll here instead of pushing the keys down.
                     Column(Modifier.verticalScroll(rememberScrollState())) {
                         hits.forEach { hit ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { onDigitsChange(hit.number) }
-                                    .padding(horizontal = 14.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Avatar(hit.name, hit.photoUri, 34.dp)
-                                Spacer(Modifier.width(12.dp))
-                                Column(Modifier.weight(1f)) {
-                                    Text(hit.name, fontSize = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurface)
-                                    Text(hit.number, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
-                                IconButton(onClick = { onCall(hit.number) }) {
-                                    Icon(Icons.Filled.Call, stringResource(R.string.action_call), tint = CallGreen)
+                            // As in the lists: a swipe right calls, a swipe left writes; a tap puts the
+                            // number in the field and the info button opens the contact.
+                            SwipeRow(onCall = { onCall(hit.number) }, onMessage = { sendSwipeMessage(context, hit.number) }) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .background(MaterialTheme.colorScheme.surface)
+                                        .clickable { onDigitsChange(hit.number) }
+                                        .padding(start = 14.dp, end = 4.dp, top = 6.dp, bottom = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Avatar(hit.name, hit.photoUri, 34.dp)
+                                    Spacer(Modifier.width(12.dp))
+                                    Column(Modifier.weight(1f)) {
+                                        // What the digits matched is bold: letters of the name, digits of the number, or both.
+                                        Text(boldPart(hit.name, T9.nameMatch(digits, hit.name)), fontSize = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurface)
+                                        Text(boldPart(hit.number, T9.numberMatch(digits, hit.number)), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
+                                    IconButton(onClick = { onOpen(Route.Contact(hit.contactId)) }) {
+                                        Icon(Icons.Outlined.Info, stringResource(R.string.contact_info), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
                                 }
                             }
                         }
@@ -162,24 +184,16 @@ fun KeypadScreen(
             NumberField(field, onValueChange = { edit(it.forDialing()) })
             if (digits.isNotEmpty()) {
                 // A number that is already someone's needs no "add to contacts".
+                // On the left, opposite the delete key.
                 if (hits.none { sameNumber(it.number, digits) }) {
-                    TextButton(
+                    IconButton(
                         onClick = { onOpen(Route.NewContact(digits)) },
-                        modifier = Modifier.align(Alignment.TopCenter).height(30.dp),
+                        modifier = Modifier.align(Alignment.CenterStart),
                     ) {
-                        Text(stringResource(R.string.action_add_to_contacts), fontSize = 13.sp)
+                        Icon(Icons.Outlined.PersonAddAlt, stringResource(R.string.action_add_to_contacts), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
-                IconButton(
-                    onClick = { edit(field.backspace()) },
-                    modifier = Modifier.align(Alignment.CenterEnd),
-                ) {
-                    Icon(
-                        Icons.AutoMirrored.Outlined.Backspace,
-                        stringResource(R.string.action_delete_digit),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+                DeleteKey(onDelete = { edit(field.backspace()) }, modifier = Modifier.align(Alignment.CenterEnd))
             }
         }
 
@@ -205,6 +219,80 @@ fun KeypadScreen(
             }
         }
     }
+    // The default-app banner lies over the top of the keypad instead of taking room from the keys;
+    // it goes once a digit is typed, and its cross puts it away until the app is opened again.
+    if (!isDefaultDialer && digits.isEmpty()) {
+        Box(Modifier.align(Alignment.TopCenter).padding(top = TOOLBAR_HEIGHT)) {
+            DefaultDialerBanner(onRequestDefault, onClose = onCloseDefault, short = compact)
+        }
+    }
+    }
+}
+
+/** [text] with the characters in [part] in bold. */
+private fun boldPart(text: String, part: IntRange?): AnnotatedString = buildAnnotatedString {
+    append(text)
+    if (part != null && part.last < text.length) {
+        addStyle(SpanStyle(fontWeight = FontWeight.Bold), part.first, part.last + 1)
+    }
+}
+
+/** How many matching contacts the keypad lists; more than fit scroll above the number. */
+private const val MAX_MATCHES = 30
+
+/** Held this long, the delete key starts repeating; then it speeds up to [REPEAT_FASTEST_MILLIS]. */
+private const val REPEAT_AFTER_MILLIS = 400L
+private const val REPEAT_FIRST_MILLIS = 110L
+private const val REPEAT_FASTEST_MILLIS = 35L
+private const val REPEAT_SPEED_UP_MILLIS = 8L
+
+/**
+ * The delete key: a tap removes one digit; held, it keeps removing them, faster the longer it is
+ * held, as on the system phone app.
+ */
+@Composable
+private fun DeleteKey(onDelete: () -> Unit, modifier: Modifier) {
+    val delete by rememberUpdatedState(onDelete)
+    val scope = rememberCoroutineScope()
+    val haptics = LocalHapticFeedback.current
+    var pressed by remember { mutableStateOf(false) }
+    val description = stringResource(R.string.action_delete_digit)
+    Box(
+        modifier
+            .size(48.dp)
+            .clip(CircleShape)
+            .background(if (pressed) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f) else Color.Transparent)
+            .semantics {
+                contentDescription = description
+                role = Role.Button
+                onClick {
+                    delete()
+                    true
+                }
+            }
+            .pointerInput(Unit) {
+                awaitEachGesture {
+                    awaitFirstDown()
+                    pressed = true
+                    delete()
+                    val repeating = scope.launch {
+                        delay(REPEAT_AFTER_MILLIS)
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        var wait = REPEAT_FIRST_MILLIS
+                        while (isActive) {
+                            delete()
+                            delay(wait)
+                            wait = (wait - REPEAT_SPEED_UP_MILLIS).coerceAtLeast(REPEAT_FASTEST_MILLIS)
+                        }
+                    }
+                    waitForUpOrCancellation()
+                    repeating.cancel()
+                    pressed = false
+                }
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(Icons.AutoMirrored.Outlined.Backspace, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -214,8 +302,8 @@ private val TOOLBAR_HEIGHT = 56.dp
 private val KEY_HEIGHT = 76.dp
 private val MIN_KEY_HEIGHT = 54.dp
 
-/** Kept free above the number for the banner or about two matching contacts. */
-private val ROOM_ABOVE = 148.dp
+/** Kept free above the number on a short screen, for at least one matching contact. */
+private val ROOM_ABOVE = 64.dp
 
 @Composable
 fun Dialpad(onDigit: (Char) -> Unit, onPlus: (() -> Unit)? = null, tint: Color = Color.Unspecified, keyHeight: Dp = KEY_HEIGHT) {
@@ -382,7 +470,8 @@ private fun NumberField(value: TextFieldValue, onValueChange: (TextFieldValue) -
     }
 }
 
-private const val DIALABLE = "0123456789+*#,;"
+/** What the number may hold: digits and the + * # keys, nothing pasted besides. */
+private const val DIALABLE = "0123456789+*#"
 
 private fun TextFieldValue.insert(text: String): TextFieldValue {
     val start = selection.min
@@ -399,9 +488,18 @@ private fun TextFieldValue.backspace(): TextFieldValue {
     }
 }
 
-/** Keeps only what a phone can dial, so a pasted "+90 (532) 410-27-85" becomes "+905324102785". */
+/** A number as people write it: digits, + * #, and spaces, brackets, dots or dashes between them. */
+private val NUMBER_RUN = Regex("""\+?[0-9*#](?:[0-9*#]|[\s ().\-]+(?=[0-9*#]))*""")
+
+/**
+ * Keeps only the number in pasted text: "+90 (532) 410-27-85" becomes "+905324102785", and from
+ * "Ali Veli 0532 410 27 85, kapı no 5" only the longest number is taken, without the 5.
+ */
 private fun TextFieldValue.forDialing(): TextFieldValue {
     if (text.all { it in DIALABLE }) return this
-    val clean = text.filter { it in DIALABLE }
+    val clean = NUMBER_RUN.findAll(text)
+        .map { run -> run.value.filter { it in DIALABLE } }
+        .maxByOrNull { run -> run.count(Char::isDigit) }
+        .orEmpty()
     return TextFieldValue(clean, TextRange(clean.length))
 }

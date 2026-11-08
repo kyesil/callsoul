@@ -98,6 +98,8 @@ class BcsInCallService : InCallService() {
         super.onDestroy()
     }
 
+    override fun onSilenceRinger() = CallManager.onSilenceRinger()
+
     override fun onCallAdded(call: Call) {
         if (WhatsAppTelecomCalls.hasOwnScreen(call)) {
             WhatsAppTelecomCalls.onCallAdded(call)

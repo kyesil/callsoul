@@ -31,6 +31,15 @@ class WhatsAppCallListener : NotificationListenerService() {
     private val tracker = WhatsAppCallTracker()
     private val pill by lazy { WhatsAppPill(this) }
 
+    override fun onCreate() {
+        super.onCreate()
+        // Telecom may learn that a call is a video call after its notification came, or a voice call
+        // may turn into one: the pill goes then.
+        scope.launch {
+            WhatsAppTelecomCalls.video.collect { video -> if (video) pill.hide() }
+        }
+    }
+
     override fun onDestroy() {
         connected = false
         pill.close()
@@ -67,7 +76,11 @@ class WhatsAppCallListener : NotificationListenerService() {
         tracker.onNotice(notice, sbn.postTime)?.let(::store)
         // A notification that arrives late may be of a call that is already over.
         if (container.whatsAppPillEnabled && callStillShown()) {
+            // A video call has WhatsApp's own screen in front, and a voice call turned into one does
+            // too: the pill would only sit on the picture.
+            val video = notice.video || sbn.notification.extras.getBoolean(EXTRA_CALL_IS_VIDEO) || WhatsAppTelecomCalls.video.value
             when {
+                video -> pill.hide()
                 notice.phase in PILL_PHASES -> {
                     val answered = notice.talkingSince ?: sbn.postTime
                     pill.show(sbn.notification, answered.takeIf { notice.phase == CallPhase.Ongoing })
@@ -138,6 +151,8 @@ class WhatsAppCallListener : NotificationListenerService() {
         private const val GRACE_MILLIS = 3_000L
         private val WHATSAPP_PACKAGES = setOf("com.whatsapp", "com.whatsapp.w4b")
         private val PILL_PHASES = setOf(CallPhase.Dialing, CallPhase.Ongoing)
+        /** Set by a call notification of the CallStyle kind when the call is a video call (Android 12). */
+        private const val EXTRA_CALL_IS_VIDEO = "android.callIsVideo"
         private const val LATE_MILLIS = 10_000L
         private const val ANY_LATE_MILLIS = 30_000L
 

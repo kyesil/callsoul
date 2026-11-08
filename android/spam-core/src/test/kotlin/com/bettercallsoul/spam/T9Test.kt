@@ -33,4 +33,19 @@ class T9Test {
         assertTrue(T9.matchesNumber("4567", "0532 123 45 67"))
         assertFalse(T9.matchesNumber("999", "0532 123 45 67"))
     }
+
+    @Test
+    fun findsWhereTheDigitsMatch() {
+        // "Ali Iki": 2-5-4 spells "Ali", and 4-5-4 starts the second word.
+        assertEquals(0..2, T9.nameMatch("254", "Ali Iki"))
+        assertEquals(4..6, T9.nameMatch("454", "Ali Iki"))
+        // A run over two words ends inside the second one.
+        assertEquals(0..5, T9.nameMatch("25445", "Ali Iki"))
+        assertEquals(null, T9.nameMatch("999", "Ali Iki"))
+        // Digits in a spaced number, and the leading 0 against +90.
+        assertEquals(9..13, T9.numberMatch("4567", "0532 123 45 67"))
+        assertEquals(2..5, T9.numberMatch("0532", "+905321234567"))
+        assertEquals(2..6, T9.numberMatch("0532", "+90 532 123"))
+        assertEquals(null, T9.numberMatch("999", "0532 123 45 67"))
+    }
 }

@@ -1,5 +1,6 @@
 package com.bettercallsoul.ui
 
+import com.bettercallsoul.ThemeChoice
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,8 +47,16 @@ private val Light = lightColorScheme(
 )
 
 @Composable
-fun BcsTheme(dark: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
+fun BcsTheme(dark: Boolean? = null, content: @Composable () -> Unit) {
     val context = LocalContext.current
+    // Without a fixed choice from the screen, the user's theme; on Android 12 and later the system
+    // already applies it, and this keeps older phones in step.
+    val systemDark = isSystemInDarkTheme()
+    val night = dark ?: when (context.container.themeChoice) {
+        ThemeChoice.System -> systemDark
+        ThemeChoice.Light -> false
+        ThemeChoice.Dark -> true
+    }
     var system by remember { mutableStateOf(systemAnimationsOn(context)) }
     // The system switch can change while the app sits in the background.
     LifecycleResumeEffect(Unit) {
@@ -55,7 +64,7 @@ fun BcsTheme(dark: Boolean = isSystemInDarkTheme(), content: @Composable () -> U
         onPauseOrDispose { }
     }
     val motion = system && context.container.animationsEnabled
-    MaterialTheme(colorScheme = if (dark) Dark else Light) {
+    MaterialTheme(colorScheme = if (night) Dark else Light) {
         CompositionLocalProvider(LocalMotion provides motion, content = content)
     }
 }

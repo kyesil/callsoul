@@ -1,5 +1,16 @@
 package com.bettercallsoul.ui
 
+import androidx.compose.material.icons.outlined.QrCode2
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+import androidx.compose.material.icons.outlined.MusicNote
+import androidx.compose.runtime.produceState
+import androidx.core.content.IntentCompat
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.compose.rememberLauncherForActivityResult
+import android.provider.Settings
+import android.media.RingtoneManager
+import android.app.Activity
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.FlowRow
@@ -428,7 +439,21 @@ fun ContactDetailScreen(contactId: Long, onCall: (String) -> Unit, onOpen: (Rout
     val shareFailed = stringResource(R.string.share_failed)
     val cantDelete = stringResource(R.string.contact_not_editable)
     var confirmDelete by remember { mutableStateOf(false) }
+    var showQr by remember { mutableStateOf(false) }
     var talked by remember { mutableLongStateOf(0L) }
+    val ringtoneTitle = stringResource(R.string.ringtone_title)
+    // The system's own picker; its "Default" takes the contact's ringtone away again.
+    val ringtonePicker = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val shown = contact ?: return@rememberLauncherForActivityResult
+        val data = result.data
+        if (result.resultCode != Activity.RESULT_OK || data == null) return@rememberLauncherForActivityResult
+        val picked = IntentCompat.getParcelableExtra(data, RingtoneManager.EXTRA_RINGTONE_PICKED_URI, Uri::class.java)
+        val chosen = picked?.takeUnless(RingtoneManager::isDefault)?.toString()
+        scope.launch {
+            app.contacts.setRingtone(shown.id, chosen)
+            contact = shown.copy(ringtone = chosen)
+        }
+    }
     LaunchedEffect(contactId) {
         val loaded = app.contacts.detail(contactId)
         contact = loaded
@@ -440,7 +465,11 @@ fun ContactDetailScreen(contactId: Long, onCall: (String) -> Unit, onOpen: (Rout
         // The calls with any of the contact's numbers.
         history = app.callHistory(loaded.phones.map { it.number }, loaded.name)
     }
-    val detail = contact ?: return
+    // Until the contact is read, the bar with the way back, so the page isn't blank.
+    val detail = contact ?: run {
+        Column(Modifier.fillMaxSize().statusBarsPadding()) { DetailToolbar(onBack) }
+        return
+    }
 
     Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState())) {
         val own = ContactsContract.isProfileId(detail.id)
@@ -461,6 +490,7 @@ fun ContactDetailScreen(contactId: Long, onCall: (String) -> Unit, onOpen: (Rout
                     }
                 }
             }
+            ToolbarIcon(Icons.Outlined.QrCode2, stringResource(R.string.qr_title)) { showQr = true }
             if (!own) ToolbarIcon(Icons.Outlined.Delete, stringResource(R.string.contact_delete)) { confirmDelete = true }
             ToolbarIcon(Icons.Filled.Edit, stringResource(R.string.action_edit)) {
                 scope.launch {
@@ -602,6 +632,12 @@ fun ContactDetailScreen(contactId: Long, onCall: (String) -> Unit, onOpen: (Rout
             detail.sips.forEach { add { InfoRow(Icons.Outlined.DialerSip, it.value, it.label) } }
             detail.customFields.forEach { add { InfoRow(Icons.Outlined.Tune, it.value, it.label) } }
             detail.note?.let { add { InfoRow(Icons.Outlined.Notes, it, stringResource(R.string.field_note)) } }
+            // Telecom rings with the contact's own ringtone; nobody calls one's own card.
+            if (!own) add {
+                InfoRow(Icons.Outlined.MusicNote, ringtoneName(detail.ringtone), ringtoneTitle) {
+                    ringtonePicker.launch(ringtonePickerIntent(detail.ringtone, ringtoneTitle))
+                }
+            }
         }
         if (info.isNotEmpty()) {
             Spacer(Modifier.height(8.dp))
@@ -629,6 +665,7 @@ fun ContactDetailScreen(contactId: Long, onCall: (String) -> Unit, onOpen: (Rout
         Spacer(Modifier.height(12.dp))
     }
 
+    if (showQr) ContactQrDialog(detail) { showQr = false }
     if (confirmDelete) {
         ConfirmDialog(
             message = pluralStringResource(R.plurals.delete_contacts_question, 1, 1),
@@ -668,6 +705,30 @@ internal fun open(context: Context, uri: String) {
     } catch (_: ActivityNotFoundException) {
         // Nothing on the phone opens it; the value is still there to read and copy.
     }
+}
+
+private fun ringtonePickerIntent(current: String?, title: String): Intent =
+    Intent(RingtoneManager.ACTION_RINGTONE_PICKER)
+        .putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_RINGTONE)
+        .putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
+        // Telecom reads an empty ringtone as the default, so silence could not be kept.
+        .putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
+        .putExtra(RingtoneManager.EXTRA_RINGTONE_DEFAULT_URI, Settings.System.DEFAULT_RINGTONE_URI)
+        .putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, current?.toUri() ?: Settings.System.DEFAULT_RINGTONE_URI)
+        .putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, title)
+
+/** The ringtone's name as the system gives it, or the phone's default when the contact has none. */
+@Composable
+private fun ringtoneName(ringtone: String?): String {
+    val context = LocalContext.current
+    val fallback = stringResource(R.string.ringtone_default)
+    // The state outlives a change of ringtone, so each change sets it, the default included.
+    val name by produceState(if (ringtone == null) fallback else "", ringtone) {
+        value = if (ringtone == null) fallback else withContext(Dispatchers.IO) {
+            runCatching { RingtoneManager.getRingtone(context, ringtone.toUri())?.getTitle(context) }.getOrNull()
+        } ?: fallback
+    }
+    return name
 }
 
 @Composable
