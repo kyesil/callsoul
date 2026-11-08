@@ -1,5 +1,11 @@
 package com.bettercallsoul.ui
 
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -79,9 +85,10 @@ fun KeypadScreen(
     onDigitsChange: (String) -> Unit,
     onCall: (String) -> Unit,
     onOpen: (Route) -> Unit,
-    onScan: () -> Unit,
     isDefaultDialer: Boolean,
     onRequestDefault: () -> Unit,
+    /** Puts the default-app banner away until the app is opened again, as on Home. */
+    onCloseDefault: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
     var hits by remember { mutableStateOf(emptyList<SearchHit>()) }
@@ -102,35 +109,46 @@ fun KeypadScreen(
         hits = if (digits.length >= 2) context.container.contacts.keypadSearch(digits) else emptyList()
     }
 
+    // On a short screen the keys get smaller, so the banner or a few matching contacts still fit
+    // above the number. The keys never move while contacts come and go.
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+    val compact = maxHeight < COMPACT_HEIGHT
+    val numberHeight = if (compact) 86.dp else 93.dp
+    val callHeight = if (compact) 80.dp else 95.dp
+    val keyHeight = ((maxHeight - TOOLBAR_HEIGHT - numberHeight - callHeight - ROOM_ABOVE) / 4).coerceIn(MIN_KEY_HEIGHT, KEY_HEIGHT)
     Column(Modifier.fillMaxSize()) {
         ToolbarRow {
-            MainToolbarActions(onScan, onOpen)
+            MainToolbarActions(onOpen)
         }
 
-        if (!isDefaultDialer) {
-            DefaultDialerBanner(onRequestDefault)
-        }
-
-        Spacer(Modifier.weight(1f))
-
-        if (hits.isNotEmpty()) {
-            Card(Modifier.padding(bottom = 4.dp)) {
-                hits.forEach { hit ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onDigitsChange(hit.number) }
-                            .padding(horizontal = 14.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Avatar(hit.name, hit.photoUri, 34.dp)
-                        Spacer(Modifier.width(12.dp))
-                        Column(Modifier.weight(1f)) {
-                            Text(hit.name, fontSize = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurface)
-                            Text(hit.number, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                        IconButton(onClick = { onCall(hit.number) }) {
-                            Icon(Icons.Filled.Call, stringResource(R.string.action_call), tint = CallGreen)
+        // The banner and the matching contacts share the room above the number. While digits are
+        // typed the banner steps aside for them; more matches than fit scroll in that room.
+        Box(Modifier.weight(1f).fillMaxWidth().clipToBounds()) {
+            if (!isDefaultDialer && digits.isEmpty()) {
+                Box(Modifier.align(Alignment.TopCenter)) { DefaultDialerBanner(onRequestDefault, onClose = onCloseDefault, short = compact) }
+            }
+            if (hits.isNotEmpty()) {
+                Card(Modifier.align(Alignment.BottomCenter).padding(bottom = 4.dp)) {
+                    // More matches than fit scroll here instead of pushing the keys down.
+                    Column(Modifier.verticalScroll(rememberScrollState())) {
+                        hits.forEach { hit ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onDigitsChange(hit.number) }
+                                    .padding(horizontal = 14.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Avatar(hit.name, hit.photoUri, 34.dp)
+                                Spacer(Modifier.width(12.dp))
+                                Column(Modifier.weight(1f)) {
+                                    Text(hit.name, fontSize = 16.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurface)
+                                    Text(hit.number, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                IconButton(onClick = { onCall(hit.number) }) {
+                                    Icon(Icons.Filled.Call, stringResource(R.string.action_call), tint = CallGreen)
+                                }
+                            }
                         }
                     }
                 }
@@ -138,7 +156,7 @@ fun KeypadScreen(
         }
 
         Box(
-            modifier = Modifier.fillMaxWidth().height(93.dp).padding(horizontal = 27.dp),
+            modifier = Modifier.fillMaxWidth().height(numberHeight).padding(horizontal = 27.dp),
             contentAlignment = Alignment.Center,
         ) {
             NumberField(field, onValueChange = { edit(it.forDialing()) })
@@ -168,9 +186,10 @@ fun KeypadScreen(
         Dialpad(
             onDigit = { edit(field.insert(it.toString())) },
             onPlus = { edit(field.insert("+")) },
+            keyHeight = keyHeight,
         )
 
-        Box(Modifier.fillMaxWidth().height(95.dp), contentAlignment = Alignment.Center) {
+        Box(Modifier.fillMaxWidth().height(callHeight), contentAlignment = Alignment.Center) {
             val description = stringResource(R.string.action_call)
             Box(
                 modifier = Modifier
@@ -186,10 +205,20 @@ fun KeypadScreen(
             }
         }
     }
+    }
 }
 
+/** Below this the keypad tab is short, as on small phones, and its parts get smaller. */
+private val COMPACT_HEIGHT = 640.dp
+private val TOOLBAR_HEIGHT = 56.dp
+private val KEY_HEIGHT = 76.dp
+private val MIN_KEY_HEIGHT = 54.dp
+
+/** Kept free above the number for the banner or about two matching contacts. */
+private val ROOM_ABOVE = 148.dp
+
 @Composable
-fun Dialpad(onDigit: (Char) -> Unit, onPlus: (() -> Unit)? = null, tint: Color = Color.Unspecified) {
+fun Dialpad(onDigit: (Char) -> Unit, onPlus: (() -> Unit)? = null, tint: Color = Color.Unspecified, keyHeight: Dp = KEY_HEIGHT) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 27.dp)) {
         Keys.forEach { row ->
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
@@ -199,6 +228,7 @@ fun Dialpad(onDigit: (Char) -> Unit, onPlus: (() -> Unit)? = null, tint: Color =
                         onClick = { onDigit(key.digit) },
                         onLongClick = if (key.digit == '0') onPlus else null,
                         tint = tint,
+                        height = keyHeight,
                         modifier = Modifier.weight(1f),
                     )
                 }
@@ -209,34 +239,68 @@ fun Dialpad(onDigit: (Char) -> Unit, onPlus: (() -> Unit)? = null, tint: Color =
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun DialKey(key: Key, onClick: () -> Unit, onLongClick: (() -> Unit)?, tint: Color, modifier: Modifier) {
+private fun DialKey(key: Key, onClick: () -> Unit, onLongClick: (() -> Unit)?, tint: Color, height: Dp, modifier: Modifier) {
     val digitColor = if (tint == Color.Unspecified) MaterialTheme.colorScheme.onBackground else tint
+    // Smaller keys get smaller digits, so the letters still fit under them.
+    val small = height < 66.dp
     Column(
         modifier = modifier
-            .height(76.dp)
+            .height(height)
             .stretchy()
             .clip(RoundedCornerShape(24.dp))
             .combinedClickable(onClick = onClick, onLongClick = onLongClick),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        Text(key.digit.toString(), fontSize = 38.sp, lineHeight = 42.sp, color = digitColor)
-        Text(key.letters, fontSize = 13.sp, lineHeight = 15.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(key.digit.toString(), fontSize = if (small) 30.sp else 38.sp, lineHeight = if (small) 33.sp else 42.sp, color = digitColor)
+        Text(key.letters, fontSize = if (small) 11.sp else 13.sp, lineHeight = if (small) 13.sp else 15.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
+/**
+ * Asks to be made the default phone app; with [onClose] it has a cross that puts it away. [short]
+ * is one line, the title and the button, for a small screen.
+ */
 @Composable
-private fun DefaultDialerBanner(onRequestDefault: () -> Unit) {
+fun DefaultDialerBanner(onRequestDefault: () -> Unit, onClose: (() -> Unit)? = null, short: Boolean = false) {
+    if (short) {
+        Card(Modifier.padding(top = 4.dp)) {
+            Row(Modifier.fillMaxWidth().padding(start = 16.dp, top = 2.dp, bottom = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.setup_default_title),
+                    fontSize = 14.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f),
+                )
+                TextButton(onClick = onRequestDefault) { Text(stringResource(R.string.setup_default_action)) }
+                if (onClose != null) {
+                    IconButton(onClick = onClose) {
+                        Icon(Icons.Filled.Close, stringResource(R.string.action_close), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
+                    }
+                }
+            }
+        }
+        return
+    }
     Card(Modifier.padding(top = 4.dp)) {
-        Column(Modifier.padding(horizontal = 20.dp, vertical = 14.dp)) {
-            Text(stringResource(R.string.setup_default_title), color = MaterialTheme.colorScheme.onSurface)
-            Text(
-                stringResource(R.string.setup_default_body),
-                fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            TextButton(onClick = onRequestDefault, modifier = Modifier.align(Alignment.End)) {
-                Text(stringResource(R.string.setup_default_action))
+        Box {
+            Column(Modifier.padding(start = 20.dp, end = if (onClose != null) 44.dp else 20.dp, top = 14.dp, bottom = 14.dp)) {
+                Text(stringResource(R.string.setup_default_title), color = MaterialTheme.colorScheme.onSurface)
+                Text(
+                    stringResource(R.string.setup_default_body),
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                TextButton(onClick = onRequestDefault, modifier = Modifier.align(Alignment.End)) {
+                    Text(stringResource(R.string.setup_default_action))
+                }
+            }
+            if (onClose != null) {
+                IconButton(onClick = onClose, modifier = Modifier.align(Alignment.TopEnd)) {
+                    Icon(Icons.Filled.Close, stringResource(R.string.action_close), tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
+                }
             }
         }
     }

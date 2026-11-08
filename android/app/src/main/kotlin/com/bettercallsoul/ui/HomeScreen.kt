@@ -1,5 +1,7 @@
 package com.bettercallsoul.ui
 
+import androidx.compose.material.icons.automirrored.outlined.Label
+import androidx.compose.material.icons.outlined.BarChart
 import com.bettercallsoul.calllog.BirthdayNear
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.filled.Cake
@@ -96,14 +98,23 @@ private fun mostTalked(calls: List<CallEntry>, labels: Map<String, String>): Lis
 
 /** The first tab: favourites and the most talked to in sliding rows, the latest calls below. */
 @Composable
-fun HomeScreen(onCall: (String) -> Unit, onOpen: (Route) -> Unit, onScan: () -> Unit) {
+fun HomeScreen(
+    onCall: (String) -> Unit,
+    onOpen: (Route) -> Unit,
+    askDefault: Boolean = false,
+    onRequestDefault: () -> Unit = {},
+    onCloseDefault: () -> Unit = {},
+    toTop: Int = 0,
+) {
+    val list = rememberLazyListState()
+    LaunchedEffect(toTop) { if (toTop > 0) list.animateScrollToItem(0) }
     val app = LocalContext.current.container
     val scope = rememberCoroutineScope()
-    val contacts by remember { app.contacts.observe() }.collectAsStateWithLifecycle(emptyList())
+    val contacts by app.contactRows.collectAsStateWithLifecycle()
     val favorites = remember(contacts) { contacts.favoritesInOrder() }
     val recents = rememberRecents(limit = 30)
-    val calls by remember { app.observeCalls(limit = 1000) }.collectAsStateWithLifecycle(emptyList())
-    val birthdays by remember { app.contacts.observeBirthdays() }.collectAsStateWithLifecycle(emptyList())
+    val calls by app.callRows.collectAsStateWithLifecycle()
+    val birthdays by app.birthdayRows.collectAsStateWithLifecycle()
     val talked = remember(calls, recents.labels, birthdays) { withBirthdays(mostTalked(calls, recents.labels), birthdays) }
     var tagging by remember { mutableStateOf<String?>(null) }
     var picked by remember { mutableStateOf(emptySet<Long>()) }
@@ -117,7 +128,7 @@ fun HomeScreen(onCall: (String) -> Unit, onOpen: (Route) -> Unit, onScan: () -> 
     }
 
     BackHandler(enabled = picked.isNotEmpty()) { picked = emptySet() }
-    LazyColumn(Modifier.fillMaxSize()) {
+    LazyColumn(Modifier.fillMaxSize(), state = list) {
         item {
             if (picked.isNotEmpty()) {
                 SelectionBar(
@@ -127,10 +138,15 @@ fun HomeScreen(onCall: (String) -> Unit, onOpen: (Route) -> Unit, onScan: () -> 
                     onDelete = { confirmDelete = true },
                 )
             } else ToolbarRow {
-                MainToolbarActions(onScan, onOpen)
+                ToolbarIcon(Icons.AutoMirrored.Outlined.Label, stringResource(R.string.section_labels)) { onOpen(Route.Labels) }
+                ToolbarIcon(Icons.Outlined.BarChart, stringResource(R.string.stats_title)) { onOpen(Route.Stats) }
+                MainToolbarActions(onOpen)
             }
         }
         item { LargeTitle(stringResource(R.string.title_phone), null) }
+        if (askDefault) {
+            item(key = "default-app") { DefaultDialerBanner(onRequestDefault, onClose = onCloseDefault) }
+        }
         item { DayHeader(stringResource(R.string.favorites)) }
         if (favorites.isEmpty()) {
             item {

@@ -125,8 +125,8 @@ fun SearchScreen(
     val app = context.container
     val scope = rememberCoroutineScope()
     val contacts by remember { app.contacts.observeSearchable() }.collectAsStateWithLifecycle(emptyList())
-    val calls by remember { app.observeCalls(limit = 1000) }.collectAsStateWithLifecycle(emptyList())
-    val tags by remember { app.store.observeTags() }.collectAsStateWithLifecycle(emptyList())
+    val calls by app.callRows.collectAsStateWithLifecycle()
+    val tags by app.tagRows.collectAsStateWithLifecycle()
     val labels = remember(tags) { tags.associate { it.number to it.label } }
 
     val focus = remember { FocusRequester() }

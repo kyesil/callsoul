@@ -1,5 +1,6 @@
 package com.bettercallsoul.ui
 
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.background
@@ -70,7 +71,9 @@ import com.bettercallsoul.container
 import com.bettercallsoul.telecom.CallerDirectory
 
 @Composable
-fun RecentsScreen(onCall: (String) -> Unit, onOpen: (Route) -> Unit) {
+fun RecentsScreen(onCall: (String) -> Unit, onOpen: (Route) -> Unit, toTop: Int = 0) {
+    val list = rememberLazyListState()
+    LaunchedEffect(toTop) { if (toTop > 0) list.animateScrollToItem(0) }
     var searching by rememberSaveable { mutableStateOf(false) }
     var query by rememberSaveable { mutableStateOf("") }
     var kind by rememberSaveable { mutableStateOf(CallFilter.All) }
@@ -110,7 +113,7 @@ fun RecentsScreen(onCall: (String) -> Unit, onOpen: (Route) -> Unit) {
                 ToolbarIcon(Icons.Filled.Search, stringResource(R.string.search_calls)) { searching = true }
             }
         }
-        LazyColumn(Modifier.fillMaxSize()) {
+        LazyColumn(Modifier.fillMaxSize(), state = list) {
             if (!searching) item { LargeTitle(stringResource(R.string.tab_recents), null) }
             item {
                 // Narrow to one kind of call; tapping the chosen chip again shows them all. The row
@@ -192,8 +195,8 @@ class RecentsState(val days: List<Pair<String, List<RecentRow>>>, val labels: Ma
 fun rememberRecents(limit: Int? = null, query: String = "", kind: CallFilter = CallFilter.All): RecentsState {
     val context = LocalContext.current
     val app = context.container
-    val calls by remember { app.observeCalls() }.collectAsStateWithLifecycle(emptyList())
-    val tags by remember { app.store.observeTags() }.collectAsStateWithLifecycle(emptyList())
+    val calls by app.callRows.collectAsStateWithLifecycle()
+    val tags by app.tagRows.collectAsStateWithLifecycle()
     val labels = remember(tags) { tags.associate { it.number to it.label } }
     val days = remember(calls, limit, query, kind, labels) {
         // A search matches the name, the label given to a number, or digits anywhere in the number.

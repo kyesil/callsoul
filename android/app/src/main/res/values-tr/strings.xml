@@ -190,6 +190,15 @@
     <string name="section_labels">Etiketler</string>
     <string name="label_new">Yeni etiket</string>
     <string name="label_name">Etiket adı</string>
+    <string name="labels_empty">Henüz etiket yok. Yukarıdaki artıyla ya da bir kişiyi düzenlerken oluşturabilirsin.</string>
+    <string name="label_rename">Yeniden adlandır</string>
+    <string name="label_delete">Etiketi sil</string>
+    <string name="label_delete_question">“%1$s” etiketi silinsin mi? İçindeki kişiler silinmez.</string>
+    <string name="label_account">Hesap</string>
+    <plurals name="label_members">
+        <item quantity="one">%d kişi</item>
+        <item quantity="other">%d kişi</item>
+    </plurals>
     <string name="section_add_field">Alan ekle</string>
     <string name="chip_address">Adres</string>
     <string name="chip_event">Önemli tarih</string>

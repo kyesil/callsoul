@@ -18,8 +18,6 @@ Geliştirici / Developer: Solid Electron (https://yesil.dev)
 
 **Sunucuda tutulan veriler ve kullanımı.** Numara başına toplanan oylar, kategori ve ad önerileri saklanır ve yalnızca diğer kullanıcılara spam uyarısı ve arayan adı göstermek için kullanılır. Satılmaz, reklam için kullanılmaz, üçüncü taraflarla paylaşılmaz. Bağlantı şifrelidir (HTTPS).
 
-**QR kod tarama.** Kartvizit veya bağlantı kodu okurken Google Play hizmetlerinin tarayıcı ekranı kullanılır; kamera görüntüsü telefonda işlenir ve bize gönderilmez. Uygulamanın kendi kamera izni yoktur.
-
 **Hata ayıklama günlüğü.** Açıksa arama akışıyla ilgili teknik kayıtlar telefonda tutulur; numaralar son dört hanesi dışında gizlenir. Günlük yalnızca sen Paylaş dediğinde, senin seçtiğin uygulamayla paylaşılır.
 
 **Silme.** Etiketlerini, ayarlarını ve günlüğü uygulamayı silerek kaldırabilirsin; Google yedeğindeki kopyayı telefonunun Google yedekleme ayarlarından silebilirsin. Gönderdiğin bildirimlerin silinmesi için bize yaz; rastgele kimliğin, Ayarlar > Hata ayıklama günlüğü > Paylaş ile paylaşılan dosyanın başında yazar.
@@ -41,8 +39,6 @@ Geliştirici / Developer: Solid Electron (https://yesil.dev)
 **End as spam.** If you press this button during a call from someone outside your contacts, the call ends and the same report is sent without a question: the caller's number, your spam answer and your random ID.
 
 **What the server keeps and why.** It keeps the votes, categories and suggested names per number and uses them only to show spam warnings and caller names to other users. It is not sold, not used for advertising and not shared with third parties. Connections are encrypted (HTTPS).
-
-**QR code scanning.** Reading a business card or link code uses Google Play services' scanner screen; the camera image is processed on the phone and is not sent to us. The app has no camera permission of its own.
 
 **Debug log.** When enabled, technical records of the call flow are kept on the phone, with numbers masked except for their last four digits. The log is shared only when you tap Share, with the app you choose.
 

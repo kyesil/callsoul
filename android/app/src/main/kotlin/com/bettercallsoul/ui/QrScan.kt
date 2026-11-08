@@ -39,31 +39,6 @@ import androidx.compose.ui.unit.sp
 import com.bettercallsoul.R
 import com.bettercallsoul.codes.ScanResult
 import com.bettercallsoul.diag.DebugLog
-import com.google.mlkit.vision.barcode.common.Barcode
-import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
-import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
-
-/**
- * Opens Google Play services' code scanner: its own camera screen, so the app needs no camera
- * permission. [onRead] gets the code's text; a cancelled scan just returns.
- */
-fun startQrScan(context: Context, onRead: (String) -> Unit) {
-    val options = GmsBarcodeScannerOptions.Builder()
-        .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
-        .enableAutoZoom()
-        .build()
-    try {
-        GmsBarcodeScanning.getClient(context, options).startScan()
-            .addOnSuccessListener { code -> code.rawValue?.takeIf(String::isNotBlank)?.let(onRead) }
-            .addOnFailureListener { error ->
-                DebugLog.w("Scan", "scanner failed", error)
-                Toast.makeText(context, R.string.scan_unavailable, Toast.LENGTH_LONG).show()
-            }
-    } catch (error: RuntimeException) {
-        DebugLog.w("Scan", "scanner unavailable", error)
-        Toast.makeText(context, R.string.scan_unavailable, Toast.LENGTH_LONG).show()
-    }
-}
 
 /** What a scanned link or text shows at the bottom of the screen: open it, copy it or close. */
 @Composable

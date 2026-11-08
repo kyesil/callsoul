@@ -1,5 +1,7 @@
 package com.bettercallsoul.ui
 
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.lifecycle.compose.LifecycleStartEffect
 import com.bettercallsoul.container
 import com.bettercallsoul.ownNumber
 import androidx.compose.animation.AnimatedContent
@@ -98,6 +100,7 @@ sealed interface Route {
     data object Settings : Route
     data object Trash : Route
     data object Stats : Route
+    data object Labels : Route
 
     /** A new contact filled from the business card in a scanned QR code; [raw] is the code's text. */
     data class ScannedContact(val raw: String) : Route
@@ -117,6 +120,7 @@ private val RouteStackSaver = listSaver<SnapshotStateList<Route>, String>(
                 Route.Settings -> "settings"
                 Route.Trash -> "trash"
                 Route.Stats -> "stats"
+                Route.Labels -> "labels"
                 is Route.ScannedContact -> "scan:${it.raw}"
             }
         }
@@ -133,6 +137,7 @@ private val RouteStackSaver = listSaver<SnapshotStateList<Route>, String>(
                 "settings" -> Route.Settings
                 "trash" -> Route.Trash
                 "stats" -> Route.Stats
+                "labels" -> Route.Labels
                 "scan" -> Route.ScannedContact(value)
                 else -> null
             }
@@ -171,6 +176,15 @@ fun MainScreen(
     var searchFocus by remember { mutableStateOf(false) }
     var beforeSearch by rememberSaveable { mutableStateOf(Tab.Home) }
     val stack = rememberSaveable(saver = RouteStackSaver) { mutableStateListOf() }
+    val tabStates = rememberSaveableStateHolder()
+    // Counts the taps on a tab that is already shown; a new count sends its list to the top.
+    var toTop by remember { mutableStateOf(emptyMap<Tab, Int>()) }
+    // Closed on Home it stays away only until the app is opened again.
+    var defaultBannerClosed by remember { mutableStateOf(false) }
+    LifecycleStartEffect(Unit) {
+        defaultBannerClosed = false
+        onStopOrDispose { }
+    }
 
     LaunchedEffect(missedRequest) {
         if (missedRequest != null) {
@@ -201,7 +215,7 @@ fun MainScreen(
         }
     }
 
-    // A scanned code: a business card opens a filled-in new contact, a number a new contact with it,
+    // A code read in a debug build: a business card opens a filled-in new contact, a number a new contact with it,
     // and a link or plain text shows at the bottom to open or copy.
     var scanResult by remember { mutableStateOf<ScanResult?>(null) }
     val handleCode: (String) -> Unit = { raw ->
@@ -211,7 +225,6 @@ fun MainScreen(
             else -> scanResult = read
         }
     }
-    val scan: () -> Unit = { startQrScan(context, handleCode) }
     LaunchedEffect(scanRequest) {
         if (scanRequest != null) {
             handleCode(scanRequest)
@@ -250,22 +263,32 @@ fun MainScreen(
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Column(Modifier.fillMaxSize().statusBarsPadding().then(underPage)) {
             Crossfade(targetState = tab, animationSpec = if (motion) tween(180) else snap(), label = "tab", modifier = Modifier.weight(1f)) { tab ->
+              // Each tab keeps its own scroll and state while another is shown.
+              tabStates.SaveableStateProvider(tab.name) {
                 when (tab) {
-                    Tab.Home -> HomeScreen(onCall = call, onOpen = open, onScan = scan)
+                    Tab.Home -> HomeScreen(
+                        onCall = call,
+                        onOpen = open,
+                        toTop = toTop[Tab.Home] ?: 0,
+                        askDefault = !isDefaultDialer && !defaultBannerClosed,
+                        onRequestDefault = onRequestDefault,
+                        onCloseDefault = { defaultBannerClosed = true },
+                    )
                     Tab.Keypad -> KeypadScreen(
                         digits = digits,
                         onDigitsChange = { digits = it },
                         onCall = call,
                         onOpen = open,
-                        onScan = scan,
-                        isDefaultDialer = isDefaultDialer,
+                        // Closed on Home or here, the banner is gone from both until the app is opened again.
+                        isDefaultDialer = isDefaultDialer || defaultBannerClosed,
                         onRequestDefault = onRequestDefault,
+                        onCloseDefault = { defaultBannerClosed = true },
                     )
-                    Tab.Recents -> RecentsScreen(onCall = call, onOpen = open)
+                    Tab.Recents -> RecentsScreen(onCall = call, onOpen = open, toTop = toTop[Tab.Recents] ?: 0)
                     Tab.Contacts -> ContactsScreen(
                         onCall = call,
                         onOpen = open,
-                        onScan = scan,
+                        toTop = toTop[Tab.Contacts] ?: 0,
                     )
                     Tab.Search -> SearchScreen(
                         query = searchQuery,
@@ -277,8 +300,11 @@ fun MainScreen(
                         onBack = { switchTab(beforeSearch) },
                     )
                 }
+              }
             }
             BottomTabs(selected = tab, onSelect = {
+                // The tab already shown, tapped again, goes back to its top.
+                if (it == tab && it != Tab.Search) toTop = toTop + (it to (toTop[it] ?: 0) + 1)
                 if (it == Tab.Search) {
                     searchFocus = true
                     if (tab != Tab.Search) {
@@ -323,6 +349,7 @@ fun MainScreen(
                     Route.Settings -> SettingsScreen(isDefaultDialer, onRequestDefault, onBack = back)
                     Route.Trash -> TrashScreen(onBack = back)
                     Route.Stats -> StatsScreen(onOpen = open, onBack = back)
+                    Route.Labels -> LabelsScreen(onOpen = open, onBack = back)
                     is Route.ScannedContact -> ContactEditorScreen(null, null, scanned = route.raw, onDone = back)
                     }
                 }

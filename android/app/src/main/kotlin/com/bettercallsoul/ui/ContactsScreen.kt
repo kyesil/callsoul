@@ -112,18 +112,19 @@ import kotlinx.coroutines.launch
 fun ContactsScreen(
     onCall: (String) -> Unit,
     onOpen: (Route) -> Unit,
-    onScan: () -> Unit,
+    toTop: Int = 0,
 ) {
     val context = LocalContext.current
     val app = context.container
     val resources = LocalResources.current
     val scope = rememberCoroutineScope()
-    val contacts by remember { app.contacts.observe() }.collectAsStateWithLifecycle(emptyList())
+    val contacts by app.contactRows.collectAsStateWithLifecycle()
     // Scrolling the list puts the keyboard away.
     var query by rememberSaveable { mutableStateOf("") }
     val keyboard = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     val list = rememberLazyListState()
+    LaunchedEffect(toTop) { if (toTop > 0) list.animateScrollToItem(0) }
     LaunchedEffect(list.isScrollInProgress) {
         if (list.isScrollInProgress) {
             keyboard?.hide()
@@ -141,7 +142,7 @@ fun ContactsScreen(
         inSource = if (chosen.isEmpty()) null else chosen.flatMapTo(HashSet()) { app.contacts.contactIdsIn(it) }
     }
 
-    val profile by remember { app.contacts.observeProfile() }.collectAsStateWithLifecycle(null)
+    val profile by app.profileRow.collectAsStateWithLifecycle()
 
     val pool = remember(contacts, inSource) { inSource?.let { ids -> contacts.filter { it.id in ids } } ?: contacts }
     val shown = remember(pool, query) {
@@ -189,10 +190,14 @@ fun ContactsScreen(
                 app.contactsSources = keys
             }
             ToolbarIcon(Icons.Filled.Add, stringResource(R.string.action_add_contact)) { onOpen(Route.NewContact(null)) }
-            MoreMenu(onScan = onScan, onTrash = { onOpen(Route.Trash) }, onSettings = { onOpen(Route.Settings) })
+            MoreMenu(onTrash = { onOpen(Route.Trash) }, onSettings = { onOpen(Route.Settings) })
         }
+        // The letter strip finds a letter's header by counting the items above the groups.
+        val showCard = query.isBlank() && picked.isEmpty()
+        val itemsBefore = (if (showCard) 1 else 0) + (if (favorites.isNotEmpty()) 2 else 0) + (if (query.isBlank() && shown.isNotEmpty()) 1 else 0) + (if (shown.isEmpty()) 1 else 0)
+        Box(Modifier.fillMaxSize()) {
         LazyColumn(Modifier.fillMaxSize(), state = list) {
-            if (query.isBlank() && picked.isEmpty()) {
+            if (showCard) {
                 item(key = "my-card") {
                     Spacer(Modifier.height(8.dp))
                     Card {
@@ -237,6 +242,13 @@ fun ContactsScreen(
                     }
                 }
             }
+        }
+        if (query.isBlank() && picked.isEmpty() && groups.size > 1) {
+            LetterStrip(
+                letters = groups.map { it.first },
+                modifier = Modifier.align(Alignment.CenterEnd),
+            ) { index -> scope.launch { list.scrollToItem(itemsBefore + 2 * index) } }
+        }
         }
     }
     if (confirmDelete) {
@@ -299,19 +311,11 @@ private val checkMark: @Composable () -> Unit = {
 }
 
 @Composable
-private fun MoreMenu(onScan: () -> Unit, onTrash: () -> Unit, onSettings: () -> Unit) {
+private fun MoreMenu(onTrash: () -> Unit, onSettings: () -> Unit) {
     var open by remember { mutableStateOf(false) }
     Box {
         ToolbarIcon(Icons.Filled.MoreVert, stringResource(R.string.action_more)) { open = true }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.action_scan_qr)) },
-                leadingIcon = { Icon(Icons.Outlined.QrCodeScanner, contentDescription = null) },
-                onClick = {
-                    open = false
-                    onScan()
-                },
-            )
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.trash_title)) },
                 leadingIcon = { Icon(Icons.Outlined.Delete, contentDescription = null) },

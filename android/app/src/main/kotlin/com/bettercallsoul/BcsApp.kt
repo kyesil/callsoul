@@ -1,5 +1,15 @@
 package com.bettercallsoul
 
+import com.bettercallsoul.calllog.Birthday
+import com.bettercallsoul.calllog.NumberTag
+import com.bettercallsoul.calllog.ContactRow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.CoroutineScope
 import com.bettercallsoul.diag.DebugLog
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -69,6 +79,17 @@ class AppContainer(context: Context) {
     }
     val spam = SpamClient(listOf(BuildConfig.API_URL) + BuildConfig.API_BACKUP_URLS.split(",").map { it.trim() })
     val directory = CallerDirectory(contacts, callLog, store, spam) { spamLookupEnabled }
+
+    /**
+     * The lists the tabs show, kept for a while after the last screen stops watching them. A tab
+     * opened again then has its rows at once, so it comes back scrolled where it was left.
+     */
+    private val lists = CoroutineScope(SupervisorJob() + Dispatchers.Default + CoroutineExceptionHandler { _, error -> DebugLog.w("App", "list failed", error) })
+    val contactRows: StateFlow<List<ContactRow>> by lazy { contacts.observe().stateIn(lists, SharingStarted.WhileSubscribed(KEEP_LISTS_MILLIS), emptyList()) }
+    val callRows: StateFlow<List<CallEntry>> by lazy { observeCalls(limit = 1000).stateIn(lists, SharingStarted.WhileSubscribed(KEEP_LISTS_MILLIS), emptyList()) }
+    val tagRows: StateFlow<List<NumberTag>> by lazy { store.observeTags().stateIn(lists, SharingStarted.WhileSubscribed(KEEP_LISTS_MILLIS), emptyList()) }
+    val profileRow: StateFlow<ContactRow?> by lazy { contacts.observeProfile().stateIn(lists, SharingStarted.WhileSubscribed(KEEP_LISTS_MILLIS), null) }
+    val birthdayRows: StateFlow<List<Birthday>> by lazy { contacts.observeBirthdays().stateIn(lists, SharingStarted.WhileSubscribed(KEEP_LISTS_MILLIS), emptyList()) }
 
     /** Everything the recents show: the phone's calls and, when switched on, the WhatsApp ones. */
     fun observeCalls(limit: Int = 300): Flow<List<CallEntry>> = combine(
@@ -296,6 +317,7 @@ class AppContainer(context: Context) {
         const val KEY_SWIPE_MESSAGE = "swipe_message"
         const val KEY_RECENT_SEARCHES = "recent_searches"
         const val KEY_HISTORY_DAYS = "history_days"
+        const val KEEP_LISTS_MILLIS = 5 * 60 * 1000L
         const val KEY_LABEL_SEARCHES = "label_searches"
         const val KEY_SEARCH_OPENED = "search_opened"
         const val MAX_SEARCH_OPENED = 20

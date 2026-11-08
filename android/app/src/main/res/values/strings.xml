@@ -191,6 +191,15 @@
     <string name="section_labels">Labels</string>
     <string name="label_new">New label</string>
     <string name="label_name">Label name</string>
+    <string name="labels_empty">No labels yet. Make one with the plus above, or while editing a contact.</string>
+    <string name="label_rename">Rename</string>
+    <string name="label_delete">Delete label</string>
+    <string name="label_delete_question">Delete the label “%1$s”? The contacts in it stay.</string>
+    <string name="label_account">Account</string>
+    <plurals name="label_members">
+        <item quantity="one">%d contact</item>
+        <item quantity="other">%d contacts</item>
+    </plurals>
     <string name="section_add_field">Add a field</string>
     <string name="chip_address">Address</string>
     <string name="chip_event">Significant date</string>

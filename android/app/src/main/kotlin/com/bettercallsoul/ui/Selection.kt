@@ -51,10 +51,9 @@ fun SelectionBar(count: Int, onClear: () -> Unit, onSelectAll: () -> Unit, onDel
     }
 }
 
-/** The home and keypad toolbar, the same on both: scan a QR code, add a contact, settings. */
+/** The home and keypad toolbar, the same on both: add a contact, settings. */
 @Composable
-fun RowScope.MainToolbarActions(onScan: () -> Unit, onOpen: (Route) -> Unit) {
-    ToolbarIcon(Icons.Outlined.QrCodeScanner, stringResource(R.string.action_scan_qr), onScan)
+fun RowScope.MainToolbarActions(onOpen: (Route) -> Unit) {
     ToolbarIcon(Icons.Outlined.PersonAdd, stringResource(R.string.action_add_contact)) { onOpen(Route.NewContact(null)) }
     ToolbarIcon(Icons.Outlined.Settings, stringResource(R.string.action_settings)) { onOpen(Route.Settings) }
 }

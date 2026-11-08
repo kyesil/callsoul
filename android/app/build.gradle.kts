@@ -13,8 +13,8 @@ android {
         // Android 17 is the target; 35 keeps the Galaxy S21 test phone usable.
         minSdk = 29
         targetSdk = 37
-        versionCode = 29
-        versionName = "0.4.1"
+        versionCode = 30
+        versionName = "0.4.2"
     }
 
     // The Play upload key lives outside the repo; its path and password are in ~/.gradle/gradle.properties.
@@ -92,7 +92,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.coil.compose)
     // QR codes through Google Play services' scanner screen: no camera permission of our own.
-    implementation(libs.code.scanner)
     // Play services pull in an old Fragment, whose activity results the permission requests can't use.
     implementation(libs.androidx.fragment)
 }

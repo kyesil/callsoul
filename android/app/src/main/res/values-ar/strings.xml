@@ -202,6 +202,19 @@
     <string name="section_labels">التصنيفات</string>
     <string name="label_new">تصنيف جديد</string>
     <string name="label_name">اسم التصنيف</string>
+    <string name="labels_empty">لا توجد تصنيفات بعد. أنشئ واحدًا بزر الإضافة في الأعلى أو أثناء تعديل جهة اتصال.</string>
+    <string name="label_rename">إعادة التسمية</string>
+    <string name="label_delete">حذف التصنيف</string>
+    <string name="label_delete_question">هل تريد حذف التصنيف «%1$s»؟ تبقى جهات الاتصال التي فيه.</string>
+    <string name="label_account">الحساب</string>
+    <plurals name="label_members">
+        <item quantity="zero">%d جهة اتصال</item>
+        <item quantity="one">جهة اتصال واحدة</item>
+        <item quantity="two">جهتا اتصال</item>
+        <item quantity="few">%d جهات اتصال</item>
+        <item quantity="many">%d جهة اتصال</item>
+        <item quantity="other">%d جهة اتصال</item>
+    </plurals>
     <string name="section_add_field">إضافة حقل</string>
     <string name="chip_address">العنوان</string>
     <string name="chip_event">تاريخ مهم</string>

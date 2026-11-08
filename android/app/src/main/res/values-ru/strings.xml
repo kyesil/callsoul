@@ -196,6 +196,17 @@
     <string name="section_labels">Ярлыки</string>
     <string name="label_new">Новая метка</string>
     <string name="label_name">Название метки</string>
+    <string name="labels_empty">Меток пока нет. Создайте метку плюсом вверху или при изменении контакта.</string>
+    <string name="label_rename">Переименовать</string>
+    <string name="label_delete">Удалить метку</string>
+    <string name="label_delete_question">Удалить метку «%1$s»? Контакты в ней останутся.</string>
+    <string name="label_account">Аккаунт</string>
+    <plurals name="label_members">
+        <item quantity="one">%d контакт</item>
+        <item quantity="few">%d контакта</item>
+        <item quantity="many">%d контактов</item>
+        <item quantity="other">%d контакта</item>
+    </plurals>
     <string name="section_add_field">Добавить поле</string>
     <string name="chip_address">Адрес</string>
     <string name="chip_event">Важная дата</string>

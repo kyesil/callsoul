@@ -216,6 +216,9 @@ data class CustomField(val label: String, val value: String, val dataId: Long? =
 /** A Google Contacts label ("group") the contact can belong to. */
 data class ContactGroup(val id: Long, val title: String)
 
+/** A label as the labels page lists it: in which account, and how many contacts it holds. */
+data class LabelInfo(val id: Long, val title: String, val account: ContactAccount, val count: Int)
+
 data class ContactDraft(
     val prefix: String = "",
     val given: String = "",
@@ -375,6 +378,37 @@ class ContactEditor(
         val id = resolver.insert(Groups.CONTENT_URI, values)?.let(ContentUris::parseId)
         uploadSoon(account)
         id
+    }
+
+    /** Every label the user made, in any account, with how many contacts are in it. */
+    suspend fun allLabels(): List<LabelInfo> = withContext(Dispatchers.IO) {
+        resolver.query(
+            Groups.CONTENT_SUMMARY_URI,
+            arrayOf(Groups._ID, Groups.TITLE, Groups.ACCOUNT_NAME, Groups.ACCOUNT_TYPE, Groups.SUMMARY_COUNT),
+            "${Groups.DELETED} = 0 AND ${Groups.SYSTEM_ID} IS NULL AND ${Groups.AUTO_ADD} = 0 AND ${Groups.FAVORITES} = 0",
+            null, "${Groups.TITLE} COLLATE LOCALIZED ASC",
+        )?.use {
+            buildList {
+                while (it.moveToNext()) {
+                    val title = it.getStringOrNull(1)?.takeIf(String::isNotBlank) ?: continue
+                    add(LabelInfo(it.getLong(0), title, ContactAccount(it.getStringOrNull(2), it.getStringOrNull(3)), it.getInt(4)))
+                }
+            }
+        }.orEmpty()
+    }
+
+    suspend fun renameGroup(label: LabelInfo, title: String): Unit = withContext(Dispatchers.IO) {
+        val values = ContentValues().apply { put(Groups.TITLE, title.trim()) }
+        resolver.update(ContentUris.withAppendedId(Groups.CONTENT_URI, label.id), values, null, null)
+        uploadSoon(label.account)
+        onChanged(emptyList())
+    }
+
+    /** The label goes; the contacts in it stay, as in Google Contacts. */
+    suspend fun deleteGroup(label: LabelInfo): Unit = withContext(Dispatchers.IO) {
+        resolver.delete(ContentUris.withAppendedId(Groups.CONTENT_URI, label.id), null, null)
+        uploadSoon(label.account)
+        onChanged(emptyList())
     }
 
     /** The labels an account offers, leaving out the system ones (My Contacts, Starred). */

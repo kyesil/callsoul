@@ -89,7 +89,6 @@ See by week, month and year how long you talked, how many people you talked to, 
 - Save to any of your Google accounts or to the phone, and move contacts between them.
 - Select several and delete; deleted contacts wait 30 days in a recycle bin.
 - Add a number to an existing contact, and share a contact as a card.
-- Scan a business card QR code and the new contact fills itself in.
 
 ### Privacy
 
