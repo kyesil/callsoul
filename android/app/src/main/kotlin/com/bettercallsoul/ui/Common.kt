@@ -115,9 +115,9 @@ fun Card(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> U
 
 /** The large centred title that scrolls away above each list. */
 @Composable
-fun LargeTitle(title: String, subtitle: String?) {
+fun LargeTitle(title: String, subtitle: String?, height: Dp = 110.dp) {
     Column(
-        modifier = Modifier.fillMaxWidth().height(110.dp),
+        modifier = Modifier.fillMaxWidth().height(height),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {

@@ -1,5 +1,9 @@
 package com.bettercallsoul.ui
 
+import androidx.compose.foundation.basicMarquee
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.outlined.BarChart
 import com.bettercallsoul.calllog.BirthdayNear
@@ -92,7 +96,7 @@ private fun withBirthdays(talked: List<TopCaller>, birthdays: List<Birthday>): L
     return first + talked.filterNot { it.key in keys }
 }
 
-/** By total talk time in the calls given; a contact's numbers count together. */
+/** By how many calls were talked in; a contact's numbers count together. */
 private fun mostTalked(calls: List<CallEntry>, labels: Map<String, String>): List<TopCaller> =
     com.bettercallsoul.mostTalked(calls, labels, MOST_TALKED).map { TopCaller(it.key, it.number, it.name, it.photoUri, it.seconds) }
 
@@ -119,6 +123,12 @@ fun HomeScreen(
     var tagging by remember { mutableStateOf<String?>(null) }
     var picked by remember { mutableStateOf(emptySet<Long>()) }
     var confirmDelete by remember { mutableStateOf(false) }
+    // A swipe up on a tile opens its actions around it.
+    val menu = rememberQuickMenu(onCall)
+    var origin by remember { mutableStateOf(Offset.Zero) }
+    val quickTarget: suspend (String) -> QuickTarget? = { number ->
+        number.takeIf { it.isNotBlank() }?.let { QuickTarget(it, app.contacts.whatsAppActions(it)) }
+    }
 
     // On the tiles a tap opens the profile and a double tap calls the default number.
     val callFavorite: (ContactRow) -> Unit = { row ->
@@ -128,6 +138,7 @@ fun HomeScreen(
     }
 
     BackHandler(enabled = picked.isNotEmpty()) { picked = emptySet() }
+    Box(Modifier.fillMaxSize().onGloballyPositioned { origin = it.positionInRoot() }) {
     LazyColumn(Modifier.fillMaxSize(), state = list) {
         item {
             if (picked.isNotEmpty()) {
@@ -143,7 +154,8 @@ fun HomeScreen(
                 MainToolbarActions(onOpen)
             }
         }
-        item { LargeTitle(stringResource(R.string.title_phone), null) }
+        // Half the usual space above and below, so the people come up sooner.
+        item { LargeTitle(stringResource(R.string.title_phone), null, height = HomeTitleHeight) }
         if (askDefault) {
             item(key = "default-app") { DefaultDialerBanner(onRequestDefault, onClose = onCloseDefault) }
         }
@@ -165,6 +177,8 @@ fun HomeScreen(
                         onCall = callFavorite,
                         onOpen = { onOpen(Route.Contact(it.id)) },
                         onReorder = { ids -> scope.launch { runCatching { app.contacts.setFavoriteOrder(ids) } } },
+                        menu = menu,
+                        quickTarget = { quickTarget(app.contacts.numbers(it.id).firstOrNull().orEmpty()) },
                     )
                 }
             }
@@ -187,6 +201,7 @@ fun HomeScreen(
                                 onCall = { if (caller.number.isNotBlank()) onCall(caller.number) else open() },
                                 onOpen = open,
                                 birthday = caller.birthday,
+                                gestures = Modifier.quickMenu(menu, caller.name, caller.photoUri) { quickTarget(caller.number) },
                             )
                         }
                     }
@@ -196,6 +211,8 @@ fun HomeScreen(
         recentCalls(recents, onCall, onOpen, onTag = { tagging = it }, picked = picked, onPick = { row ->
             picked = if (row.key in picked) picked - row.key else picked + row.key
         })
+    }
+    QuickMenuOverlay(menu, origin)
     }
 
     tagging?.let { TagDialog(number = it, onDismiss = { tagging = null }) }
@@ -248,13 +265,16 @@ private fun PersonTile(
             }
         }
         Spacer(Modifier.height(6.dp))
+        // A name too long for the tile slides along to show the rest; with animations off it is cut short.
+        val motion = LocalMotion.current
         Text(
             name,
             fontSize = 13.sp,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
+            overflow = if (motion) TextOverflow.Clip else TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface,
+            modifier = if (motion) Modifier.basicMarquee(iterations = Int.MAX_VALUE) else Modifier,
         )
     }
 }
@@ -269,6 +289,8 @@ private fun FavoritesRow(
     onCall: (ContactRow) -> Unit,
     onOpen: (ContactRow) -> Unit,
     onReorder: (List<Long>) -> Unit,
+    menu: QuickMenu,
+    quickTarget: suspend (ContactRow) -> QuickTarget?,
 ) {
     val state = rememberLazyListState()
     val haptics = LocalHapticFeedback.current
@@ -341,6 +363,7 @@ private fun FavoritesRow(
                         scaleY = lift
                     },
                 gestures = Modifier
+                    .quickMenu(menu, contact.name, contact.photoUri) { quickTarget(contact) }
                     .pointerInput(contact.id) {
                         fun drop() {
                             dragged = null
@@ -372,3 +395,6 @@ private fun FavoritesRow(
 
 /** How far the row scrolls in a frame while a tile is held at its edge, in pixels. */
 private const val MAX_EDGE_SCROLL = 18f
+
+/** The home title with half the space other pages leave around theirs. */
+private val HomeTitleHeight = 72.dp

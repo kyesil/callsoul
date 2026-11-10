@@ -94,9 +94,12 @@ import com.bettercallsoul.MAX_SWIPE_EDGE
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.bettercallsoul.BackupWatch
+import com.bettercallsoul.TelLinks
 import com.bettercallsoul.R
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -143,6 +146,7 @@ private class SettingEntry(val group: SettingsGroup, val words: List<Int>, val c
 @Composable
 fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBack: () -> Unit, onOpen: (Route) -> Unit = {}) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     var overlayAllowed by remember { mutableStateOf(Settings.canDrawOverlays(context)) }
     LifecycleResumeEffect(Unit) {
         overlayAllowed = Settings.canDrawOverlays(context)
@@ -169,7 +173,7 @@ fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBac
         SettingEntry(SettingsGroup.Contacts, listOf(R.string.section_labels, R.string.labels_body)) {
             LinkCard(Icons.AutoMirrored.Outlined.Label, R.string.section_labels, R.string.labels_body) { onOpen(Route.Labels) }
         },
-        SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_default_held)) { DefaultAppSettings(isDefaultDialer, onRequestDefault) },
+        SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_default_held, R.string.tel_links_row)) { DefaultAppSettings(isDefaultDialer, onRequestDefault) },
         SettingEntry(
             SettingsGroup.WhatsApp,
             listOf(R.string.settings_whatsapp_title, R.string.settings_whatsapp_body, R.string.settings_whatsapp_pill_title, R.string.settings_whatsapp_pill_body),
@@ -186,6 +190,7 @@ fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBac
         SettingEntry(SettingsGroup.Looks, listOf(R.string.settings_language_title)) { LanguageSettings() },
         SettingEntry(SettingsGroup.Looks, listOf(R.string.settings_animations_title, R.string.settings_animations_body)) { AnimationSettings() },
         SettingEntry(SettingsGroup.Looks, listOf(R.string.settings_swipe_title, R.string.settings_swipe_body, R.string.settings_swipe_message)) { SwipeSettings() },
+        SettingEntry(SettingsGroup.Looks, listOf(R.string.settings_quick_menu_title, R.string.settings_quick_menu_body)) { QuickMenuSettings() },
         SettingEntry(SettingsGroup.Storage, listOf(R.string.settings_history_title, R.string.settings_history_body)) { HistorySettings() },
         SettingEntry(SettingsGroup.Storage, listOf(R.string.settings_backup_title, R.string.settings_backup_body)) { BackupSettings() },
         SettingEntry(SettingsGroup.About, listOf(R.string.settings_log_title, R.string.settings_log_body)) { DebugLogSettings(isDefaultDialer) },
@@ -222,14 +227,14 @@ fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBac
                                         modifier = Modifier.padding(start = 62.dp),
                                     )
                                 }
-                                val summary = entries.filter { it.group == each }.joinToString(", ") { context.getString(it.words.first()) }
+                                val summary = entries.filter { it.group == each }.joinToString(", ") { resources.getString(it.words.first()) }
                                 GroupRow(each, summary) { groupName = each.name }
                             }
                         }
                     }
                 } else {
                     val found = entries.filter { entry ->
-                        (entry.words + entry.group.title).any { SearchText.find(context.getString(it), text) != null }
+                        (entry.words + entry.group.title).any { SearchText.find(resources.getString(it), text) != null }
                     }
                     if (found.isEmpty()) {
                         Text(
@@ -495,6 +500,34 @@ private fun DefaultAppSettings(isDefaultDialer: Boolean, onRequestDefault: () ->
                 }
             }
         }
+        if (isDefaultDialer) TelLinksRow()
+    }
+}
+
+/** tel: links from other apps: the phone role doesn't cover them, so they are shown apart. */
+@Composable
+private fun TelLinksRow() {
+    val context = LocalContext.current
+    var holder by remember { mutableStateOf(TelLinks.holder(context)) }
+    LifecycleResumeEffect(Unit) {
+        holder = TelLinks.holder(context)
+        onPauseOrDispose {}
+    }
+    Row(Modifier.fillMaxWidth().padding(start = 10.dp, end = 10.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
+            Text(stringResource(R.string.tel_links_row), fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
+            val note = when (val h = holder) {
+                TelLinks.Holder.Us -> null
+                TelLinks.Holder.Nobody -> stringResource(R.string.tel_links_asks)
+                is TelLinks.Holder.Other -> stringResource(R.string.tel_links_other, TelLinks.label(context, h.packageName))
+            }
+            if (note != null) Text(note, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        if (holder == TelLinks.Holder.Us) {
+            Text("✓", fontSize = 20.sp, color = CallGreen)
+        } else {
+            TextButton(onClick = { TelLinks.choose(context) }) { Text(stringResource(R.string.tel_links_action)) }
+        }
     }
 }
 
@@ -569,13 +602,48 @@ private suspend fun databaseSize(context: Context): Long = withContext(Dispatche
     listOf("", "-wal", "-shm", "-journal").sumOf { File(db.path + it).length() }
 }
 
-/** What the phone's Google backup takes along; Android itself turns it on and off. */
+/**
+ * What the phone's Google backup takes along, and when it last ran. Apps can't ask whether backup is
+ * on (only system apps may), so the date of the last backup stands for it.
+ */
 @Composable
 private fun BackupSettings() {
+    val context = LocalContext.current
+    var last by remember { mutableStateOf(BackupWatch.lastBackup(context)) }
+    LifecycleResumeEffect(Unit) {
+        last = BackupWatch.lastBackup(context)
+        onPauseOrDispose { }
+    }
     Card {
         Column(Modifier.fillMaxWidth().padding(10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(stringResource(R.string.settings_backup_title), fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
+            val when_ = last
+            if (when_ != null) {
+                val date = android.text.format.DateUtils.formatDateTime(
+                    context, when_,
+                    android.text.format.DateUtils.FORMAT_SHOW_DATE or android.text.format.DateUtils.FORMAT_SHOW_TIME or android.text.format.DateUtils.FORMAT_SHOW_YEAR,
+                )
+                Text(stringResource(R.string.settings_backup_last, date), fontSize = 15.sp, color = MaterialTheme.colorScheme.primary)
+            } else {
+                Text(stringResource(R.string.settings_backup_never), fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurface)
+            }
             Text(stringResource(R.string.settings_backup_body), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+/** The swipe-up menu on the home screen's favourites and most talked. */
+@Composable
+private fun QuickMenuSettings() {
+    val app = LocalContext.current.container
+    Card {
+        Row(Modifier.fillMaxWidth().padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.settings_quick_menu_title), fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
+                Text(stringResource(R.string.settings_quick_menu_body), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Spacer(Modifier.width(6.dp))
+            Switch(checked = app.quickMenuEnabled, onCheckedChange = app::setQuickMenu)
         }
     }
 }

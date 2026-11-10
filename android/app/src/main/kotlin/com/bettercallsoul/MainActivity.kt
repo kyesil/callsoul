@@ -7,7 +7,14 @@ import com.bettercallsoul.widget.Widgets
 import com.bettercallsoul.widget.WidgetActionActivity
 import android.Manifest
 import android.app.role.RoleManager
+import android.content.ContentResolver
+import com.bettercallsoul.diag.DebugLog
+import android.content.ContentUris
 import android.content.Intent
+import android.net.Uri
+import android.provider.ContactsContract
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -26,6 +33,7 @@ import com.bettercallsoul.ui.BcsTheme
 import com.bettercallsoul.ui.DefaultPhonePrompt
 import com.bettercallsoul.ui.MainScreen
 import com.bettercallsoul.ui.SetupScreen
+import com.bettercallsoul.ui.TelLinksPrompt
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 import com.bettercallsoul.calllog.ContactRow
@@ -41,6 +49,12 @@ class MainActivity : ComponentActivity() {
     private var permissionsGranted by mutableStateOf(false)
     private var isDefaultDialer by mutableStateOf(false)
     private var askForDefault by mutableStateOf(false)
+
+    /** Once the role is here: links from other apps still ask which app, until one is picked. */
+    private var askForTelLinks by mutableStateOf(false)
+
+    /** The role was asked for on the setup screen and not given. */
+    private var roleDeclined by mutableStateOf(false)
     private var lastTouch = Offset.Zero
     private var dialRequest by mutableStateOf<String?>(null)
 
@@ -60,7 +74,14 @@ class MainActivity : ComponentActivity() {
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { refresh() }
 
     private val requestRole =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { refresh() }
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            refresh()
+            if (!permissionsGranted) {
+                // On the setup screen: with the role, straight on to the permissions.
+                if (isDefaultDialer) requestPermissions.launch(REQUIRED_PERMISSIONS) else roleDeclined = true
+            }
+            offerTelLinks()
+        }
 
     override fun attachBaseContext(newBase: Context) = super.attachBaseContext(AppLook.wrap(newBase))
 
@@ -74,6 +95,8 @@ class MainActivity : ComponentActivity() {
         // Known before the first frame, so the question doesn't flash up for an app that already has the role.
         isDefaultDialer = holdsDialerRole()
         askForDefault = !container.defaultPhoneAsked
+        // Also for those who made it the default before this question existed.
+        if (isDefaultDialer) offerTelLinks()
         setContent {
             BcsTheme {
                 if (permissionsGranted) {
@@ -99,8 +122,23 @@ class MainActivity : ComponentActivity() {
                             onDismiss = ::answerDefaultQuestion,
                         )
                     }
+                    if (askForTelLinks) {
+                        TelLinksPrompt(
+                            onAccept = {
+                                askForTelLinks = false
+                                TelLinks.choose(this)
+                            },
+                            onDismiss = { askForTelLinks = false },
+                        )
+                    }
                 } else {
-                    SetupScreen(onRequestPermissions = { requestPermissions.launch(REQUIRED_PERMISSIONS) })
+                    SetupScreen(
+                        isDefaultDialer = isDefaultDialer,
+                        roleDeclined = roleDeclined,
+                        onRequestRole = ::askForDialerRole,
+                        onOpenDefaultApps = ::openDefaultApps,
+                        onRequestPermissions = { requestPermissions.launch(REQUIRED_PERMISSIONS) },
+                    )
                 }
             }
         }
@@ -130,8 +168,16 @@ class MainActivity : ComponentActivity() {
 
     private fun handleDial(intent: Intent) {
         if (BuildConfig.DEBUG) intent.getStringExtra(EXTRA_DEBUG_SCAN)?.let { scanRequest = it }
+        // The link sent to bring up the system's question: it has done its job by arriving.
+        if (intent.getBooleanExtra(TelLinks.EXTRA_SETUP, false)) {
+            DebugLog.i("TelLinks", "picked: ${TelLinks.holder(this)}")
+            return
+        }
         when (intent.action) {
-            Intent.ACTION_DIAL, Intent.ACTION_VIEW -> dialRequest = intent.data?.schemeSpecificPart
+            Intent.ACTION_VIEW, ContactsContract.QuickContact.ACTION_QUICK_CONTACT, ACTION_QUICK_CONTACT_OLD ->
+                if (intent.data?.scheme == ContentResolver.SCHEME_CONTENT) openContact(intent.data!!)
+                else dialRequest = intent.data?.schemeSpecificPart
+            Intent.ACTION_DIAL -> dialRequest = intent.data?.schemeSpecificPart
             FavoriteShortcuts.ACTION_CALL -> callFavorite(intent)
             WidgetActionActivity.ACTION_OPEN -> {
                 val contact = intent.getLongExtra(WidgetActionActivity.EXTRA_CONTACT, -1)
@@ -175,6 +221,32 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * A contact sent from elsewhere, such as the launcher's search: a lookup, contact or raw contact
+     * URI, opened on the person's page. Nothing happens for one that can't be found.
+     */
+    private fun openContact(uri: Uri) {
+        DebugLog.i("Open", "contact from ${referrer?.host ?: "?"}: ${uri.pathSegments.firstOrNull()}")
+        lifecycleScope.launch {
+            val id = withContext(Dispatchers.IO) { runCatching { contactIdOf(uri) }.getOrNull() }
+            if (id != null) openRequest = Route.Contact(id)
+        }
+    }
+
+    private fun contactIdOf(uri: Uri): Long? {
+        val raw = uri.pathSegments.firstOrNull() == "raw_contacts" || uri.authority == "contacts"
+        val target = if (raw) {
+            val rawId = uri.lastPathSegment?.toLongOrNull() ?: return null
+            ContentUris.withAppendedId(ContactsContract.RawContacts.CONTENT_URI, rawId)
+        } else {
+            ContactsContract.Contacts.lookupContact(contentResolver, uri) ?: return null
+        }
+        val column = if (raw) ContactsContract.RawContacts.CONTACT_ID else ContactsContract.Contacts._ID
+        return contentResolver.query(target, arrayOf(column), null, null, null)?.use { c ->
+            if (c.moveToFirst()) c.getLong(0) else null
+        }
+    }
+
     /** Opened again from the recent apps, the shortcut's intent comes back: that must not call. */
     private fun callFavorite(intent: Intent) {
         if (intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0) return
@@ -189,6 +261,17 @@ class MainActivity : ComponentActivity() {
 
     private fun holdsDialerRole() = getSystemService(RoleManager::class.java).isRoleHeld(RoleManager.ROLE_DIALER)
 
+    /** Asked once only; Settings keeps the way to it after that. */
+    private fun offerTelLinks() {
+        if (container.telLinksAsked || !holdsDialerRole() || TelLinks.holder(this) == TelLinks.Holder.Us) return
+        container.telLinksAsked = true
+        askForTelLinks = true
+    }
+
+    private fun openDefaultApps() {
+        runCatching { startActivity(Intent(android.provider.Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)) }
+    }
+
     private fun answerDefaultQuestion() {
         container.defaultPhoneAsked = true
         askForDefault = false
@@ -200,6 +283,9 @@ class MainActivity : ComponentActivity() {
 
     private companion object {
         const val EXTRA_DEBUG_SCAN = "debug_scan"
+
+        /** The QuickContact action older apps and launchers still send. */
+        const val ACTION_QUICK_CONTACT_OLD = "com.android.contacts.action.QUICK_CONTACT"
         val REQUIRED_PERMISSIONS = listOfNotNull(
             Manifest.permission.READ_CONTACTS,
             Manifest.permission.WRITE_CONTACTS,

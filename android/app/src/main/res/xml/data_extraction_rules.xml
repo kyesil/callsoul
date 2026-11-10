@@ -6,9 +6,11 @@
     <cloud-backup>
         <exclude domain="file" path="logs/" />
         <exclude domain="sharedpref" path="call_overlay.xml" />
+        <exclude domain="sharedpref" path="backup_watch.xml" />
     </cloud-backup>
     <device-transfer>
         <exclude domain="file" path="logs/" />
         <exclude domain="sharedpref" path="call_overlay.xml" />
+        <exclude domain="sharedpref" path="backup_watch.xml" />
     </device-transfer>
 </data-extraction-rules>

@@ -7,6 +7,7 @@ import android.net.Uri
 import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
 import android.telecom.Call
 import android.telecom.DisconnectCause
 import android.telecom.InCallService
@@ -82,6 +83,10 @@ object CallManager {
     private const val AUDIO = "Audio"
     private const val QUIET_ECHO_MILLIS = 1_500L
 
+    /** How long after the ringer is quieted the screen is watched for the power key turning it off. */
+    private const val POWER_KEY_MILLIS = 1_000L
+    private const val POWER_KEY_STEP = 50L
+
     private lateinit var directory: CallerDirectory
     internal var silentWhenFaceDown: () -> Boolean = { false }
         private set
@@ -129,9 +134,6 @@ object CallManager {
 
     private val _audio = MutableStateFlow(AudioUiState())
     val audio: StateFlow<AudioUiState> = _audio.asStateFlow()
-
-    private val _keypadOpen = MutableStateFlow(false)
-    val keypadOpen: StateFlow<Boolean> = _keypadOpen.asStateFlow()
 
     private val _callScreenVisible = MutableStateFlow(false)
     val callScreenVisible: StateFlow<Boolean> = _callScreenVisible.asStateFlow()
@@ -261,15 +263,31 @@ object CallManager {
     }
 
     /**
-     * Telecom quieted the ringing: Android does that for a volume key (and the power key) pressed
-     * while a call rings, before any app sees the key. With the user's choice it declines instead.
+     * Telecom quieted the ringing: Android does that for a volume key or the power key pressed
+     * while a call rings, before any app sees the key, and doesn't say which. With the user's choice
+     * a volume key declines; the power key only quiets, as on any phone. The power key is the one that
+     * turns the screen off (or on), so a screen that changes just after tells them apart.
      */
     internal fun onSilenceRinger() {
         val call = primary()?.takeIf { it.currentState == Call.STATE_RINGING }
         DebugLog.i(TAG, "ringer silenced by the system, self=$quietingItself, decline=${declineOnKey()}")
         if (call == null || quietingItself || !declineOnKey()) return
-        DebugLog.i(TAG, "reject on key")
-        call.reject(false, null)
+        val power = service?.getSystemService(PowerManager::class.java)
+        val screenWasOn = power?.isInteractive
+        scope.launch {
+            // Android turns the screen off only once the key is up and the wait for a double press is
+            // over, so it is watched for a while rather than checked once.
+            repeat((POWER_KEY_MILLIS / POWER_KEY_STEP).toInt()) {
+                kotlinx.coroutines.delay(POWER_KEY_STEP)
+                if (screenWasOn != null && power.isInteractive != screenWasOn) {
+                    DebugLog.i(TAG, "power key: only quieted")
+                    return@launch
+                }
+            }
+            if (call.currentState != Call.STATE_RINGING) return@launch
+            DebugLog.i(TAG, "reject on volume key")
+            call.reject(false, null)
+        }
     }
 
     /** Going to the waiting call puts the current one on hold; Telecom takes care of that. */
@@ -359,10 +377,6 @@ object CallManager {
 
     fun selectAccount(account: PhoneAccountHandle) {
         calls.firstOrNull { it.currentState == Call.STATE_SELECT_PHONE_ACCOUNT }?.phoneAccountSelected(account, false)
-    }
-
-    fun setKeypadOpen(open: Boolean) {
-        _keypadOpen.value = open
     }
 
     fun setCallScreenVisible(visible: Boolean) {

@@ -430,7 +430,7 @@
     <string name="tone_end_title">Сигнал в конце звонка</string>
     <string name="tone_end_body">Два коротких сигнала, когда звонок завершён</string>
     <string name="key_decline_title">Кнопка громкости отклоняет звонок</string>
-    <string name="key_decline_body">Во время входящего звонка нажатие кнопки громкости (или питания) отклоняет его, а не только выключает звук. Android не сообщает приложениям, какая кнопка нажата, поэтому ответить кнопкой громкости нельзя.</string>
+    <string name="key_decline_body">Во время входящего звонка нажатие кнопки громкости отклоняет его, а не только выключает звук. Кнопка питания по-прежнему только выключает звук. Android не сообщает приложениям, какая кнопка громкости нажата, поэтому ответить кнопкой громкости нельзя.</string>
     <string name="dup_title">Повторяющиеся контакты</string>
     <string name="dup_body">Найдите людей, сохранённых несколько раз, и объедините их</string>
     <string name="dup_note">Объединение связывает копии в один контакт на этом телефоне. Ничего не удаляется.</string>
@@ -465,4 +465,25 @@
     <string name="widget_pick_person">Выберите контакт</string>
     <string name="widget_add">Готово</string>
     <string name="widget_empty">Пока никого нет</string>
+    <string name="quick_whatsapp_message">Чат WhatsApp</string>
+    <string name="quick_whatsapp_call">Звонок WhatsApp</string>
+    <string name="quick_whatsapp_video">Видеозвонок</string>
+    <string name="widget_action_menu">Меню</string>
+    <string name="blocked_count">Номеров: %1$d</string>
+    <string name="blocked_search_hint">Поиск по заблокированным</string>
+    <string name="blocked_export">Сохранить как CSV</string>
+    <string name="blocked_exported">Сохранено номеров: %1$d</string>
+    <string name="blocked_export_failed">Не удалось сохранить файл</string>
+    <string name="settings_quick_menu_title">Свайп вверх по контакту</string>
+    <string name="settings_quick_menu_body">На главном экране быстрый свайп вверх по избранному или частому контакту открывает вокруг фото сообщение, звонок и действия WhatsApp.</string>
+    <string name="settings_backup_last">Последняя копия: %1$s</string>
+    <string name="settings_backup_never">Телефон ещё не делал копию приложения. Либо резервное копирование выключено, либо ещё не запускалось: Android копирует приложения примерно раз в день, когда телефон заряжается и подключён к Wi-Fi.</string>
+    <string name="tel_links_title">Ссылки на номера</string>
+    <string name="tel_links_body">Ссылки на номера в других приложениях всё ещё спрашивают, чем их открыть. Выберите Better Call Soul и «Всегда» в открывшемся списке.</string>
+    <string name="tel_links_action">Выбрать</string>
+    <string name="tel_links_row">Ссылки на номера</string>
+    <string name="tel_links_asks">Каждый раз спрашивает</string>
+    <string name="tel_links_other">Открываются в %1$s; там в «Открывать по умолчанию» сбросьте настройки</string>
+    <string name="setup_role_body">Better Call Soul — приложение для звонков. Сначала сделайте его приложением по умолчанию, затем оно попросит разрешения показывать вызовы, недавние и контакты.</string>
+    <string name="setup_role_settings">Открыть приложения по умолчанию</string>
 </resources>

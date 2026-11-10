@@ -3,4 +3,5 @@
 <full-backup-content>
     <exclude domain="file" path="logs/" />
     <exclude domain="sharedpref" path="call_overlay.xml" />
+    <exclude domain="sharedpref" path="backup_watch.xml" />
 </full-backup-content>

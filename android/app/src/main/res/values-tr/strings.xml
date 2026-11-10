@@ -398,7 +398,7 @@
     <string name="tone_end_title">Bitince ton</string>
     <string name="tone_end_body">Arama bitince iki kısa bip</string>
     <string name="key_decline_title">Ses tuşu aramayı reddeder</string>
-    <string name="key_decline_body">Arama çalarken ses tuşuna (ya da güç tuşuna) basınca arama yalnızca susmaz, reddedilir. Android hangi tuşa basıldığını uygulamalara söylemediği için ses açma tuşuyla cevaplanamaz.</string>
+    <string name="key_decline_body">Arama çalarken ses tuşuna basınca arama yalnızca susmaz, reddedilir. Güç tuşu yine yalnızca susturur. Android hangi ses tuşuna basıldığını uygulamalara söylemediği için ses açma tuşuyla cevaplanamaz.</string>
     <string name="dup_title">Yinelenen kişiler</string>
     <string name="dup_body">Birden fazla kaydedilmiş kişileri bul ve birleştir</string>
     <string name="dup_note">Birleştirmek kopyaları bu telefonda tek kişi olarak bağlar. Hiçbir bilgi silinmez.</string>
@@ -431,4 +431,25 @@
     <string name="widget_pick_person">Bir kişi seç</string>
     <string name="widget_add">Tamam</string>
     <string name="widget_empty">Henüz kimse yok</string>
+    <string name="quick_whatsapp_message">WhatsApp mesaj</string>
+    <string name="quick_whatsapp_call">WhatsApp ara</string>
+    <string name="quick_whatsapp_video">Görüntülü ara</string>
+    <string name="widget_action_menu">Menü</string>
+    <string name="blocked_count">%1$d numara</string>
+    <string name="blocked_search_hint">Engellenenlerde ara</string>
+    <string name="blocked_export">CSV olarak kaydet</string>
+    <string name="blocked_exported">%1$d numara kaydedildi</string>
+    <string name="blocked_export_failed">Dosya kaydedilemedi</string>
+    <string name="settings_quick_menu_title">Kişilerde yukarı kaydırma</string>
+    <string name="settings_quick_menu_body">Ana sayfada bir favoriye ya da en çok konuşulan kişiye hızlıca yukarı kaydırınca fotoğrafının etrafında mesaj, arama ve WhatsApp seçenekleri açılır.</string>
+    <string name="settings_backup_last">Son yedek: %1$s</string>
+    <string name="settings_backup_never">Telefon uygulamayı henüz yedeklemedi. Ya yedekleme kapalı ya da henüz çalışmadı: Android uygulamaları günde bir kez kadar, telefon Wi-Fi\'dayken şarj olurken yedekler.</string>
+    <string name="tel_links_title">Numara bağlantıları</string>
+    <string name="tel_links_body">Başka uygulamalardaki numara bağlantıları hâlâ hangi uygulamayla açılacağını soruyor. Açılan listede Better Call Soul\'u ve “Her zaman”ı seç.</string>
+    <string name="tel_links_action">Seç</string>
+    <string name="tel_links_row">Numara bağlantıları</string>
+    <string name="tel_links_asks">Her seferinde soruyor</string>
+    <string name="tel_links_other">%1$s ile açılıyor; orada “Varsayılan olarak aç” altından varsayılanları temizle</string>
+    <string name="setup_role_body">Better Call Soul bir telefon uygulaması. Önce varsayılan telefon uygulaması yap; ardından aramaları, son aramaları ve rehberini göstermek için izin ister.</string>
+    <string name="setup_role_settings">Varsayılan uygulamaları aç</string>
 </resources>

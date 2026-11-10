@@ -32,8 +32,12 @@
   .button small { display: block; font-weight: 400; font-size: 12px; color: var(--soft); }
   .button.main small { color: #d7f3e1; }
   h2 { font-size: 28px; letter-spacing: -0.01em; margin: 0 0 20px; }
-  .shots { display: flex; gap: 14px; overflow-x: auto; padding: 4px 4px 18px; margin: 0 -4px 40px; scroll-snap-type: x proximity; }
-  .shots img { width: 240px; height: auto; aspect-ratio: 9 / 16; flex: none; border-radius: 16px; scroll-snap-align: start; box-shadow: 0 8px 22px rgba(20, 26, 34, .18); }
+  .gallery { columns: 3 280px; column-gap: 16px; margin-bottom: 40px; }
+  .gallery figure { break-inside: avoid; margin: 0 0 16px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+  .gallery figure.wide { column-span: all; }
+  .gallery img { display: block; width: 100%; height: auto; }
+  .gallery figcaption { padding: 12px 16px 14px; font-size: 15px; color: var(--soft); }
+  .gallery figcaption b { display: block; color: var(--ink); font-size: 16.5px; margin-bottom: 2px; }
   .features { columns: 2 420px; column-gap: 14px; margin-bottom: 28px; }
   .features article { break-inside: avoid; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px 20px; margin: 0 0 14px; }
   h3 { font-size: 18px; margin: 0 0 6px; }
@@ -50,7 +54,6 @@
   @media (max-width: 760px) {
     .hero { grid-template-columns: 1fr; gap: 32px; }
     .tour { max-width: 300px; margin: 0 auto; }
-    .shots img { width: 200px; }
   }
 </style>
 </head>
@@ -72,7 +75,24 @@
     <video class="tour" id="tour" src="assets/tour.mp4" poster="assets/tour-poster.jpg" controls muted playsinline preload="metadata" width="1080" height="1920"></video>
   </section>
 
-  <div class="shots" id="shots"></div>
+  <h2 data-tr="Ekranlar" data-en="Screens">Ekranlar</h2>
+  <section class="gallery" id="gallery">
+    <figure class="wide"><img data-shot="0-overview" src="assets/shots/tr-0-overview.jpg" alt="" width="900" height="629" loading="lazy"><figcaption><b data-tr="Genel bakış" data-en="At a glance">Genel bakış</b><span data-tr="Ana sayfa, kişi sayfası ve gelen arama." data-en="The home page, a contact&#x27;s page and an incoming call.">Ana sayfa, kişi sayfası ve gelen arama.</span></figcaption></figure>
+    <figure><img data-shot="1-home" src="assets/shots/tr-1-home.jpg" alt="" width="900" height="1210" loading="lazy"><figcaption><b data-tr="Ana sayfa" data-en="Home">Ana sayfa</b><span data-tr="Favoriler ve en çok konuştukların; uygulama simgesine uzun basınca favoriler; satırı kaydırınca arama." data-en="Favourites and the people you talk to most; favourites on the app icon&#x27;s long press; swipe a row to call.">Favoriler ve en çok konuştukların; uygulama simgesine uzun basınca favoriler; satırı kaydırınca arama.</span></figcaption></figure>
+    <figure><img data-shot="9-quick" src="assets/shots/tr-9-quick.jpg" alt="" width="900" height="810" loading="lazy"><figcaption><b data-tr="Yukarı kaydır, hızlı menü" data-en="Swipe up for a quick menu">Yukarı kaydır, hızlı menü</b><span data-tr="Ana sayfada bir kişiye yukarı kaydır: mesaj, arama, WhatsApp mesajı, WhatsApp araması ve görüntülü arama fotoğrafın etrafında açılır. Parmağını birine götürüp bırakman yeter. İstersen Ayarlar&#x27;dan kapatırsın." data-en="Swipe up on a person on the home page: message, call, WhatsApp chat, WhatsApp call and video call open around their photo. Slide to one and let go. You can turn it off in Settings.">Ana sayfada bir kişiye yukarı kaydır: mesaj, arama, WhatsApp mesajı, WhatsApp araması ve görüntülü arama fotoğrafın etrafında açılır. Parmağını birine götürüp bırakman yeter. İstersen Ayarlar&#x27;dan kapatırsın.</span></figcaption></figure>
+    <figure><img data-shot="10-widgets" src="assets/shots/tr-10-widgets.jpg" alt="" width="900" height="515" loading="lazy"><figcaption><b data-tr="Ana ekran widget&#x27;ları" data-en="Home screen widgets">Ana ekran widget&#x27;ları</b><span data-tr="Favorilerin ya da en çok konuştukların bir widget&#x27;ta, tek kişilik widget da var. Dokununca arar, WhatsApp&#x27;ı açar, profili ya da aynı hızlı menüyü gösterir; seçim senin." data-en="Your favourites or the people you talk to most in a widget, and a one-person widget too. A tap calls, opens WhatsApp, the profile or the same quick menu; you choose.">Favorilerin ya da en çok konuştukların bir widget&#x27;ta, tek kişilik widget da var. Dokununca arar, WhatsApp&#x27;ı açar, profili ya da aynı hızlı menüyü gösterir; seçim senin.</span></figcaption></figure>
+    <figure><img data-shot="2-contact" src="assets/shots/tr-2-contact.jpg" alt="" width="900" height="492" loading="lazy"><figcaption><b data-tr="Kişi sayfası ve düzenleme" data-en="A contact&#x27;s page and editor">Kişi sayfası ve düzenleme</b><span data-tr="Google Kişiler&#x27;in tüm alanları; kaydederken hangi hesaba gideceğini sen seçersin." data-en="Every Google Contacts field; you choose which account a contact is saved to.">Google Kişiler&#x27;in tüm alanları; kaydederken hangi hesaba gideceğini sen seçersin.</span></figcaption></figure>
+    <figure><img data-shot="11-contact-more" src="assets/shots/tr-11-contact-more.jpg" alt="" width="900" height="1438" loading="lazy"><figcaption><b data-tr="Kişiye özel zil sesi ve QR kod" data-en="Ringtone per contact and a QR code">Kişiye özel zil sesi ve QR kod</b><span data-tr="Her kişiye ayrı zil sesi ver. Kişiyi QR kodla paylaş: başka bir telefonun kamerası okuyunca rehberine ekler." data-en="Give anyone their own ringtone. Share a contact as a QR code: another phone&#x27;s camera adds it to its contacts.">Her kişiye ayrı zil sesi ver. Kişiyi QR kodla paylaş: başka bir telefonun kamerası okuyunca rehberine ekler.</span></figcaption></figure>
+    <figure><img data-shot="3-labels" src="assets/shots/tr-3-labels.jpg" alt="" width="900" height="911" loading="lazy"><figcaption><b data-tr="Etiketler" data-en="Labels">Etiketler</b><span data-tr="Rehberinde olmayan numaraya kendi etiketini ver; bir dahaki aramada o adla görünür." data-en="Give a number outside your contacts your own label; next time it shows by that name.">Rehberinde olmayan numaraya kendi etiketini ver; bir dahaki aramada o adla görünür.</span></figcaption></figure>
+    <figure><img data-shot="12-manage" src="assets/shots/tr-12-manage.jpg" alt="" width="900" height="1718" loading="lazy"><figcaption><b data-tr="Etiketler, kopyalar, engelliler" data-en="Labels, duplicates, blocked numbers">Etiketler, kopyalar, engelliler</b><span data-tr="Etiketleri tek sayfada yönet. Aynı kişinin kopyalarını bul ve birleştir; hiçbir şey silinmez. Engelli numaralarda ara, listeyi CSV olarak kaydet." data-en="Manage your labels on one page. Find people saved twice and merge them; nothing is deleted. Search your blocked numbers and save the list as CSV.">Etiketleri tek sayfada yönet. Aynı kişinin kopyalarını bul ve birleştir; hiçbir şey silinmez. Engelli numaralarda ara, listeyi CSV olarak kaydet.</span></figcaption></figure>
+    <figure><img data-shot="4-call" src="assets/shots/tr-4-call.jpg" alt="" width="900" height="1268" loading="lazy"><figcaption><b data-tr="Gelen arama ve konuşma" data-en="Incoming call and in a call">Gelen arama ve konuşma</b><span data-tr="Cevaplamak ve reddetmek için kaydır; Bluetooth bağlıyken bile tek dokunuşla hoparlör." data-en="Swipe to answer or decline; the speaker in one tap, even with Bluetooth connected.">Cevaplamak ve reddetmek için kaydır; Bluetooth bağlıyken bile tek dokunuşla hoparlör.</span></figcaption></figure>
+    <figure><img data-shot="13-call-card" src="assets/shots/tr-13-call-card.jpg" alt="" width="900" height="1362" loading="lazy"><figcaption><b data-tr="Arama ekranında kişi kartı" data-en="The contact card on the call screen">Arama ekranında kişi kartı</b><span data-tr="Numaraları en üstte, arayan numara beyaz; altında iş, e-posta, doğum günü, etiket ve web sitesi. Karta dokununca adres ve not da açılır. Konuşurken tuş takımı yazdığını gösterir ve kopyalar." data-en="Their numbers at the top, the one calling in white; work, e-mail, birthday, labels and website below. Tap the card for the address and note too. In a call, the keypad shows what you type and copies it.">Numaraları en üstte, arayan numara beyaz; altında iş, e-posta, doğum günü, etiket ve web sitesi. Karta dokununca adres ve not da açılır. Konuşurken tuş takımı yazdığını gösterir ve kopyalar.</span></figcaption></figure>
+    <figure><img data-shot="5-pill" src="assets/shots/tr-5-pill.jpg" alt="" width="900" height="1200" loading="lazy"><figcaption><b data-tr="Arama hapı" data-en="The call pill">Arama hapı</b><span data-tr="Başka uygulamadayken arama ekranın kenarında durur: gelen arama ya da konuşma, yatay ya da dikey." data-en="In another app, the call waits at the edge of the screen: ringing or talking, side by side or upright.">Başka uygulamadayken arama ekranın kenarında durur: gelen arama ya da konuşma, yatay ya da dikey.</span></figcaption></figure>
+    <figure><img data-shot="6-spam" src="assets/shots/tr-6-spam.jpg" alt="" width="900" height="1207" loading="lazy"><figcaption><b data-tr="Spam&#x27;e karşı" data-en="Against spam">Spam&#x27;e karşı</b><span data-tr="Bilinmeyen numarada spam uyarısı, tek dokunuşla bildir ve kapat, arama sonunda tek soru." data-en="A spam warning for unknown numbers, report and hang up in one tap, one question after the call.">Bilinmeyen numarada spam uyarısı, tek dokunuşla bildir ve kapat, arama sonunda tek soru.</span></figcaption></figure>
+    <figure><img data-shot="8-stats" src="assets/shots/tr-8-stats.jpg" alt="" width="900" height="1702" loading="lazy"><figcaption><b data-tr="İstatistikler ve arama" data-en="Statistics and search">İstatistikler ve arama</b><span data-tr="Haftalık, aylık ve yıllık konuşma süresi; kişilerde ve aramalarda birden arama." data-en="Talk time by week, month and year; search contacts and calls at once.">Haftalık, aylık ve yıllık konuşma süresi; kişilerde ve aramalarda birden arama.</span></figcaption></figure>
+    <figure><img data-shot="7-settings" src="assets/shots/tr-7-settings.jpg" alt="" width="900" height="1215" loading="lazy"><figcaption><b data-tr="Ayarlar" data-en="Settings">Ayarlar</b><span data-tr="Yüzü kapalıyken sessiz çal, WhatsApp aramaları, sola kaydırınca mesaj, hazır SMS yanıtları." data-en="Silent face down, WhatsApp calls, swipe left to message, quick SMS replies.">Yüzü kapalıyken sessiz çal, WhatsApp aramaları, sola kaydırınca mesaj, hazır SMS yanıtları.</span></figcaption></figure>
+    <figure><img data-shot="14-settings-more" src="assets/shots/tr-14-settings-more.jpg" alt="" width="900" height="1658" loading="lazy"><figcaption><b data-tr="Görünüm, dil ve arama sesleri" data-en="Look, language and call sounds">Görünüm, dil ve arama sesleri</b><span data-tr="Açık, koyu ya da sistem teması ve dört dil. Ses tuşuyla reddet, bağlanınca ve bitince kısa bir ton; Rahatsız Etmeyin açıkken kimin arayabileceği de burada." data-en="Light, dark or system theme and four languages. Decline with a volume key, a short tone when a call connects and ends; who can still ring in Do Not Disturb is shown here too.">Açık, koyu ya da sistem teması ve dört dil. Ses tuşuyla reddet, bağlanınca ve bitince kısa bir ton; Rahatsız Etmeyin açıkken kimin arayabileceği de burada.</span></figcaption></figure>
+  </section>
 
   <h2 data-tr="Özellikler" data-en="Features">Özellikler</h2>
   <section class="features">
@@ -198,9 +218,7 @@
   </footer>
 </main>
 <script>
-  const names = ['1-home', '2-contact', '3-labels', '4-call', '5-pill', '6-spam', '7-settings', '8-stats'];
   const button = document.getElementById("lang");
-  const shots = document.getElementById("shots");
   const tour = document.getElementById("tour");
   function show(lang) {
     document.documentElement.lang = lang;
@@ -211,13 +229,8 @@
       tour.poster = `assets/${film}-poster.jpg`;
       tour.src = `assets/${film}.mp4`;
     }
-    shots.replaceChildren(...names.map(name => {
-      const image = new Image(540, 960);
-      image.src = `assets/shots/${lang}-${name}.jpg`;
-      image.alt = "";
-      image.loading = "lazy";
-      return image;
-    }));
+    // The pictures carry no text of their own; each language has its own captures.
+    document.querySelectorAll("img[data-shot]").forEach(image => { image.src = `assets/shots/${lang}-${image.dataset.shot}.jpg`; });
     button.onclick = () => show(lang === "tr" ? "en" : "tr");
   }
   // The browser's own language; Turkish for Turkish, English for everything else.

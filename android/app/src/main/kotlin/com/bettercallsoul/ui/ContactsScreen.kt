@@ -595,6 +595,14 @@ fun ContactDetailScreen(contactId: Long, onCall: (String) -> Unit, onOpen: (Rout
                                 Text(account, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
                             }
                         }
+                        // A message first, then the calls: the chat with this WhatsApp number.
+                        if (account.isNotEmpty()) {
+                            IconButton(onClick = {
+                                if (!openWhatsAppChat(context, account)) Toast.makeText(context, R.string.whatsapp_missing, Toast.LENGTH_SHORT).show()
+                            }) {
+                                Icon(Icons.AutoMirrored.Filled.Message, stringResource(R.string.widget_action_whatsapp_message), tint = WhatsAppGreen)
+                            }
+                        }
                         actions.distinctBy { it.kind }.sortedBy { it.kind }.forEach { action ->
                             IconButton(onClick = { openWhatsApp(context, action) }) {
                                 Icon(

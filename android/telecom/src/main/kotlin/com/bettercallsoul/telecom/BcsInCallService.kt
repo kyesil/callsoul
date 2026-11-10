@@ -82,9 +82,13 @@ class BcsInCallService : InCallService() {
         }
         scope.launch {
             // Held here rather than in the call screen, so the screen also goes dark for a call
-            // answered from the pill or the notification while another app is open.
-            combine(CallManager.call, CallManager.audio, CallManager.keypadOpen) { call, audio, keypad ->
-                call != null && call.phase in EAR_PHASES && audio.routeKnown && audio.routeType == AudioRouteType.Earpiece && !keypad
+            // answered from the pill or the notification while another app is open. It stays held with
+            // the keypad open too: the screen is only dark at the ear, and a menu's digits are typed
+            // and then talked over with the phone back at the ear. On the speaker as well, so a phone
+            // held to the face or put in a pocket doesn't take touches.
+            combine(CallManager.call, CallManager.audio) { call, audio ->
+                call != null && call.phase in EAR_PHASES && audio.routeKnown &&
+                    (audio.routeType == AudioRouteType.Earpiece || audio.routeType == AudioRouteType.Speaker)
             }.distinctUntilChanged().collect(::holdProximity)
         }
     }

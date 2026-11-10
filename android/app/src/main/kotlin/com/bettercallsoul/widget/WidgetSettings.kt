@@ -5,8 +5,8 @@ import android.content.ComponentName
 import android.content.Context
 import androidx.core.content.edit
 
-/** What a tap on a person in a widget does. */
-enum class WidgetAction { Call, WhatsAppCall, WhatsAppMessage, Profile }
+/** What a tap on a person in a widget does; [Menu] opens the actions around their photo. */
+enum class WidgetAction { Call, WhatsAppCall, WhatsAppMessage, Profile, Menu }
 
 /** Whom the people widget shows. */
 enum class WidgetSource { Favorites, MostTalked }

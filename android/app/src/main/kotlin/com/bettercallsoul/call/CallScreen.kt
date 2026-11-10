@@ -1,5 +1,19 @@
 package com.bettercallsoul.call
 
+import com.bettercallsoul.ui.formatContactDate
+import com.bettercallsoul.calllog.birthdayOf
+import androidx.compose.material.icons.outlined.Notes
+import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material.icons.outlined.DialerSip
+import androidx.compose.material.icons.outlined.People
+import androidx.compose.material.icons.outlined.Event
+import androidx.compose.material.icons.outlined.Place
+import androidx.compose.material.icons.outlined.Badge
+import androidx.compose.material.icons.outlined.Phone
+import androidx.compose.material.icons.outlined.Public
+import androidx.compose.material.icons.outlined.Cake
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Work
 import com.bettercallsoul.ui.copyText
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -45,6 +59,7 @@ import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -101,7 +116,6 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.foundation.Canvas
 import androidx.compose.material3.IconButton
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -401,47 +415,87 @@ private fun SwipeCallButton(
     }
 }
 
+/** One line of a contact's card on the call screen: what it is, as an icon, and the value; [bright] for the number calling. */
+private class ExtraLine(val icon: ImageVector, val text: String, val bright: Boolean = false)
+
+/** A saved contact's card split in two: what the call screen always shows, and the rest behind a tap. */
+private class CallerCard(val main: List<ExtraLine>, val more: List<ExtraLine>)
+
 /**
- * The rest of a saved contact's card (other numbers, e-mail, work, address, note), faint and
- * scrollable in the free space under the name. Empty for numbers outside the contacts.
+ * A saved contact's card, scrollable in the free space under the name: their numbers first, the one
+ * calling in white, then faint work, e-mail, birthday, labels and website. A tap on the area shows
+ * the rest (addresses, notes and such), the next hides it. Empty for numbers outside the contacts.
  */
 @Composable
 private fun CallerExtras(caller: CallerInfo, modifier: Modifier) {
     val context = LocalContext.current
     val contactId = caller.contactId
-    var lines by remember(contactId) { mutableStateOf(emptyList<String>()) }
+    var card by remember(contactId) { mutableStateOf<CallerCard?>(null) }
+    var open by rememberSaveable(contactId) { mutableStateOf(false) }
     LaunchedEffect(contactId, caller.number) {
         if (contactId == null) return@LaunchedEffect
         val detail = context.container.contacts.detail(contactId) ?: return@LaunchedEffect
         val calling = caller.number.filter(Char::isDigit).takeLast(10)
-        lines = buildList {
-            detail.phones
-                .filter { it.number.filter(Char::isDigit).takeLast(10) != calling }
-                .forEach { add(listOfNotNull(it.label, it.number).joinToString(" · ")) }
-            addAll(detail.emails.map { it.value })
+        val birthday = detail.events.firstOrNull { birthdayOf(it.value) == detail.birthday && detail.birthday != null }
+        val main = buildList {
+            detail.phones.forEach {
+                val ringing = it.number.filter(Char::isDigit).takeLast(10) == calling
+                add(ExtraLine(Icons.Outlined.Phone, listOfNotNull(it.label, it.number).joinToString(" · "), bright = ringing))
+            }
             // Company and title already sit under the name; only what they leave out goes here.
             val work = listOfNotNull(detail.company, detail.jobTitle, detail.department).joinToString(" · ")
             val shown = caller.subtitle
             val rest = if (shown != null && work.startsWith(shown)) work.removePrefix(shown).removePrefix(" · ") else work
-            rest.ifEmpty { null }?.let(::add)
-            addAll(detail.addresses.map { it.value })
-            detail.note?.let(::add)
-        }.filter { it != caller.subtitle }.distinct()
-    }
-    Box(modifier) {
-        if (lines.isNotEmpty()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .fadingEdges()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 32.dp, vertical = 20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                lines.forEach { Text(it, color = Soft.copy(alpha = 0.55f), fontSize = 15.sp, textAlign = TextAlign.Center) }
-            }
+            if (rest.isNotEmpty() && rest != shown) add(ExtraLine(Icons.Outlined.Work, rest))
+            detail.emails.forEach { add(ExtraLine(Icons.Outlined.Email, it.value)) }
+            birthday?.let { add(ExtraLine(Icons.Outlined.Cake, formatContactDate(context, it.value))) }
+            if (detail.labels.isNotEmpty()) add(ExtraLine(Icons.AutoMirrored.Outlined.Label, detail.labels.joinToString(" · ")))
+            detail.websites.forEach { add(ExtraLine(Icons.Outlined.Public, it.value)) }
         }
+        val more = buildList {
+            detail.nickname?.let { add(ExtraLine(Icons.Outlined.Badge, it)) }
+            detail.addresses.forEach { add(ExtraLine(Icons.Outlined.Place, it.value)) }
+            detail.events.filter { it != birthday }.forEach {
+                add(ExtraLine(Icons.Outlined.Event, "${it.label} · ${formatContactDate(context, it.value)}"))
+            }
+            detail.relations.forEach { add(ExtraLine(Icons.Outlined.People, "${it.label} · ${it.value}")) }
+            detail.sips.forEach { add(ExtraLine(Icons.Outlined.DialerSip, it.value)) }
+            detail.customFields.forEach { add(ExtraLine(Icons.Outlined.Tune, "${it.label} · ${it.value}")) }
+            detail.note?.let { add(ExtraLine(Icons.Outlined.Notes, it)) }
+        }
+        card = CallerCard(main.distinctBy { it.text }, more.distinctBy { it.text })
+    }
+    val shown = card ?: return Box(modifier)
+    if (shown.main.isEmpty() && shown.more.isEmpty()) return Box(modifier)
+    // The whole area is the toggle, without a ripple: the rest of the card shows or hides on a tap.
+    val taps = remember { MutableInteractionSource() }
+    Box(
+        modifier.then(
+            if (shown.more.isEmpty()) Modifier
+            else Modifier.clickable(interactionSource = taps, indication = null) { open = !open },
+        ),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .fadingEdges()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 32.dp, vertical = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(5.dp),
+        ) {
+            shown.main.forEach { ExtraRow(it, if (it.bright) Color.White else Soft.copy(alpha = 0.55f)) }
+            if (open) shown.more.forEach { ExtraRow(it, Soft.copy(alpha = 0.55f)) }
+        }
+    }
+}
+
+@Composable
+private fun ExtraRow(line: ExtraLine, color: Color) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(line.icon, contentDescription = null, tint = color, modifier = Modifier.size(16.dp))
+        Spacer(Modifier.width(8.dp))
+        Text(line.text, color = color, fontSize = 15.sp, textAlign = TextAlign.Start, modifier = Modifier.weight(1f, fill = false))
     }
 }
 
@@ -500,9 +554,6 @@ private fun BoxScope.OngoingCall(state: CallUiState) {
     // The digits sent during this call, shown over the keys so a code or extension can be read back and copied.
     var typed by rememberSaveable { mutableStateOf("") }
     BackHandler(enabled = showKeypad) { showKeypad = false }
-    // The proximity lock lets go while the keypad is open, so the screen stays usable for digits.
-    LaunchedEffect(showKeypad) { CallManager.setKeypadOpen(showKeypad) }
-    DisposableEffect(Unit) { onDispose { CallManager.setKeypadOpen(false) } }
     var pickBluetooth by remember { mutableStateOf(false) }
     val status = when (state.phase) {
         CallPhase.Dialing -> stringResource(R.string.call_dialing)
@@ -554,13 +605,16 @@ private fun BoxScope.OngoingCall(state: CallUiState) {
                 )
             }
             Spacer(Modifier.height(16.dp))
-            // With the keypad open, the way back to the call sits just left of the end button.
+            // With the keypad open, the way back to the call sits just left of the end button and the
+            // speaker just right of it, so a menu can be listened to on the speaker while typing.
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
                     if (showKeypad) BackToCall { showKeypad = false }
                 }
                 CircleButton(Icons.Filled.CallEnd, R.string.call_end, Color.White, EndRed) { CallManager.hangUp() }
-                Spacer(Modifier.weight(1f))
+                Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    if (showKeypad) KeypadSpeaker(audio.speakerOn, CallManager::toggleSpeaker)
+                }
             }
         }
     }
@@ -640,6 +694,26 @@ private fun BackToCall(onClick: () -> Unit) {
         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color.White, modifier = Modifier.size(26.dp))
         Spacer(Modifier.height(4.dp))
         Text(stringResource(R.string.call_back_to_call), color = Color.White, fontSize = 12.sp, textAlign = TextAlign.Center, maxLines = 2)
+    }
+}
+
+/** The speaker beside the end button while the keypad is open, an icon alone, lit when the call is on the speaker. */
+@Composable
+private fun KeypadSpeaker(on: Boolean, onClick: () -> Unit) {
+    Box(
+        Modifier
+            .size(52.dp)
+            .clip(CircleShape)
+            .background(if (on) Color.White else Color.Transparent)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            Icons.AutoMirrored.Filled.VolumeUp,
+            contentDescription = stringResource(R.string.call_speaker),
+            tint = if (on) Color.Black else Color.White,
+            modifier = Modifier.size(28.dp),
+        )
     }
 }
 

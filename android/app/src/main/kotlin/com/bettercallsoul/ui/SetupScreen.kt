@@ -21,8 +21,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bettercallsoul.R
 
+/**
+ * First start. Play's policy for call log access wants the default-app question before any
+ * permission prompt, so the role comes first and the permissions only once it is held.
+ */
 @Composable
-fun SetupScreen(onRequestPermissions: () -> Unit) {
+fun SetupScreen(
+    isDefaultDialer: Boolean,
+    roleDeclined: Boolean,
+    onRequestRole: () -> Unit,
+    onOpenDefaultApps: () -> Unit,
+    onRequestPermissions: () -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -39,13 +49,19 @@ fun SetupScreen(onRequestPermissions: () -> Unit) {
         )
         Spacer(Modifier.height(6.dp))
         Text(
-            stringResource(R.string.setup_body),
+            stringResource(if (isDefaultDialer) R.string.setup_body else R.string.setup_role_body),
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.height(16.dp))
-        Button(onClick = onRequestPermissions) {
-            Text(stringResource(R.string.setup_permissions))
+        if (isDefaultDialer) {
+            Button(onClick = onRequestPermissions) { Text(stringResource(R.string.setup_permissions)) }
+        } else {
+            Button(onClick = onRequestRole) { Text(stringResource(R.string.setup_default_action)) }
+            // Turned down twice, the system stops asking; its own page still can.
+            if (roleDeclined) {
+                TextButton(onClick = onOpenDefaultApps) { Text(stringResource(R.string.setup_role_settings)) }
+            }
         }
     }
 }
@@ -58,6 +74,18 @@ fun DefaultPhonePrompt(onAccept: () -> Unit, onDismiss: () -> Unit) {
         title = { Text(stringResource(R.string.setup_default_title)) },
         text = { Text(stringResource(R.string.setup_default_body)) },
         confirmButton = { TextButton(onClick = onAccept) { Text(stringResource(R.string.setup_default_action)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_skip)) } },
+    )
+}
+
+/** After the phone role: the system's own question for links, explained before it shows. */
+@Composable
+fun TelLinksPrompt(onAccept: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.tel_links_title)) },
+        text = { Text(stringResource(R.string.tel_links_body)) },
+        confirmButton = { TextButton(onClick = onAccept) { Text(stringResource(R.string.tel_links_action)) } },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_skip)) } },
     )
 }

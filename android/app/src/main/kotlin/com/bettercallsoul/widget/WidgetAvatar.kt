@@ -72,6 +72,7 @@ private fun badgeIcon(action: WidgetAction): Int = when (action) {
     WidgetAction.Call, WidgetAction.WhatsAppCall -> R.drawable.ic_widget_call
     WidgetAction.WhatsAppMessage -> R.drawable.ic_widget_message
     WidgetAction.Profile -> R.drawable.ic_widget_person
+    WidgetAction.Menu -> R.drawable.ic_widget_menu
 }
 
 private val WHATSAPP_GREEN = Color.rgb(0x25, 0xD3, 0x66)

@@ -399,7 +399,7 @@
     <string name="tone_end_title">Tone when a call ends</string>
     <string name="tone_end_body">Two short beeps when the call ends</string>
     <string name="key_decline_title">Volume key declines a call</string>
-    <string name="key_decline_body">While a call rings, pressing a volume key (or the power key) turns it down instead of only quieting it. Android doesn\'t tell apps which key was pressed, so volume up can\'t answer.</string>
+    <string name="key_decline_body">While a call rings, pressing a volume key declines it instead of only quieting it. The power key still only quiets it. Android doesn\'t tell apps which volume key was pressed, so volume up can\'t answer.</string>
     <string name="dup_title">Duplicate contacts</string>
     <string name="dup_body">Find people saved more than once and merge them</string>
     <string name="dup_note">Merging links the copies into one contact on this phone. Nothing is deleted.</string>
@@ -432,4 +432,25 @@
     <string name="widget_pick_person">Choose a person</string>
     <string name="widget_add">Done</string>
     <string name="widget_empty">No one here yet</string>
+    <string name="quick_whatsapp_message">WhatsApp chat</string>
+    <string name="quick_whatsapp_call">WhatsApp call</string>
+    <string name="quick_whatsapp_video">Video call</string>
+    <string name="widget_action_menu">Menu</string>
+    <string name="blocked_count">%1$d numbers</string>
+    <string name="blocked_search_hint">Search blocked numbers</string>
+    <string name="blocked_export">Save as CSV</string>
+    <string name="blocked_exported">Saved %1$d numbers</string>
+    <string name="blocked_export_failed">Couldn\'t save the file</string>
+    <string name="settings_quick_menu_title">Swipe up on people</string>
+    <string name="settings_quick_menu_body">On the home screen, a quick swipe up on a favourite or a most talked person opens message, call and WhatsApp actions around their photo.</string>
+    <string name="settings_backup_last">Last backup: %1$s</string>
+    <string name="settings_backup_never">The phone hasn\'t backed up the app yet. Either backup is off, or it hasn\'t run: Android backs apps up about once a day while the phone charges on Wi-Fi.</string>
+    <string name="tel_links_title">Links to numbers</string>
+    <string name="tel_links_body">Links to phone numbers in other apps still ask which app to open. Pick Better Call Soul and “Always” in the list that opens.</string>
+    <string name="tel_links_action">Choose</string>
+    <string name="tel_links_row">Links to numbers</string>
+    <string name="tel_links_asks">Ask every time</string>
+    <string name="tel_links_other">Open in %1$s; there, under “Open by default”, clear its defaults</string>
+    <string name="setup_role_body">Better Call Soul is a phone app. Make it the default phone app first; then it asks for permission to show your calls, recents and contacts.</string>
+    <string name="setup_role_settings">Open default apps</string>
 </resources>

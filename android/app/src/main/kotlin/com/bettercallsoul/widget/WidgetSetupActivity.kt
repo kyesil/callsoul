@@ -147,6 +147,7 @@ private fun actionLabel(action: WidgetAction): Int = when (action) {
     WidgetAction.WhatsAppCall -> R.string.widget_action_whatsapp_call
     WidgetAction.WhatsAppMessage -> R.string.widget_action_whatsapp_message
     WidgetAction.Profile -> R.string.widget_action_profile
+    WidgetAction.Menu -> R.string.widget_action_menu
 }
 
 @Composable

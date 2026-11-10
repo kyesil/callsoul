@@ -462,7 +462,7 @@
     <string name="tone_end_title">نغمة عند انتهاء المكالمة</string>
     <string name="tone_end_body">صفارتان قصيرتان عند انتهاء المكالمة</string>
     <string name="key_decline_title">زر الصوت يرفض المكالمة</string>
-    <string name="key_decline_body">أثناء رنين المكالمة، الضغط على زر الصوت (أو زر التشغيل) يرفضها بدل أن يكتم الرنين فقط. لا يخبر Android التطبيقات بالزر المضغوط، لذا لا يمكن الرد بزر رفع الصوت.</string>
+    <string name="key_decline_body">أثناء رنين المكالمة، الضغط على زر الصوت يرفضها بدل أن يكتم الرنين فقط. زر التشغيل يكتم الرنين فقط كالمعتاد. لا يخبر Android التطبيقات بزر الصوت المضغوط، لذا لا يمكن الرد بزر رفع الصوت.</string>
     <string name="dup_title">جهات الاتصال المكررة</string>
     <string name="dup_body">اعثر على الأشخاص المحفوظين أكثر من مرة وادمجهم</string>
     <string name="dup_note">الدمج يربط النسخ في جهة اتصال واحدة على هذا الهاتف. لا يُحذف شيء.</string>
@@ -499,4 +499,25 @@
     <string name="widget_pick_person">اختر شخصًا</string>
     <string name="widget_add">تم</string>
     <string name="widget_empty">لا أحد هنا بعد</string>
+    <string name="quick_whatsapp_message">دردشة واتساب</string>
+    <string name="quick_whatsapp_call">اتصال واتساب</string>
+    <string name="quick_whatsapp_video">مكالمة فيديو</string>
+    <string name="widget_action_menu">قائمة</string>
+    <string name="blocked_count">عدد الأرقام: %1$d</string>
+    <string name="blocked_search_hint">ابحث في الأرقام المحظورة</string>
+    <string name="blocked_export">حفظ كملف CSV</string>
+    <string name="blocked_exported">تم حفظ %1$d من الأرقام</string>
+    <string name="blocked_export_failed">تعذّر حفظ الملف</string>
+    <string name="settings_quick_menu_title">السحب لأعلى على الأشخاص</string>
+    <string name="settings_quick_menu_body">في الشاشة الرئيسية، السحب السريع لأعلى على شخص مفضل أو من الأكثر تواصلاً يفتح حول صورته الرسالة والاتصال وإجراءات واتساب.</string>
+    <string name="settings_backup_last">آخر نسخة احتياطية: %1$s</string>
+    <string name="settings_backup_never">لم ينسخ الهاتف التطبيق احتياطيًا بعد. إما أن النسخ الاحتياطي متوقف، أو لم يعمل بعد: يقوم Android بالنسخ مرة يوميًا تقريبًا أثناء شحن الهاتف واتصاله بشبكة Wi-Fi.</string>
+    <string name="tel_links_title">روابط الأرقام</string>
+    <string name="tel_links_body">ما زالت روابط أرقام الهاتف في التطبيقات الأخرى تسأل عن التطبيق الذي يفتحها. اختر Better Call Soul ثم «دائمًا» في القائمة التي تظهر.</string>
+    <string name="tel_links_action">اختيار</string>
+    <string name="tel_links_row">روابط الأرقام</string>
+    <string name="tel_links_asks">يسأل في كل مرة</string>
+    <string name="tel_links_other">تُفتح في %1$s؛ هناك امسح الإعدادات الافتراضية من «الفتح تلقائيًا»</string>
+    <string name="setup_role_body">Better Call Soul تطبيق هاتف. عيّنه أولًا تطبيق الهاتف الافتراضي، ثم يطلب الإذن لعرض مكالماتك وسجل المكالمات وجهات الاتصال.</string>
+    <string name="setup_role_settings">فتح التطبيقات الافتراضية</string>
 </resources>

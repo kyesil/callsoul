@@ -10,9 +10,19 @@
     <uses-permission android:name="android.permission.WRITE_CALL_LOG" />
     <uses-permission android:name="android.permission.READ_PHONE_NUMBERS" />
 
+    <!-- To see which app opens tel: links, so the app can tell whether it is the one. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="tel" />
+        </intent>
+    </queries>
+
     <application
         android:name=".BcsApp"
         android:allowBackup="true"
+        android:backupAgent=".BackupWatch"
+        android:fullBackupOnly="true"
         android:fullBackupContent="@xml/backup_rules"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:icon="@mipmap/ic_launcher"
@@ -44,16 +54,26 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="tel" />
             </intent-filter>
+            <!-- A contact opened from elsewhere (launcher search, other apps) opens on their page here. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.provider.action.QUICK_CONTACT" />
+                <action android:name="com.android.contacts.action.QUICK_CONTACT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.item/contact" />
+                <data android:mimeType="vnd.android.cursor.item/raw_contact" />
+                <data android:mimeType="vnd.android.cursor.item/person" />
+            </intent-filter>
         </activity>
 
-        <!-- A tap on a widget: does the action and closes, showing nothing. -->
+        <!-- A tap on a widget: does the action and closes, showing nothing but the menu. -->
         <activity
             android:name=".widget.WidgetActionActivity"
             android:excludeFromRecents="true"
             android:exported="false"
             android:noHistory="true"
             android:taskAffinity=""
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+            android:theme="@style/Theme.BetterCallSoul.Widget" />
 
         <activity
             android:name=".widget.WidgetSetupActivity"

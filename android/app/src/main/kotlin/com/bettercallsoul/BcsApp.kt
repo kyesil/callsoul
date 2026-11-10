@@ -226,6 +226,11 @@ class AppContainer(context: Context) {
         get() = prefs.getBoolean(KEY_DEFAULT_ASKED, false)
         set(value) = prefs.edit { putBoolean(KEY_DEFAULT_ASKED, value) }
 
+    /** Whether the question about tel: links was put once, after the phone role came. */
+    var telLinksAsked: Boolean
+        get() = prefs.getBoolean(KEY_TEL_LINKS_ASKED, false)
+        set(value) = prefs.edit { putBoolean(KEY_TEL_LINKS_ASKED, value) }
+
     /** A call arriving on a phone lying on its face rings silently, with the screen on. */
     var silentWhenFaceDown: Boolean
         get() = prefs.getBoolean(KEY_FACE_DOWN, false)
@@ -269,6 +274,15 @@ class AppContainer(context: Context) {
     fun setAnimations(enabled: Boolean) {
         animationsEnabled = enabled
         prefs.edit { putBoolean(KEY_ANIMATIONS, enabled) }
+    }
+
+    /** The swipe-up menu on the home screen's people; Compose state, so the switch takes effect at once. */
+    var quickMenuEnabled by mutableStateOf(prefs.getBoolean(KEY_QUICK_MENU, true))
+        private set
+
+    fun setQuickMenu(enabled: Boolean) {
+        quickMenuEnabled = enabled
+        prefs.edit { putBoolean(KEY_QUICK_MENU, enabled) }
     }
 
     /**
@@ -335,6 +349,7 @@ class AppContainer(context: Context) {
     private companion object {
         const val KEY_LOOKUP = "spam_lookup"
         const val KEY_DEFAULT_ASKED = "default_phone_asked"
+        const val KEY_TEL_LINKS_ASKED = "tel_links_asked"
         const val KEY_FACE_DOWN = "silent_face_down"
         const val KEY_TONE_CONNECT = "tone_on_connect"
         const val KEY_THEME = "theme"
@@ -342,6 +357,7 @@ class AppContainer(context: Context) {
         const val KEY_DECLINE_ON_KEY = "decline_on_key"
         const val KEY_KEPT_APART = "duplicates_kept_apart"
         const val KEY_ANIMATIONS = "animations"
+        const val KEY_QUICK_MENU = "quick_menu"
         const val KEY_DEBUG_LOG = "debug_log"
         const val KEY_OWN_NUMBER = "own_number_seeded"
         const val KEY_DEVICE_ID = "device_id"

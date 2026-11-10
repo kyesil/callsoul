@@ -9,4 +9,14 @@
     <style name="Theme.BetterCallSoul.Call">
         <item name="android:windowBackground">@color/call_background</item>
     </style>
+    <!-- A widget's tap: nothing of its own but, for the menu, a layer over the home screen, bars included. -->
+    <style name="Theme.BetterCallSoul.Widget" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
+    </style>
 </resources>
