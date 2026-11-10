@@ -450,6 +450,10 @@
     <string name="tel_links_row">Numara bağlantıları</string>
     <string name="tel_links_asks">Her seferinde soruyor</string>
     <string name="tel_links_other">%1$s ile açılıyor; orada “Varsayılan olarak aç” altından varsayılanları temizle</string>
+    <string name="lock_calls_title">Kilit ekranında aramalar</string>
+    <string name="lock_calls_body">Gelen arama ekranı uyandırır ve kilit ekranının üstünde açılır. Kapalıyken kilitli telefona gelen arama yalnızca bildirim olarak görünür.</string>
+    <string name="lock_calls_prompt">Android bu uygulamaya aramaları kilit ekranının üstünde açma izni vermemiş; ekran kapalıyken biri aradığında ekran uyanmaz. Açılan sayfada Better Call Soul için izni açın.</string>
+    <string name="lock_calls_action">Aç</string>
     <string name="setup_role_body">Better Call Soul bir telefon uygulaması. Önce varsayılan telefon uygulaması yap; ardından aramaları, son aramaları ve rehberini göstermek için izin ister.</string>
     <string name="setup_role_settings">Varsayılan uygulamaları aç</string>
 </resources>

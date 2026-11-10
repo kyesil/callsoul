@@ -33,6 +33,7 @@ import com.bettercallsoul.ui.BcsTheme
 import com.bettercallsoul.ui.DefaultPhonePrompt
 import com.bettercallsoul.ui.MainScreen
 import com.bettercallsoul.ui.SetupScreen
+import com.bettercallsoul.ui.LockCallsPrompt
 import com.bettercallsoul.ui.TelLinksPrompt
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
@@ -52,6 +53,9 @@ class MainActivity : ComponentActivity() {
 
     /** Once the role is here: links from other apps still ask which app, until one is picked. */
     private var askForTelLinks by mutableStateOf(false)
+
+    /** Once the role is here: without this, a call doesn't wake a sleeping, locked phone. */
+    private var askForLockCalls by mutableStateOf(false)
 
     /** The role was asked for on the setup screen and not given. */
     private var roleDeclined by mutableStateOf(false)
@@ -80,6 +84,7 @@ class MainActivity : ComponentActivity() {
                 // On the setup screen: with the role, straight on to the permissions.
                 if (isDefaultDialer) requestPermissions.launch(REQUIRED_PERMISSIONS) else roleDeclined = true
             }
+            offerLockCalls()
             offerTelLinks()
         }
 
@@ -96,7 +101,10 @@ class MainActivity : ComponentActivity() {
         isDefaultDialer = holdsDialerRole()
         askForDefault = !container.defaultPhoneAsked
         // Also for those who made it the default before this question existed.
-        if (isDefaultDialer) offerTelLinks()
+        if (isDefaultDialer) {
+            offerLockCalls()
+            offerTelLinks()
+        }
         setContent {
             BcsTheme {
                 if (permissionsGranted) {
@@ -122,7 +130,16 @@ class MainActivity : ComponentActivity() {
                             onDismiss = ::answerDefaultQuestion,
                         )
                     }
-                    if (askForTelLinks) {
+                    // One question at a time; the links one waits behind this.
+                    if (askForLockCalls) {
+                        LockCallsPrompt(
+                            onAccept = {
+                                askForLockCalls = false
+                                LockScreenCalls.open(this)
+                            },
+                            onDismiss = { askForLockCalls = false },
+                        )
+                    } else if (askForTelLinks) {
                         TelLinksPrompt(
                             onAccept = {
                                 askForTelLinks = false
@@ -266,6 +283,13 @@ class MainActivity : ComponentActivity() {
         if (container.telLinksAsked || !holdsDialerRole() || TelLinks.holder(this) == TelLinks.Holder.Us) return
         container.telLinksAsked = true
         askForTelLinks = true
+    }
+
+    /** Asked once only; Settings keeps the way to it after that. */
+    private fun offerLockCalls() {
+        if (container.lockCallsAsked || !holdsDialerRole() || LockScreenCalls.allowed(this)) return
+        container.lockCallsAsked = true
+        askForLockCalls = true
     }
 
     private fun openDefaultApps() {

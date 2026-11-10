@@ -518,6 +518,10 @@
     <string name="tel_links_row">روابط الأرقام</string>
     <string name="tel_links_asks">يسأل في كل مرة</string>
     <string name="tel_links_other">تُفتح في %1$s؛ هناك امسح الإعدادات الافتراضية من «الفتح تلقائيًا»</string>
+    <string name="lock_calls_title">المكالمات على شاشة القفل</string>
+    <string name="lock_calls_body">توقظ المكالمة الواردة الشاشة وتفتح فوق شاشة القفل. بدون ذلك تصل المكالمة إلى الهاتف المقفل كإشعار فقط.</string>
+    <string name="lock_calls_prompt">لم يسمح Android لهذا التطبيق بفتح المكالمات فوق شاشة القفل، لذلك لن توقظ المكالمة الشاشة المطفأة. فعّل ذلك لـ Better Call Soul في الصفحة التي ستفتح.</string>
+    <string name="lock_calls_action">تفعيل</string>
     <string name="setup_role_body">Better Call Soul تطبيق هاتف. عيّنه أولًا تطبيق الهاتف الافتراضي، ثم يطلب الإذن لعرض مكالماتك وسجل المكالمات وجهات الاتصال.</string>
     <string name="setup_role_settings">فتح التطبيقات الافتراضية</string>
 </resources>

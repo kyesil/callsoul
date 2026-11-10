@@ -2,6 +2,7 @@ package com.bettercallsoul.telecom
 
 import com.bettercallsoul.diag.DebugLog
 import android.app.KeyguardManager
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
@@ -113,6 +114,13 @@ class BcsInCallService : InCallService() {
         // On an unlocked phone a ringing call stays a pop-up, so whatever is on screen isn't interrupted.
         val ringing = call.currentState == Call.STATE_RINGING || call.currentState == Call.STATE_SIMULATED_RINGING
         DebugLog.i(TAG, "call screen: ${if (!ringing || !screenInUse()) "opened" else "pop-up only (phone in use)"}")
+        if (ringing) {
+            // Without the full-screen permission a sleeping, locked phone may not light up for the call.
+            val fullScreen = Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE ||
+                getSystemService(NotificationManager::class.java).canUseFullScreenIntent()
+            val awake = getSystemService(PowerManager::class.java).isInteractive
+            DebugLog.i(TAG, "ringing: fullScreen=$fullScreen awake=$awake")
+        }
         if (!ringing || !screenInUse()) {
             // An outgoing call comes up behind the burst on the app; a ringing one keeps the system's opening.
             val opening = if (ringing) 0 else Intent.FLAG_ACTIVITY_NO_ANIMATION

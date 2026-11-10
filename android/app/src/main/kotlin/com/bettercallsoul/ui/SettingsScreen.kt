@@ -99,6 +99,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bettercallsoul.BackupWatch
+import com.bettercallsoul.LockScreenCalls
 import com.bettercallsoul.TelLinks
 import com.bettercallsoul.R
 import androidx.core.net.toUri
@@ -148,8 +149,10 @@ fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBac
     val context = LocalContext.current
     val resources = LocalResources.current
     var overlayAllowed by remember { mutableStateOf(Settings.canDrawOverlays(context)) }
+    var lockCallsAllowed by remember { mutableStateOf(LockScreenCalls.allowed(context)) }
     LifecycleResumeEffect(Unit) {
         overlayAllowed = Settings.canDrawOverlays(context)
+        lockCallsAllowed = LockScreenCalls.allowed(context)
         onPauseOrDispose { }
     }
     var groupName by rememberSaveable { mutableStateOf<String?>(null) }
@@ -158,6 +161,7 @@ fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBac
     BackHandler(enabled = group != null) { groupName = null }
 
     val entries = listOf(
+        SettingEntry(SettingsGroup.Calls, listOf(R.string.lock_calls_title, R.string.lock_calls_body)) { LockCallsSettings(lockCallsAllowed) },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_lookup_title, R.string.settings_lookup_body)) { LookupSettings() },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_face_down_title, R.string.settings_face_down_body)) { FaceDownSettings() },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_replies_title, R.string.settings_replies_body)) { QuickReplySettings() },
@@ -471,6 +475,13 @@ private fun FaceDownSettings() {
         faceDown = it
         app.silentWhenFaceDown = it
     }
+}
+
+/** Only the system page can change this, in either direction. */
+@Composable
+private fun LockCallsSettings(allowed: Boolean) {
+    val context = LocalContext.current
+    SwitchCard(R.string.lock_calls_title, R.string.lock_calls_body, allowed) { LockScreenCalls.open(context) }
 }
 
 /** Only the system page can change this, in either direction. */

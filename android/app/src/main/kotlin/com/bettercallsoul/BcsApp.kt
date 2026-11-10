@@ -231,6 +231,11 @@ class AppContainer(context: Context) {
         get() = prefs.getBoolean(KEY_TEL_LINKS_ASKED, false)
         set(value) = prefs.edit { putBoolean(KEY_TEL_LINKS_ASKED, value) }
 
+    /** Whether the question about calls on the lock screen was put once, after the phone role came. */
+    var lockCallsAsked: Boolean
+        get() = prefs.getBoolean(KEY_LOCK_CALLS_ASKED, false)
+        set(value) = prefs.edit { putBoolean(KEY_LOCK_CALLS_ASKED, value) }
+
     /** A call arriving on a phone lying on its face rings silently, with the screen on. */
     var silentWhenFaceDown: Boolean
         get() = prefs.getBoolean(KEY_FACE_DOWN, false)
@@ -350,6 +355,7 @@ class AppContainer(context: Context) {
         const val KEY_LOOKUP = "spam_lookup"
         const val KEY_DEFAULT_ASKED = "default_phone_asked"
         const val KEY_TEL_LINKS_ASKED = "tel_links_asked"
+        const val KEY_LOCK_CALLS_ASKED = "lock_calls_asked"
         const val KEY_FACE_DOWN = "silent_face_down"
         const val KEY_TONE_CONNECT = "tone_on_connect"
         const val KEY_THEME = "theme"

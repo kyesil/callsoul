@@ -484,6 +484,10 @@
     <string name="tel_links_row">Ссылки на номера</string>
     <string name="tel_links_asks">Каждый раз спрашивает</string>
     <string name="tel_links_other">Открываются в %1$s; там в «Открывать по умолчанию» сбросьте настройки</string>
+    <string name="lock_calls_title">Вызовы на экране блокировки</string>
+    <string name="lock_calls_body">Входящий вызов будит экран и открывается поверх экрана блокировки. Без этого на заблокированном телефоне вызов приходит только уведомлением.</string>
+    <string name="lock_calls_prompt">Android не разрешил приложению открывать вызовы поверх экрана блокировки, поэтому вызов не разбудит погасший экран. Включите это для Better Call Soul на открывшейся странице.</string>
+    <string name="lock_calls_action">Включить</string>
     <string name="setup_role_body">Better Call Soul — приложение для звонков. Сначала сделайте его приложением по умолчанию, затем оно попросит разрешения показывать вызовы, недавние и контакты.</string>
     <string name="setup_role_settings">Открыть приложения по умолчанию</string>
 </resources>

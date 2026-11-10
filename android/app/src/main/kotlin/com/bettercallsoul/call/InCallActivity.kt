@@ -58,6 +58,12 @@ class InCallActivity : ComponentActivity() {
                 }
                 when {
                     active != null -> CallScreen(active)
+                    // Someone in the contacts: there is nothing to ask or tag, so the call just closes.
+                    // A call that failed still stays, for the reason.
+                    finished != null && finished.caller.isContact && !finished.failed -> LaunchedEffect(finished) {
+                        CallManager.dismissEnded()
+                        finish()
+                    }
                     finished != null -> EndedScreen(finished, onClose = {
                         CallManager.dismissEnded()
                         finish()

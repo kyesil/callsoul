@@ -78,6 +78,18 @@ fun DefaultPhonePrompt(onAccept: () -> Unit, onDismiss: () -> Unit) {
     )
 }
 
+/** After the phone role, when Android hasn't let calls open over the lock screen. */
+@Composable
+fun LockCallsPrompt(onAccept: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.lock_calls_title)) },
+        text = { Text(stringResource(R.string.lock_calls_prompt)) },
+        confirmButton = { TextButton(onClick = onAccept) { Text(stringResource(R.string.lock_calls_action)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_skip)) } },
+    )
+}
+
 /** After the phone role: the system's own question for links, explained before it shows. */
 @Composable
 fun TelLinksPrompt(onAccept: () -> Unit, onDismiss: () -> Unit) {

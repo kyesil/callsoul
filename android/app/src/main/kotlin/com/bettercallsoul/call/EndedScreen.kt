@@ -75,7 +75,7 @@ fun EndedScreen(ended: EndedCall, onClose: () -> Unit) {
     }
     LaunchedEffect(asking, interacted, editingTag) {
         if (!asking && !interacted && !editingTag) {
-            delay(if (ended.caller.isContact) 1500 else 4000)
+            delay(4000)
             onClose()
         }
     }

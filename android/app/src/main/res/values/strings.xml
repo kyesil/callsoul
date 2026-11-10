@@ -451,6 +451,10 @@
     <string name="tel_links_row">Links to numbers</string>
     <string name="tel_links_asks">Ask every time</string>
     <string name="tel_links_other">Open in %1$s; there, under “Open by default”, clear its defaults</string>
+    <string name="lock_calls_title">Calls on the lock screen</string>
+    <string name="lock_calls_body">An incoming call wakes the screen and opens over the lock screen. Without it, a call on a locked phone comes only as a notification.</string>
+    <string name="lock_calls_prompt">Android hasn\'t allowed this app to open calls over the lock screen, so a call won\'t wake a sleeping screen. Turn it on for Better Call Soul on the page that opens.</string>
+    <string name="lock_calls_action">Turn on</string>
     <string name="setup_role_body">Better Call Soul is a phone app. Make it the default phone app first; then it asks for permission to show your calls, recents and contacts.</string>
     <string name="setup_role_settings">Open default apps</string>
 </resources>
