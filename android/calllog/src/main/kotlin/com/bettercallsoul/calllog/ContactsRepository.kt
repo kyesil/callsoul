@@ -28,6 +28,9 @@ import com.bettercallsoul.spam.T9
 import kotlinx.coroutines.Dispatchers
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.awaitClose
@@ -46,6 +49,8 @@ data class ContactRow(
     val starred: Boolean,
     /** The favourite's place set by dragging, from 1; 0 or less for one never placed. */
     val pinned: Int = 0,
+    /** What the call screen shows under the name: company and job title, or else the note's first line. */
+    val subtitle: String? = null,
 )
 
 /**
@@ -84,6 +89,9 @@ fun birthdayOf(value: String): MonthDay? {
 
 /** A value with what it is: "Doğum günü", "Eş", "İş". For a date the value is yyyy-MM-dd or --MM-dd. */
 data class DetailItem(val value: String, val label: String)
+
+/** Kinds of account to offer even while Android keeps them hidden: the user picks one to let the app see it. */
+private val ASK_FOR_ACCOUNT = setOf("com.osp.app.signin", "com.microsoft.office.outlook.USER_ACCOUNT")
 
 /** Where contacts come from: an account on the phone, such as a Google account, the SIM or WhatsApp. */
 data class ContactSource(val type: String?, val name: String?, val label: String) {
@@ -181,7 +189,13 @@ class ContactsRepository(context: Context) {
     /** Every contact, those without a number too, re-read when the address book changes. */
     fun observeSearchable(): Flow<List<SearchableContact>> = changes().map { searchable() }.flowOn(Dispatchers.IO)
 
-    private fun changes(): Flow<Unit> = merge(addressBookChanges(), refreshes).conflate()
+    /**
+     * Read at once, then again after the app's own changes and after Android reports one. Those
+     * reports wait for a quiet moment: a move writes hundreds of contacts, and reading the lists
+     * after each would slow it several times over.
+     */
+    @OptIn(FlowPreview::class)
+    private fun changes(): Flow<Unit> = merge(flowOf(Unit), addressBookChanges().debounce(QUIET_MS), refreshes).conflate()
 
     private fun addressBookChanges(): Flow<Unit> = callbackFlow {
         val observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
@@ -191,7 +205,6 @@ class ContactsRepository(context: Context) {
         }
         resolver.registerContentObserver(Contacts.CONTENT_URI, true, observer)
         resolver.registerContentObserver(Profile.CONTENT_URI, true, observer)
-        trySend(Unit)
         awaitClose { resolver.unregisterContentObserver(observer) }
     }
 
@@ -201,10 +214,10 @@ class ContactsRepository(context: Context) {
             Organization.CONTENT_ITEM_TYPE, Nickname.CONTENT_ITEM_TYPE, GroupMembership.CONTENT_ITEM_TYPE,
         )
         val labels = labelTitles()
-        val projection = arrayOf(Data.CONTACT_ID, Data.DISPLAY_NAME_PRIMARY, Data.PHOTO_THUMBNAIL_URI, Data.MIMETYPE, Data.DATA1)
+        val projection = arrayOf(Data.CONTACT_ID, NameOrder.nameColumn, Data.PHOTO_THUMBNAIL_URI, Data.MIMETYPE, Data.DATA1)
         val cursor = resolver.query(
             Data.CONTENT_URI, projection, "${Data.MIMETYPE} IN (${kinds.joinToString { "?" }})", kinds,
-            "${Data.DISPLAY_NAME_PRIMARY} COLLATE LOCALIZED ASC, ${Data.IS_SUPER_PRIMARY} DESC, ${Data._ID} ASC",
+            "${NameOrder.sortColumn} COLLATE LOCALIZED ASC, ${Data.IS_SUPER_PRIMARY} DESC, ${Data._ID} ASC",
         ) ?: return emptyList()
         val contacts = LinkedHashMap<Long, SearchableContact>()
         cursor.use {
@@ -246,18 +259,73 @@ class ContactsRepository(context: Context) {
      */
     fun observeProfile(): Flow<ContactRow?> = changes().map { profile() }.flowOn(Dispatchers.IO)
 
+    /** My card as it is now: the profile, or the contact standing for it; null until one is made. */
+    fun myCard(): ContactRow? = profile()
+
     private fun profile(): ContactRow? = runCatching {
-        val projection = arrayOf(Contacts._ID, Contacts.LOOKUP_KEY, Contacts.DISPLAY_NAME_PRIMARY, Contacts.PHOTO_THUMBNAIL_URI)
+        val projection = arrayOf(Contacts._ID, Contacts.LOOKUP_KEY, NameOrder.nameColumn, Contacts.PHOTO_THUMBNAIL_URI)
         resolver.query(Profile.CONTENT_URI, projection, null, null, null)?.use {
             if (it.moveToFirst()) ContactRow(it.getLong(0), it.getStringOrNull(1).orEmpty(), it.getStringOrNull(2).orEmpty(), it.getStringOrNull(3), false) else null
         }
+    }.getOrNull() ?: myCardContact()
+
+    /**
+     * Samsung keeps the profile from every app but its own, so My card can't be read or written
+     * there. On such a phone My card is an ordinary contact in phone storage, kept by [myCardKey].
+     */
+    val profileHidden: Boolean
+        get() = hiddenProfile ?: run {
+            if (!android.os.Build.MANUFACTURER.equals("samsung", ignoreCase = true)) return false.also { hiddenProfile = it }
+            // Known only once the contacts may be read; until then it is asked again.
+            val rows = runCatching { resolver.query(Profile.CONTENT_RAW_CONTACTS_URI, arrayOf(RawContacts._ID), null, null, null)?.use { it.count } }.getOrNull()
+                ?: return false
+            (rows == 0).also { hiddenProfile = it }
+        }
+
+    @Volatile private var hiddenProfile: Boolean? = null
+
+    /** The lookup key of the contact that stands for My card where the profile is hidden; set by the app. */
+    var myCardKey: () -> String? = { null }
+
+    private fun myCardContact(): ContactRow? {
+        if (!profileHidden) return null
+        val key = myCardKey() ?: return null
+        val projection = arrayOf(Contacts._ID, Contacts.LOOKUP_KEY, NameOrder.nameColumn, Contacts.PHOTO_THUMBNAIL_URI)
+        return runCatching {
+            resolver.query(Uri.withAppendedPath(Contacts.CONTENT_LOOKUP_URI, key), projection, null, null, null)?.use {
+                if (it.moveToFirst()) ContactRow(it.getLong(0), it.getStringOrNull(1).orEmpty(), it.getStringOrNull(2).orEmpty(), it.getStringOrNull(3), false) else null
+            }
+        }.getOrNull()
+    }
+
+    /**
+     * A contact in phone storage named one of [names], the way the app names the contact that stands
+     * for My card; for finding that contact again after a reinstall, when the app has forgotten it.
+     */
+    fun localContactNamed(names: Collection<String>): Long? {
+        if (names.isEmpty()) return null
+        val marks = names.joinToString(",") { "?" }
+        // Phone storage: no account, or the phone maker's own kind of one (Samsung's).
+        val selection = "${RawContacts.DELETED} = 0 AND ${RawContacts.DISPLAY_NAME_PRIMARY} IN ($marks) AND " +
+            "(${RawContacts.ACCOUNT_TYPE} IS NULL OR ${RawContacts.ACCOUNT_TYPE} = ? OR ${RawContacts.ACCOUNT_TYPE} LIKE ?)"
+        val args = names.toTypedArray() + arrayOf("vnd.sec.contact.phone", "%local%")
+        return runCatching {
+            resolver.query(RawContacts.CONTENT_URI, arrayOf(RawContacts.CONTACT_ID), selection, args, "${RawContacts._ID} ASC")
+                ?.use { if (it.moveToFirst()) it.getLong(0) else null }
+        }.getOrNull()
+    }
+
+    /** The lookup key of a contact, for keeping hold of it when its id changes. */
+    fun lookupKeyOf(contactId: Long): String? = runCatching {
+        resolver.query(android.content.ContentUris.withAppendedId(Contacts.CONTENT_URI, contactId), arrayOf(Contacts.LOOKUP_KEY), null, null, null)
+            ?.use { if (it.moveToFirst()) it.getStringOrNull(0) else null }
     }.getOrNull()
 
     /** The contacts whose birthday is today or tomorrow, today's first, re-read when the address book changes. */
     fun observeBirthdays(): Flow<List<Birthday>> = changes().map { birthdays(LocalDate.now()) }.flowOn(Dispatchers.IO)
 
     private fun birthdays(now: LocalDate): List<Birthday> {
-        val projection = arrayOf(Data.CONTACT_ID, Data.DISPLAY_NAME_PRIMARY, Data.PHOTO_THUMBNAIL_URI, Event.START_DATE)
+        val projection = arrayOf(Data.CONTACT_ID, NameOrder.nameColumn, Data.PHOTO_THUMBNAIL_URI, Event.START_DATE)
         val found = resolver.query(
             Data.CONTENT_URI, projection, "${Data.MIMETYPE} = ? AND ${Event.TYPE} = ?",
             arrayOf(Event.CONTENT_ITEM_TYPE, Event.TYPE_BIRTHDAY.toString()), null,
@@ -289,22 +357,44 @@ class ContactsRepository(context: Context) {
 
     private fun list(): List<ContactRow> {
         val projection = arrayOf(
-            Contacts._ID, Contacts.LOOKUP_KEY, Contacts.DISPLAY_NAME_PRIMARY,
+            Contacts._ID, Contacts.LOOKUP_KEY, NameOrder.nameColumn,
             Contacts.PHOTO_THUMBNAIL_URI, Contacts.STARRED, Contacts.PINNED,
         )
         val cursor = resolver.query(
             Contacts.CONTENT_URI, projection, "${Contacts.HAS_PHONE_NUMBER} = 1", null,
-            "${Contacts.SORT_KEY_PRIMARY} COLLATE LOCALIZED ASC",
+            "${NameOrder.sortColumn} COLLATE LOCALIZED ASC",
         ) ?: return emptyList()
+        val subtitles = subtitles()
         return cursor.use {
             buildList {
                 while (it.moveToNext()) {
                     val name = it.getStringOrNull(2) ?: continue
                     if (it.getLong(0) in deleted) continue
-                    add(ContactRow(it.getLong(0), it.getString(1), name, it.getStringOrNull(3), it.getInt(4) == 1, it.getInt(5)))
+                    add(ContactRow(it.getLong(0), it.getString(1), name, it.getStringOrNull(3), it.getInt(4) == 1, it.getInt(5), subtitles[it.getLong(0)]))
                 }
             }
         }
+    }
+
+    /** For every contact at once, the line the call screen puts under its name (see [ContactRow.subtitle]). */
+    private fun subtitles(): Map<Long, String> {
+        val work = HashMap<Long, String>()
+        val notes = HashMap<Long, String>()
+        resolver.query(
+            Data.CONTENT_URI, arrayOf(Data.CONTACT_ID, Data.MIMETYPE, Organization.COMPANY, Organization.TITLE),
+            "${Data.MIMETYPE} IN (?, ?)", arrayOf(Organization.CONTENT_ITEM_TYPE, Note.CONTENT_ITEM_TYPE), null,
+        )?.use {
+            while (it.moveToNext()) {
+                val id = it.getLong(0)
+                if (it.getString(1) == Organization.CONTENT_ITEM_TYPE) {
+                    val line = listOfNotNull(it.clean(2), it.clean(3)).joinToString(" · ")
+                    if (line.isNotEmpty()) work.putIfAbsent(id, line)
+                } else {
+                    it.clean(2)?.lineSequence()?.map(String::trim)?.firstOrNull(String::isNotEmpty)?.let { note -> notes.putIfAbsent(id, note) }
+                }
+            }
+        }
+        return notes + work
     }
 
     /**
@@ -314,10 +404,10 @@ class ContactsRepository(context: Context) {
      */
     suspend fun keypadSearch(typed: String, limit: Int = 3): List<SearchHit> = withContext(Dispatchers.IO) {
         if (typed.isBlank()) return@withContext emptyList()
-        val projection = arrayOf(Phone.CONTACT_ID, Phone.DISPLAY_NAME_PRIMARY, Phone.NUMBER, Phone.PHOTO_THUMBNAIL_URI)
+        val projection = arrayOf(Phone.CONTACT_ID, NameOrder.nameColumn, Phone.NUMBER, Phone.PHOTO_THUMBNAIL_URI)
         val rows = resolver.query(
             Phone.CONTENT_URI, projection, null, null,
-            "${Phone.DISPLAY_NAME_PRIMARY} COLLATE LOCALIZED ASC, ${Phone.IS_SUPER_PRIMARY} DESC, ${Phone._ID} ASC",
+            "${NameOrder.sortColumn} COLLATE LOCALIZED ASC, ${Phone.IS_SUPER_PRIMARY} DESC, ${Phone._ID} ASC",
         )?.use {
             buildList {
                 while (it.moveToNext()) {
@@ -335,7 +425,7 @@ class ContactsRepository(context: Context) {
     /** The first number of the contact with exactly this name, for a caller known only by name. */
     suspend fun numberOf(name: String): String? = withContext(Dispatchers.IO) {
         resolver.query(
-            Phone.CONTENT_URI, arrayOf(Phone.NUMBER), "${Phone.DISPLAY_NAME_PRIMARY} = ?", arrayOf(name),
+            Phone.CONTENT_URI, arrayOf(Phone.NUMBER), "${NameOrder.nameColumn} = ?", arrayOf(name),
             "${Phone.IS_SUPER_PRIMARY} DESC, ${Phone._ID} ASC",
         )?.use { if (it.moveToFirst()) it.getStringOrNull(0) else null }
     }
@@ -343,7 +433,7 @@ class ContactsRepository(context: Context) {
     suspend fun match(number: String): ContactMatch? = withContext(Dispatchers.IO) {
         if (number.isBlank()) return@withContext null
         val uri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number))
-        val projection = arrayOf(PhoneLookup.CONTACT_ID, PhoneLookup.DISPLAY_NAME, PhoneLookup.PHOTO_URI)
+        val projection = arrayOf(PhoneLookup.CONTACT_ID, NameOrder.nameColumn, PhoneLookup.PHOTO_URI)
         val found = resolver.query(uri, projection, null, null, null)?.use {
             if (it.moveToFirst()) Triple(it.getLong(0), it.getStringOrNull(1).orEmpty(), it.getStringOrNull(2)) else null
         } ?: return@withContext null
@@ -354,7 +444,7 @@ class ContactsRepository(context: Context) {
 
     suspend fun detail(contactId: Long): ContactDetail? = withContext(Dispatchers.IO) {
         if (contactId in deleted) return@withContext null
-        val projection = arrayOf(Contacts.LOOKUP_KEY, Contacts.DISPLAY_NAME_PRIMARY, Contacts.PHOTO_URI, Contacts.STARRED, Contacts.CUSTOM_RINGTONE)
+        val projection = arrayOf(Contacts.LOOKUP_KEY, NameOrder.nameColumn, Contacts.PHOTO_URI, Contacts.STARRED, Contacts.CUSTOM_RINGTONE)
         var starred = false
         var ringtone: String? = null
         val base = resolver.query(
@@ -403,6 +493,49 @@ class ContactsRepository(context: Context) {
             .sortedWith(compareBy({ it.type != null && it.label != appContext.getString(R.string.source_phone) }, { it.type != GOOGLE }, { it.label }))
     }
 
+    /**
+     * The address books contacts can move between and be exported from: the phone first, then each
+     * Google account, then the rest (a Samsung, Outlook or iCloud account). Never the SIM or an app.
+     */
+    suspend fun stores(): List<ContactStore> = withContext(Dispatchers.IO) {
+        fun pairs(uri: Uri, typeColumn: String, nameColumn: String) = resolver.query(uri, arrayOf(typeColumn, nameColumn), null, null, null)
+            ?.use { buildSet { while (it.moveToNext()) add(it.getStringOrNull(0) to it.getStringOrNull(1)) } }.orEmpty()
+        val known = pairs(RawContacts.CONTENT_URI, RawContacts.ACCOUNT_TYPE, RawContacts.ACCOUNT_NAME) +
+            pairs(Groups.CONTENT_URI, Groups.ACCOUNT_TYPE, Groups.ACCOUNT_NAME) +
+            runCatching { android.accounts.AccountManager.get(appContext).accounts.map { it.type to it.name } }.getOrDefault(emptyList())
+        val phone = ContactStore(ContactAccount(null, null), appContext.getString(R.string.source_phone), null)
+        val others = known
+            .filter { (type, name) -> type != null && name != null && !isPhoneStorage(type) && isWritableAccount(type) }
+            .distinct()
+            .map { (type, name) ->
+                if (type == GOOGLE) {
+                    ContactStore(ContactAccount(name, type), name!!, "Google")
+                } else {
+                    val label = authenticatorLabel(type!!) ?: sourceLabel(type, name)
+                    ContactStore(ContactAccount(name, type), label, name?.takeIf { it != label })
+                }
+            }
+            .sortedWith(compareBy({ it.account.type != GOOGLE }, { it.label.lowercase() }))
+        // Accounts Android keeps from apps until the user picks one for them, such as the Samsung
+        // account: offered by their kind while the phone syncs contacts with it.
+        val shown = others.mapTo(HashSet()) { it.account.type }
+        val hidden = runCatching { android.content.ContentResolver.getSyncAdapterTypes().toList() }.getOrDefault(emptyList())
+            .filter { it.authority == ContactsContract.AUTHORITY && it.accountType in ASK_FOR_ACCOUNT && it.accountType !in shown }
+            .map { it.accountType }
+            .distinct()
+            .map { type -> ContactStore(ContactAccount(null, type), authenticatorLabel(type) ?: sourceLabel(type, null), null, needsAccess = true) }
+        listOf(phone) + others + hidden
+    }
+
+    /** The contacts with a copy in phone storage: no account, or the phone maker's own (Samsung's). */
+    suspend fun phoneContactIds(): Set<Long> = withContext(Dispatchers.IO) {
+        resolver.query(
+            RawContacts.CONTENT_URI, arrayOf(RawContacts.CONTACT_ID),
+            "${RawContacts.DELETED} = 0 AND (${RawContacts.ACCOUNT_TYPE} IS NULL OR ${RawContacts.ACCOUNT_TYPE} = ? OR ${RawContacts.ACCOUNT_TYPE} LIKE ?)",
+            arrayOf("vnd.sec.contact.phone", "%local%"), null,
+        )?.use { buildSet { while (it.moveToNext()) add(it.getLong(0)) } }.orEmpty()
+    }
+
     /** The contacts with a copy in [source]. */
     suspend fun contactIdsIn(source: ContactSource): Set<Long> = withContext(Dispatchers.IO) {
         val (selection, args) = when {
@@ -419,6 +552,9 @@ class ContactsRepository(context: Context) {
         rawUri(contactId), arrayOf(RawContacts.ACCOUNT_TYPE, RawContacts.ACCOUNT_NAME),
         "${RawContacts.CONTACT_ID} = ? AND ${RawContacts.DELETED} = 0", arrayOf(contactId.toString()), null,
     )?.use { buildList { while (it.moveToNext()) add(it.getStringOrNull(0) to it.getStringOrNull(1)) } }.orEmpty()
+
+    /** A short name for where a copy of a contact lives: "Google", "Phone", "SIM", "Telegram". */
+    fun sourceShortLabel(type: String?, name: String?): String = if (type == GOOGLE) "Google" else sourceLabel(type, name)
 
     /** A name people know for an account: the e-mail of a Google account, "SIM", "WhatsApp". */
     private fun sourceLabel(type: String?, name: String?): String = when {
@@ -585,6 +721,9 @@ class ContactsRepository(context: Context) {
     private fun android.database.Cursor.clean(index: Int): String? = getStringOrNull(index)?.trim()?.ifEmpty { null }
 
     private companion object {
+        /** How long the address book has to stay unchanged before the lists are read again. */
+        const val QUIET_MS = 400L
+
         val WHATSAPP_MIME_TYPES = mapOf(
             "vnd.android.cursor.item/vnd.com.whatsapp.voip.call" to (WhatsAppKind.Voice to "com.whatsapp"),
             "vnd.android.cursor.item/vnd.com.whatsapp.video.call" to (WhatsAppKind.Video to "com.whatsapp"),

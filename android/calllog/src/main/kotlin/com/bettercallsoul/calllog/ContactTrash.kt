@@ -21,7 +21,7 @@ class ContactTrash(context: Context, private val dao: LocalDao, private val edit
     fun observe(): Flow<List<TrashedContact>> = dao.observeTrash()
 
     /** Moves the contacts to the bin; returns how many could be deleted (SIM and app-owned ones can't). */
-    suspend fun trash(contactIds: Collection<Long>): Int = withContext(Dispatchers.IO) {
+    suspend fun trash(contactIds: Collection<Long>, onEach: (Int) -> Unit = {}): Int = withContext(Dispatchers.IO) {
         var done = 0
         contactIds.forEach { contactId ->
             val stored = editor.load(contactId) ?: return@forEach
@@ -37,9 +37,11 @@ class ContactTrash(context: Context, private val dao: LocalDao, private val edit
                 ),
             )
             photo?.let { photoFile(id).writeBytes(it) }
-            editor.deleteContact(contactId)
+            editor.deleteContact(contactId, notify = contactIds.size == 1)
             done++
+            onEach(done)
         }
+        if (contactIds.size > 1) editor.notifyChanged()
         done
     }
 

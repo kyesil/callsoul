@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="notification_answer">Responder</string>
+    <string name="notification_decline">Rechazar</string>
+    <string name="notification_end">Colgar</string>
+</resources>

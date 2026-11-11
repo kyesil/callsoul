@@ -1,1 +1,1 @@
-İlk sürüm: telefon ve rehber bir arada, kaydırarak arama ve cevaplama, numara etiketleri, bulut spam uyarısı, arama hapı, dört dil.
+İlk sürüm: telefon ve rehber bir arada, kaydırarak arama ve cevaplama, numara etiketleri, bulut spam uyarısı, arama hapı, on dil.

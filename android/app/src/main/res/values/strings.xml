@@ -3,7 +3,6 @@
     <string name="app_name" translatable="false">Better Call Soul</string>
     <string name="tab_home">Home</string>
     <string name="favorites">Favourites</string>
-    <string name="favorites_empty">No favourites yet. Add one with the star on a contact.</string>
     <string name="action_favorite">Add to favourites</string>
     <string name="action_unfavorite">Remove from favourites</string>
     <string name="tab_keypad">Keypad</string>
@@ -341,6 +340,7 @@
     <string name="settings_whatsapp_pill_body">Hang up and switch the speaker from the pill; tap the time to get back to the call. A small mark shows when the sound is on a headset.</string>
     <string name="settings_whatsapp_late">Battery optimization can stop the app in the background, and then WhatsApp calls get no pill and aren\'t recorded. Turn it off for this app: in App info, under Battery, choose Unrestricted or Don\'t optimize. Power saving mode can still stop it.</string>
     <string name="settings_whatsapp_late_open">Open app settings</string>
+    <string name="settings_whatsapp_no_access">Notification access is off, so WhatsApp calls don\'t reach the recents.</string>
     <string name="call_end_spam">Report spam and hang up</string>
     <string name="spam_reported">Reported as spam</string>
     <string name="settings_group_calls">Calls</string>
@@ -378,6 +378,18 @@
     <string name="contact_info">Contact info</string>
     <string name="settings_group_contacts">Contacts</string>
     <string name="labels_body">Every label with how many people are in it</string>
+    <string name="block_abroad_title">Block calls from abroad</string>
+    <string name="block_abroad_body">Calls from country codes that aren\'t in the list are turned away without ringing. They still show in the call log, with no notification. Saved contacts always ring.</string>
+    <string name="block_abroad_home">Your country code: +%1$s</string>
+    <string name="block_abroad_allowed">Calls from these codes ring:</string>
+    <string name="block_abroad_add_hint">+49</string>
+    <string name="block_abroad_add">Add</string>
+    <string name="block_abroad_remove">Remove +%1$s</string>
+    <string name="block_abroad_invalid">Type a country code, such as +49.</string>
+    <string name="block_spam_title">Block spam calls</string>
+    <string name="block_spam_body">Numbers that enough people marked as spam are turned away without ringing. They still show in the call log, with no notification. Saved contacts always ring.</string>
+    <string name="block_spam_votes">Spam votes needed</string>
+    <string name="block_spam_lookup_off">Cloud spam and caller ID is off, so only numbers already known on this phone are checked.</string>
     <string name="blocked_title">Blocked numbers</string>
     <string name="blocked_body">See the numbers you blocked, unblock them or add one</string>
     <string name="blocked_empty">No blocked numbers.</string>
@@ -448,6 +460,8 @@
     <string name="tel_links_title">Links to numbers</string>
     <string name="tel_links_body">Links to phone numbers in other apps still ask which app to open. Pick Better Call Soul and “Always” in the list that opens.</string>
     <string name="tel_links_action">Choose</string>
+    <string name="tel_links_lost">Links to phone numbers in other apps ask again which app to open. Pick Better Call Soul and “Always” in the list that opens.</string>
+    <string name="tel_links_lost_other">Links to phone numbers in other apps now open in %1$s. On its page that opens, under “Open by default”, clear its defaults.</string>
     <string name="tel_links_row">Links to numbers</string>
     <string name="tel_links_asks">Ask every time</string>
     <string name="tel_links_other">Open in %1$s; there, under “Open by default”, clear its defaults</string>
@@ -455,6 +469,65 @@
     <string name="lock_calls_body">An incoming call wakes the screen and opens over the lock screen. Without it, a call on a locked phone comes only as a notification.</string>
     <string name="lock_calls_prompt">Android hasn\'t allowed this app to open calls over the lock screen, so a call won\'t wake a sleeping screen. Turn it on for Better Call Soul on the page that opens.</string>
     <string name="lock_calls_action">Turn on</string>
+    <string name="whatsapp_calls_prompt">WhatsApp calls are on in Settings, but the app has no notification access, so they don\'t reach the recents. Turn it on for Better Call Soul on the page that opens.</string>
+    <string name="setup_whatsapp_body">Show your WhatsApp calls in the recents too? The app reads them from WhatsApp\'s notifications, so Android asks for notification access on the page that opens. Only WhatsApp\'s notifications are looked at and nothing leaves the phone.</string>
     <string name="setup_role_body">Better Call Soul is a phone app. Make it the default phone app first; then it asks for permission to show your calls, recents and contacts.</string>
     <string name="setup_role_settings">Open default apps</string>
+    <string name="move_title">Move contacts</string>
+    <string name="move_body">Move contacts between the phone, Google and your other accounts, merging those already there</string>
+    <string name="move_note">Choose where the contacts come from and where they go. One the other side already has, with the same number or e-mail, is merged into it, the details from where it came taking precedence. Contacts keep their photo, star, labels and ringtone. My card stays where it is.</string>
+    <string name="move_from">From</string>
+    <string name="move_to">To</string>
+    <string name="move_swap">Swap</string>
+    <string name="move_counting">Counting…</string>
+    <string name="move_allow_access">Tap to choose the account</string>
+    <string name="move_action">Move</string>
+    <string name="move_checking">Looking for contacts already there…</string>
+    <string name="move_phone_not_allowed">This phone puts new contacts in a cloud account, so they can\'t be moved to the phone.</string>
+    <string name="move_running">Moving contacts</string>
+    <string name="move_progress">%1$d of %2$d</string>
+    <plurals name="move_count">
+        <item quantity="one">%d contact</item>
+        <item quantity="other">%d contacts</item>
+    </plurals>
+    <plurals name="move_question">
+        <item quantity="one">Move %1$d contact from %2$s to %3$s? It won\'t be in %2$s any more.</item>
+        <item quantity="other">Move %1$d contacts from %2$s to %3$s? They won\'t be in %2$s any more.</item>
+    </plurals>
+    <plurals name="move_matches">
+        <item quantity="one">%1$d of them is already in %2$s with the same number or e-mail: it will be merged into that one, the details from %3$s taking precedence.</item>
+        <item quantity="other">%1$d of them are already in %2$s with the same number or e-mail: they will be merged into those, the details from %3$s taking precedence.</item>
+    </plurals>
+    <plurals name="move_moved">
+        <item quantity="one">%d moved</item>
+        <item quantity="other">%d moved</item>
+    </plurals>
+    <plurals name="move_merged">
+        <item quantity="one">%d merged</item>
+        <item quantity="other">%d merged</item>
+    </plurals>
+    <plurals name="move_failed">
+        <item quantity="one">%d couldn\'t be moved</item>
+        <item quantity="other">%d couldn\'t be moved</item>
+    </plurals>
+    <string name="name_order_title">Name format</string>
+    <string name="name_order_body">How contacts\' names read in lists, calls and search; lists sort the same way</string>
+    <string name="name_order_given">First Last</string>
+    <string name="name_order_family">Last, First</string>
+    <string name="export_title">Export contacts</string>
+    <string name="export_body">Save contacts to a vCard or CSV file</string>
+    <string name="export_note">The file goes wherever you choose: the phone, Drive or elsewhere. Keep it safe: it holds everyone\'s numbers.</string>
+    <string name="export_which">Contacts</string>
+    <string name="export_all">All contacts</string>
+    <string name="export_vcf">vCard</string>
+    <string name="export_csv">CSV</string>
+    <string name="export_vcf_hint">Phones, Google Contacts and iCloud import it, photos included.</string>
+    <string name="export_csv_hint">In Google Contacts\' layout: Google Contacts and Outlook import it, Excel opens it. No photos.</string>
+    <string name="export_action">Export</string>
+    <string name="export_running">Exporting</string>
+    <plurals name="export_done">
+        <item quantity="one">%d contact saved</item>
+        <item quantity="other">%d contacts saved</item>
+    </plurals>
+    <string name="export_failed">The file couldn\'t be written.</string>
 </resources>

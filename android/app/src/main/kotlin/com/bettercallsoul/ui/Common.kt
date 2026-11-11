@@ -62,6 +62,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.bettercallsoul.AppLook
 import com.bettercallsoul.R
 import java.time.Instant
 import java.time.LocalDate
@@ -222,7 +223,7 @@ fun dayHeader(context: Context, millis: Long): String {
     return when (day) {
         today -> context.getString(R.string.today)
         today.minusDays(1) -> context.getString(R.string.yesterday)
-        else -> day.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(context.resources.configuration.locales[0]))
+        else -> day.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(AppLook.formatLocale(context)))
     }
 }
 

@@ -1,5 +1,6 @@
 package com.bettercallsoul.ui
 
+import com.bettercallsoul.myCardAccount
 import androidx.compose.material3.OutlinedTextField
 import android.provider.ContactsContract
 import androidx.activity.compose.BackHandler
@@ -274,6 +275,11 @@ fun ContactEditorScreen(
         val destination = moveTo
         run {
             when {
+                existing == null && isProfile && app.contacts.profileHidden -> {
+                    // The phone keeps its profile to itself: My card is a contact in phone storage.
+                    editor.create(current, myCardAccount(app), photo)?.let { app.myCardKey = app.contacts.lookupKeyOf(it) }
+                    onDone
+                }
                 existing == null && isProfile -> {
                     editor.create(current, account, photo, profile = true)
                     onDone

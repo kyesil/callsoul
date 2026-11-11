@@ -10,11 +10,12 @@ android {
 
     defaultConfig {
         applicationId = "dev.yesil.callsoul"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         // Android 17 is the target; 35 keeps the Galaxy S21 test phone usable.
         minSdk = 29
         targetSdk = 37
-        versionCode = 34
-        versionName = "0.4.6"
+        versionCode = 35
+        versionName = "0.4.7"
     }
 
     // The Play upload key lives outside the repo; its path and password are in ~/.gradle/gradle.properties.
@@ -87,6 +88,11 @@ dependencies {
     implementation(libs.compose.material.icons)
     implementation(libs.compose.ui.tooling.preview)
     debugImplementation(libs.compose.ui.tooling)
+    debugImplementation(libs.compose.ui.test.manifest)
+    androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation(libs.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.ext.junit)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

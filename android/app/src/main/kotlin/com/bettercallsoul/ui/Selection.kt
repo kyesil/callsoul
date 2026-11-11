@@ -15,6 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -72,6 +73,17 @@ fun SelectedMark(size: Dp) {
 @Composable
 fun ConfirmDialog(
     message: String,
+    icon: ImageVector,
+    action: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    destructive: Boolean = true,
+) = ConfirmDialog(AnnotatedString(message), icon, action, onConfirm, onDismiss, destructive)
+
+/** The same, with parts of the question set apart (in bold, say). */
+@Composable
+fun ConfirmDialog(
+    message: AnnotatedString,
     icon: ImageVector,
     action: String,
     onConfirm: () -> Unit,

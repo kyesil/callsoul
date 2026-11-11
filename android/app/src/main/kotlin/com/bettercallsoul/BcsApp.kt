@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import android.app.Application
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Handler
 import android.os.Looper
 import androidx.core.content.edit
@@ -30,11 +31,16 @@ import kotlinx.coroutines.flow.combine
 import com.bettercallsoul.calllog.CallLogRepository
 import com.bettercallsoul.calllog.ContactEditor
 import com.bettercallsoul.calllog.ContactTrash
+import com.bettercallsoul.calllog.ContactExport
+import com.bettercallsoul.calllog.NameOrder
 import com.bettercallsoul.calllog.ContactsRepository
 import com.bettercallsoul.calllog.LocalDatabase
 import com.bettercallsoul.calllog.withRingTimes
 import com.bettercallsoul.telecom.CallChannels
 import com.bettercallsoul.spam.SpamClient
+import com.bettercallsoul.spam.BlockRules
+import com.bettercallsoul.spam.CallingCodes
+import android.telephony.TelephonyManager
 import com.bettercallsoul.telecom.CallManager
 import com.bettercallsoul.telecom.WhatsAppTelecomCalls
 import com.bettercallsoul.telecom.CallerDirectory
@@ -51,9 +57,10 @@ enum class SwipeMessage(val key: String) {
 }
 
 class AppContainer(context: Context) {
+    private val appContext: Context = context.applicationContext
     private val prefs = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
 
-    val contacts = ContactsRepository(context)
+    val contacts = ContactsRepository(context).also { it.myCardKey = { myCardKey } }
     val callLog = CallLogRepository(context)
     val editor = ContactEditor(context) { deleted ->
         // A contact's small photo keeps its address when the picture changes, so the old one has to go.
@@ -63,6 +70,8 @@ class AppContainer(context: Context) {
     }
     val store = LocalDatabase.create(context).dao()
     val trash = ContactTrash(context, store, editor)
+    val moves = ContactMoves(editor)
+    val exports = ContactExports(context, ContactExport(context, editor))
     val history = CallHistory(context, store) { historyDays }
     val whatsApp = WhatsAppCallLog(store, callLog, contacts) { historyDays }
 
@@ -221,6 +230,65 @@ class AppContainer(context: Context) {
         get() = prefs.getBoolean(KEY_LOOKUP, true)
         set(value) = prefs.edit { putBoolean(KEY_LOOKUP, value) }
 
+    /** The phone's own country calling code ("90"), from the SIM or the network, else the language's country. */
+    val homeCallingCode: String by lazy {
+        val phone = appContext.getSystemService(TelephonyManager::class.java)
+        listOf(phone?.simCountryIso, phone?.networkCountryIso, android.content.res.Resources.getSystem().configuration.locales[0].country)
+            .firstNotNullOfOrNull { CallingCodes.of(it) } ?: "90"
+    }
+
+    /** Off by default: calls from abroad turned away before they ring, logged with no notice. */
+    /** Names family name first ("Arslan, Deniz") everywhere, lists sorted that way too; off for "Deniz Arslan". */
+    var nameFamilyFirst by mutableStateOf(prefs.getBoolean(KEY_NAME_FAMILY_FIRST, false).also { NameOrder.familyFirst = it })
+        private set
+
+    fun saveNameFamilyFirst(on: Boolean) {
+        nameFamilyFirst = on
+        NameOrder.familyFirst = on
+        prefs.edit { putBoolean(KEY_NAME_FAMILY_FIRST, on) }
+        contacts.refresh()
+        callLog.refresh()
+    }
+
+    var blockAbroad by mutableStateOf(prefs.getBoolean(KEY_BLOCK_ABROAD, false))
+        private set
+
+    fun saveBlockAbroad(on: Boolean) {
+        blockAbroad = on
+        prefs.edit { putBoolean(KEY_BLOCK_ABROAD, on) }
+    }
+
+    /** The country codes whose calls still ring with [blockAbroad] on; the phone's own one to begin with. */
+    var allowedCodes by mutableStateOf(
+        prefs.getString(KEY_ALLOWED_CODES, null)?.split(',')?.filter(String::isNotEmpty) ?: listOf(homeCallingCode),
+    )
+        private set
+
+    fun saveAllowedCodes(codes: List<String>) {
+        allowedCodes = codes.distinct()
+        prefs.edit { putString(KEY_ALLOWED_CODES, allowedCodes.joinToString(",")) }
+    }
+
+    /** Off by default: numbers with at least [spamBlockVotes] spam votes turned away like [blockAbroad]. */
+    var blockSpam by mutableStateOf(prefs.getBoolean(KEY_BLOCK_SPAM, false))
+        private set
+
+    fun saveBlockSpam(on: Boolean) {
+        blockSpam = on
+        prefs.edit { putBoolean(KEY_BLOCK_SPAM, on) }
+    }
+
+    var spamBlockVotes by mutableStateOf(prefs.getInt(KEY_SPAM_VOTES, BlockRules.DEFAULT_SPAM_VOTES))
+        private set
+
+    fun saveSpamBlockVotes(votes: Int) {
+        spamBlockVotes = votes.coerceIn(1, 999)
+        prefs.edit { putInt(KEY_SPAM_VOTES, spamBlockVotes) }
+    }
+
+    val blockRules: BlockRules
+        get() = BlockRules(blockAbroad, allowedCodes, blockSpam, spamBlockVotes)
+
     /** The first-run question about being the default phone app has been answered, either way. */
     var defaultPhoneAsked: Boolean
         get() = prefs.getBoolean(KEY_DEFAULT_ASKED, false)
@@ -235,6 +303,29 @@ class AppContainer(context: Context) {
     var lockCallsAsked: Boolean
         get() = prefs.getBoolean(KEY_LOCK_CALLS_ASKED, false)
         set(value) = prefs.edit { putBoolean(KEY_LOCK_CALLS_ASKED, value) }
+
+    /** Whether the welcome screen went through all its steps; after that, missing pieces are banners. */
+    var setupDone: Boolean
+        get() = prefs.getBoolean(KEY_SETUP_DONE, false)
+        set(value) = prefs.edit { putBoolean(KEY_SETUP_DONE, value) }
+
+    /**
+     * Noted on the first start of a version with the stepped setup: one already set up before it
+     * (the permissions are there) doesn't go through the welcome again.
+     */
+    fun noteSetupStart(alreadySetUp: Boolean) {
+        if (!prefs.contains(KEY_SETUP_DONE)) setupDone = alreadySetUp
+    }
+
+    /** Whether links to numbers opened here once; their going elsewhere later is then shown on the home screen. */
+    var telLinksWanted: Boolean
+        get() = prefs.getBoolean(KEY_TEL_LINKS_WANTED, false)
+        set(value) = prefs.edit { putBoolean(KEY_TEL_LINKS_WANTED, value) }
+
+    /** Whether the WhatsApp step of the welcome screen was skipped. */
+    var whatsAppAccessAsked: Boolean
+        get() = prefs.getBoolean(KEY_WHATSAPP_ACCESS_ASKED, false)
+        set(value) = prefs.edit { putBoolean(KEY_WHATSAPP_ACCESS_ASKED, value) }
 
     /** A call arriving on a phone lying on its face rings silently, with the screen on. */
     var silentWhenFaceDown: Boolean
@@ -341,6 +432,14 @@ class AppContainer(context: Context) {
         get() = prefs.getBoolean(KEY_DEBUG_LOG, BuildConfig.LOG_BY_DEFAULT)
         set(value) = prefs.edit { putBoolean(KEY_DEBUG_LOG, value) }
 
+    /** Where the phone hides its profile (Samsung): the lookup key of the contact that is My card. */
+    var myCardKey: String?
+        get() = prefs.getString(KEY_MY_CARD, null)
+        set(value) {
+            prefs.edit { putString(KEY_MY_CARD, value) }
+            contacts.refresh()
+        }
+
     var ownNumberSeeded: Boolean
         get() = prefs.getBoolean(KEY_OWN_NUMBER, false)
         set(value) = prefs.edit { putBoolean(KEY_OWN_NUMBER, value) }
@@ -356,6 +455,14 @@ class AppContainer(context: Context) {
         const val KEY_DEFAULT_ASKED = "default_phone_asked"
         const val KEY_TEL_LINKS_ASKED = "tel_links_asked"
         const val KEY_LOCK_CALLS_ASKED = "lock_calls_asked"
+        const val KEY_WHATSAPP_ACCESS_ASKED = "whatsapp_access_asked"
+        const val KEY_SETUP_DONE = "setup_done"
+        const val KEY_BLOCK_ABROAD = "block_abroad"
+        const val KEY_NAME_FAMILY_FIRST = "name_family_first"
+        const val KEY_ALLOWED_CODES = "allowed_codes"
+        const val KEY_BLOCK_SPAM = "block_spam"
+        const val KEY_SPAM_VOTES = "spam_block_votes"
+        const val KEY_TEL_LINKS_WANTED = "tel_links_wanted"
         const val KEY_FACE_DOWN = "silent_face_down"
         const val KEY_TONE_CONNECT = "tone_on_connect"
         const val KEY_THEME = "theme"
@@ -365,7 +472,8 @@ class AppContainer(context: Context) {
         const val KEY_ANIMATIONS = "animations"
         const val KEY_QUICK_MENU = "quick_menu"
         const val KEY_DEBUG_LOG = "debug_log"
-        const val KEY_OWN_NUMBER = "own_number_seeded"
+        const val KEY_OWN_NUMBER = "own_number_profile"
+        const val KEY_MY_CARD = "my_card_key"
         const val KEY_DEVICE_ID = "device_id"
         const val KEY_SWIPE_EDGE = "swipe_edge_dp"
         const val KEY_NEW_CONTACT_ACCOUNT = "new_contact_account"
@@ -402,6 +510,7 @@ class BcsApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        AppLook.matchFormats(this)
         container = AppContainer(this)
         DebugLog.init(this) { container.debugLogEnabled }
         DebugLog.i("App", "start ${BuildConfig.VERSION_NAME} (${BuildConfig.BUILD_TYPE})")
@@ -420,6 +529,12 @@ class BcsApp : Application() {
         Handler(Looper.getMainLooper()).postDelayed({
             if (container.whatsAppCallsEnabled) WhatsAppCallListener.reconnect(this)
         }, LISTENER_WAIT_MILLIS)
+    }
+
+    // Android sets the phone's language as the default again on every change of language.
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        AppLook.matchFormats(this)
     }
 
     private companion object {

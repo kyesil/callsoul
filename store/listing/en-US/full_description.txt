@@ -27,7 +27,7 @@ WHAT'S IN SETTINGS
 • Decline with a message: write your own quick SMS replies.
 • See WhatsApp calls in your recents, with an icon for voice or video. Optional; it needs notification access.
 • How far from the edge swipes start, so they never clash with Android's back gesture.
-• The call pill's look, animations, and four languages: Turkish, English, Arabic and Russian.
+• The call pill's look, animations, and ten languages, from Turkish to Indonesian.
 
 STATISTICS
 See by week, month and year how long you talked, how many people you talked to, how much of it was with numbers outside your contacts, and who you talk to most. It stays on your phone and is kept for a year at most.

@@ -1,5 +1,6 @@
 package com.bettercallsoul.ui
 
+import com.bettercallsoul.AppLook
 import android.content.Intent
 import androidx.core.content.FileProvider
 import com.bettercallsoul.container
@@ -72,7 +73,7 @@ private fun placeType(kind: ValueKind, home: Int, work: Int, other: Int): Int = 
 
 /** "23 Nisan 1988", or "23 Nisan" for a date kept without its year; the raw text if it isn't a date. */
 fun formatContactDate(context: Context, value: String): String {
-    val locale = context.resources.configuration.locales[0]
+    val locale = AppLook.formatLocale(context)
     return runCatching {
         if (value.startsWith("--")) {
             MonthDay.parse(value).atYear(2000).format(DateTimeFormatter.ofPattern("d MMMM", locale))

@@ -76,7 +76,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.bettercallsoul.WhatsAppCallListener
-import android.content.ComponentName
 import com.bettercallsoul.SwipeMessage
 import androidx.compose.material3.FilterChip
 import androidx.compose.runtime.mutableLongStateOf
@@ -84,6 +83,8 @@ import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.SwapHoriz
+import androidx.compose.material.icons.outlined.IosShare
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -128,6 +129,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import com.bettercallsoul.calllog.CallHistory
 import com.bettercallsoul.calllog.LocalDatabase
 import com.bettercallsoul.spam.SearchText
+import com.bettercallsoul.spam.cleanCountryCode
+import androidx.compose.ui.text.input.KeyboardType
 import java.io.File
 
 /** The groups the settings are sorted into: the first page lists them and each opens a page of its own. */
@@ -150,9 +153,11 @@ fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBac
     val resources = LocalResources.current
     var overlayAllowed by remember { mutableStateOf(Settings.canDrawOverlays(context)) }
     var lockCallsAllowed by remember { mutableStateOf(LockScreenCalls.allowed(context)) }
+    var whatsAppInstalled by remember { mutableStateOf(WhatsAppCallListener.whatsAppInstalled(context)) }
     LifecycleResumeEffect(Unit) {
         overlayAllowed = Settings.canDrawOverlays(context)
         lockCallsAllowed = LockScreenCalls.allowed(context)
+        whatsAppInstalled = WhatsAppCallListener.whatsAppInstalled(context)
         onPauseOrDispose { }
     }
     var groupName by rememberSaveable { mutableStateOf<String?>(null) }
@@ -160,7 +165,8 @@ fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBac
     var query by rememberSaveable { mutableStateOf("") }
     BackHandler(enabled = group != null) { groupName = null }
 
-    val entries = listOf(
+    // Without WhatsApp on the phone its settings are left out, and its group with them.
+    val entries = listOfNotNull(
         SettingEntry(SettingsGroup.Calls, listOf(R.string.lock_calls_title, R.string.lock_calls_body)) { LockCallsSettings(lockCallsAllowed) },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_lookup_title, R.string.settings_lookup_body)) { LookupSettings() },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_face_down_title, R.string.settings_face_down_body)) { FaceDownSettings() },
@@ -168,12 +174,21 @@ fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBac
         SettingEntry(SettingsGroup.Calls, listOf(R.string.key_decline_title, R.string.key_decline_body)) { KeySettings() },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.tone_connect_title, R.string.tone_connect_body, R.string.tone_end_title, R.string.tone_end_body)) { ToneSettings() },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.dnd_title, R.string.dnd_body)) { DndSettings() },
+        SettingEntry(SettingsGroup.Calls, listOf(R.string.block_abroad_title, R.string.block_abroad_body)) { BlockAbroadSettings() },
+        SettingEntry(SettingsGroup.Calls, listOf(R.string.block_spam_title, R.string.block_spam_body)) { BlockSpamSettings() },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.blocked_title, R.string.blocked_body)) {
             LinkCard(Icons.Outlined.Block, R.string.blocked_title, R.string.blocked_body) { onOpen(Route.Blocked) }
         },
         SettingEntry(SettingsGroup.Contacts, listOf(R.string.dup_title, R.string.dup_body)) {
             LinkCard(Icons.Outlined.JoinInner, R.string.dup_title, R.string.dup_body) { onOpen(Route.Duplicates) }
         },
+        SettingEntry(SettingsGroup.Contacts, listOf(R.string.move_title, R.string.move_body)) {
+            LinkCard(Icons.Outlined.SwapHoriz, R.string.move_title, R.string.move_body) { onOpen(Route.MoveContacts) }
+        },
+        SettingEntry(SettingsGroup.Contacts, listOf(R.string.export_title, R.string.export_body)) {
+            LinkCard(Icons.Outlined.IosShare, R.string.export_title, R.string.export_body) { onOpen(Route.ExportContacts) }
+        },
+        SettingEntry(SettingsGroup.Contacts, listOf(R.string.name_order_title, R.string.name_order_body)) { NameOrderSettings() },
         SettingEntry(SettingsGroup.Contacts, listOf(R.string.section_labels, R.string.labels_body)) {
             LinkCard(Icons.AutoMirrored.Outlined.Label, R.string.section_labels, R.string.labels_body) { onOpen(Route.Labels) }
         },
@@ -181,7 +196,7 @@ fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBac
         SettingEntry(
             SettingsGroup.WhatsApp,
             listOf(R.string.settings_whatsapp_title, R.string.settings_whatsapp_body, R.string.settings_whatsapp_pill_title, R.string.settings_whatsapp_pill_body),
-        ) { WhatsAppCallSettings() },
+        ) { WhatsAppCallSettings() }.takeIf { whatsAppInstalled },
         SettingEntry(SettingsGroup.Pill, listOf(R.string.settings_overlay_title, R.string.settings_overlay_body)) { OverlaySettings(overlayAllowed) },
         SettingEntry(
             SettingsGroup.Pill,
@@ -224,7 +239,7 @@ fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBac
                 if (text.isEmpty()) {
                     Card {
                         Column {
-                            SettingsGroup.entries.forEachIndexed { index, each ->
+                            SettingsGroup.entries.filter { each -> entries.any { it.group == each } }.forEachIndexed { index, each ->
                                 if (index > 0) {
                                     HorizontalDivider(
                                         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
@@ -316,6 +331,30 @@ private fun LinkCard(icon: ImageVector, title: Int, body: Int, onClick: () -> Un
                 Text(stringResource(body), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+/** First name or family name first, wherever a contact's name shows. */
+@Composable
+private fun NameOrderSettings() {
+    val app = LocalContext.current.container
+    Card {
+        Column(Modifier.fillMaxWidth().padding(10.dp)) {
+            Text(stringResource(R.string.name_order_title), fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
+            Text(stringResource(R.string.name_order_body), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.height(6.dp))
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                val options = listOf(false to R.string.name_order_given, true to R.string.name_order_family)
+                options.forEachIndexed { index, (familyFirst, label) ->
+                    SegmentedButton(
+                        selected = app.nameFamilyFirst == familyFirst,
+                        onClick = { app.saveNameFamilyFirst(familyFirst) },
+                        shape = SegmentedButtonDefaults.itemShape(index, options.size),
+                        label = { Text(stringResource(label), maxLines = 1, fontSize = 13.sp) },
+                    )
+                }
+            }
         }
     }
 }
@@ -474,6 +513,101 @@ private fun FaceDownSettings() {
     SwitchCard(R.string.settings_face_down_title, R.string.settings_face_down_body, faceDown) {
         faceDown = it
         app.silentWhenFaceDown = it
+    }
+}
+
+/**
+ * Calls from country codes outside the list are turned away before they ring. The list starts with
+ * the phone's own code, which is shown above it; codes can be added and removed.
+ */
+@Composable
+private fun BlockAbroadSettings() {
+    val app = LocalContext.current.container
+    var typed by remember { mutableStateOf("") }
+    var invalid by remember { mutableStateOf(false) }
+    fun add() {
+        val code = cleanCountryCode(typed)
+        invalid = code == null
+        if (code != null) {
+            app.saveAllowedCodes(app.allowedCodes + code)
+            typed = ""
+        }
+    }
+    Card {
+        Column(Modifier.fillMaxWidth().padding(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.block_abroad_title), fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(R.string.block_abroad_body), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Spacer(Modifier.width(6.dp))
+                Switch(checked = app.blockAbroad, onCheckedChange = app::saveBlockAbroad)
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(stringResource(R.string.block_abroad_home, app.homeCallingCode), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
+            Text(stringResource(R.string.block_abroad_allowed), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                app.allowedCodes.forEach { code ->
+                    FilterChip(
+                        selected = true,
+                        onClick = { app.saveAllowedCodes(app.allowedCodes - code) },
+                        label = { Text("+$code") },
+                        trailingIcon = {
+                            Icon(Icons.Filled.Close, stringResource(R.string.block_abroad_remove, code), modifier = Modifier.size(16.dp))
+                        },
+                    )
+                }
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CompactTextField(
+                    value = typed,
+                    onValueChange = {
+                        typed = it.filter { c -> c.isDigit() || c == '+' }.take(6)
+                        invalid = false
+                    },
+                    placeholder = stringResource(R.string.block_abroad_add_hint),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Done),
+                    modifier = Modifier.width(120.dp),
+                )
+                TextButton(onClick = ::add, enabled = typed.isNotBlank()) { Text(stringResource(R.string.block_abroad_add)) }
+            }
+            if (invalid) Text(stringResource(R.string.block_abroad_invalid), fontSize = 13.sp, color = MaterialTheme.colorScheme.error)
+        }
+    }
+}
+
+/** Numbers with at least the given number of spam votes are turned away before they ring. */
+@Composable
+private fun BlockSpamSettings() {
+    val app = LocalContext.current.container
+    var votes by remember { mutableStateOf(app.spamBlockVotes.toString()) }
+    Card {
+        Column(Modifier.fillMaxWidth().padding(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.block_spam_title), fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(R.string.block_spam_body), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Spacer(Modifier.width(6.dp))
+                Switch(checked = app.blockSpam, onCheckedChange = app::saveBlockSpam)
+            }
+            Spacer(Modifier.height(8.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.block_spam_votes), fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f))
+                CompactTextField(
+                    value = votes,
+                    onValueChange = { text ->
+                        votes = text.filter(Char::isDigit).take(3)
+                        votes.toIntOrNull()?.takeIf { it >= 1 }?.let(app::saveSpamBlockVotes)
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+                    modifier = Modifier.width(72.dp),
+                )
+            }
+            if (app.blockSpam && !app.spamLookupEnabled) {
+                Text(stringResource(R.string.block_spam_lookup_off), fontSize = 13.sp, color = MaterialTheme.colorScheme.error)
+            }
+        }
     }
 }
 
@@ -708,23 +842,20 @@ private fun WhatsAppCallSettings() {
                 Text(stringResource(R.string.settings_whatsapp_body), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Spacer(Modifier.width(6.dp))
+            // The switch is the setting itself; missing access shows below it, so it can be turned off too.
             Switch(
-                checked = app.whatsAppCallsEnabled && access,
+                checked = app.whatsAppCallsEnabled,
                 onCheckedChange = { on ->
                     app.saveWhatsAppCalls(on)
-                    if (on && !access) {
-                        val listener = ComponentName(context, WhatsAppCallListener::class.java)
-                        context.startActivity(
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                                Intent(Settings.ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS)
-                                    .putExtra(Settings.EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME, listener.flattenToString())
-                            } else {
-                                Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
-                            },
-                        )
-                    }
+                    if (on && !access) WhatsAppCallListener.openAccess(context)
                 },
             )
+        }
+        if (app.whatsAppCallsEnabled && !access) {
+            Column(Modifier.fillMaxWidth().padding(horizontal = 10.dp)) {
+                Text(stringResource(R.string.settings_whatsapp_no_access), fontSize = 13.sp, color = MaterialTheme.colorScheme.error)
+                TextButton(onClick = { WhatsAppCallListener.openAccess(context) }) { Text(stringResource(R.string.lock_calls_action)) }
+            }
         }
         // The pill rides on the WhatsApp calls: it can be on only while they are.
         val calls = app.whatsAppCallsEnabled && access
@@ -1028,7 +1159,7 @@ private fun PillSettings(overlayAllowed: Boolean) {
                 listOf(stringResource(R.string.pill_horizontal), stringResource(R.string.pill_vertical)),
                 selected = if (style.vertical) 1 else 0,
             ) { update(style.copy(vertical = it == 1)) }
-            val locale = LocalConfiguration.current.locales[0]
+            val locale = AppLook.formatLocale(LocalContext.current)
             val percent = remember(locale) { NumberFormat.getPercentInstance(locale) }
             LabeledSlider(
                 label = R.string.settings_pill_size,

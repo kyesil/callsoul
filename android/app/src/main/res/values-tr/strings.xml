@@ -2,7 +2,6 @@
 <resources>
     <string name="tab_home">Ana sayfa</string>
     <string name="favorites">Favoriler</string>
-    <string name="favorites_empty">Henüz favori yok. Kişi sayfasındaki yıldızla ekleyebilirsin.</string>
     <string name="action_favorite">Favorilere ekle</string>
     <string name="action_unfavorite">Favorilerden çıkar</string>
     <string name="tab_keypad">Tuş takımı</string>
@@ -340,6 +339,7 @@
     <string name="settings_whatsapp_pill_body">Aramayı haptan kapat, hoparlörü aç kapa; aramaya dönmek için süreye dokun. Ses kulaklıktaysa küçük bir işaret çıkar.</string>
     <string name="settings_whatsapp_late">Pil optimizasyonu uygulamayı arka planda durdurabilir; o zaman WhatsApp aramalarında hap çıkmaz ve arama kaydedilmez. Bu uygulama için kapat: Uygulama bilgisi\'nde Pil bölümünden Kısıtlamasız ya da Optimize etme\'yi seç. Güç tasarrufu modu yine de durdurabilir.</string>
     <string name="settings_whatsapp_late_open">Uygulama ayarlarını aç</string>
+    <string name="settings_whatsapp_no_access">Bildirim erişimi kapalı; WhatsApp aramaları son aramalara düşmüyor.</string>
     <string name="call_end_spam">Spam olarak bildir ve kapat</string>
     <string name="spam_reported">Spam olarak bildirildi</string>
     <string name="settings_group_calls">Aramalar</string>
@@ -377,6 +377,18 @@
     <string name="contact_info">Kişi bilgisi</string>
     <string name="settings_group_contacts">Kişiler</string>
     <string name="labels_body">Bütün etiketler, içlerindeki kişi sayısıyla</string>
+    <string name="block_abroad_title">Yurt dışından gelen aramaları engelle</string>
+    <string name="block_abroad_body">Listede olmayan ülke kodlarından gelen aramalar çalmadan reddedilir. Arama kaydında görünür, bildirim gelmez. Rehberdeki kişiler her zaman çalar.</string>
+    <string name="block_abroad_home">Ülke kodunuz: +%1$s</string>
+    <string name="block_abroad_allowed">Bu kodlardan gelen aramalar çalar:</string>
+    <string name="block_abroad_add_hint">+49</string>
+    <string name="block_abroad_add">Ekle</string>
+    <string name="block_abroad_remove">+%1$s kaldır</string>
+    <string name="block_abroad_invalid">+49 gibi bir ülke kodu yazın.</string>
+    <string name="block_spam_title">Spam aramaları engelle</string>
+    <string name="block_spam_body">Yeterince kişinin spam olarak işaretlediği numaralar çalmadan reddedilir. Arama kaydında görünür, bildirim gelmez. Rehberdeki kişiler her zaman çalar.</string>
+    <string name="block_spam_votes">Gereken spam oyu</string>
+    <string name="block_spam_lookup_off">Bulut spam ve arayan kimliği kapalı; yalnızca bu telefonun zaten bildiği numaralara bakılır.</string>
     <string name="blocked_title">Engelli numaralar</string>
     <string name="blocked_body">Engellediğin numaraları gör, engeli kaldır ya da yenisini ekle</string>
     <string name="blocked_empty">Engelli numara yok.</string>
@@ -447,6 +459,8 @@
     <string name="tel_links_title">Numara bağlantıları</string>
     <string name="tel_links_body">Başka uygulamalardaki numara bağlantıları hâlâ hangi uygulamayla açılacağını soruyor. Açılan listede Better Call Soul\'u ve “Her zaman”ı seç.</string>
     <string name="tel_links_action">Seç</string>
+    <string name="tel_links_lost">Diğer uygulamalardaki numara bağlantıları yine hangi uygulamayla açılacağını soruyor. Açılan listede Better Call Soul ve “Her zaman”ı seçin.</string>
+    <string name="tel_links_lost_other">Diğer uygulamalardaki numara bağlantıları artık %1$s ile açılıyor. Açılan sayfasında “Varsayılan olarak aç” altında varsayılanlarını temizleyin.</string>
     <string name="tel_links_row">Numara bağlantıları</string>
     <string name="tel_links_asks">Her seferinde soruyor</string>
     <string name="tel_links_other">%1$s ile açılıyor; orada “Varsayılan olarak aç” altından varsayılanları temizle</string>
@@ -454,6 +468,65 @@
     <string name="lock_calls_body">Gelen arama ekranı uyandırır ve kilit ekranının üstünde açılır. Kapalıyken kilitli telefona gelen arama yalnızca bildirim olarak görünür.</string>
     <string name="lock_calls_prompt">Android bu uygulamaya aramaları kilit ekranının üstünde açma izni vermemiş; ekran kapalıyken biri aradığında ekran uyanmaz. Açılan sayfada Better Call Soul için izni açın.</string>
     <string name="lock_calls_action">Aç</string>
+    <string name="whatsapp_calls_prompt">Ayarlarda WhatsApp aramaları açık, ama uygulamanın bildirim erişimi yok; bu yüzden aramalar son aramalara düşmüyor. Açılan sayfada Better Call Soul için izni açın.</string>
+    <string name="setup_whatsapp_body">WhatsApp aramaları da son aramalarda görünsün mü? Uygulama bunları WhatsApp bildirimlerinden okur; açılan sayfada Android bildirim erişimi ister. Yalnızca WhatsApp bildirimlerine bakılır, hiçbir şey telefondan çıkmaz.</string>
     <string name="setup_role_body">Better Call Soul bir telefon uygulaması. Önce varsayılan telefon uygulaması yap; ardından aramaları, son aramaları ve rehberini göstermek için izin ister.</string>
     <string name="setup_role_settings">Varsayılan uygulamaları aç</string>
+    <string name="move_title">Kişileri taşı</string>
+    <string name="move_body">Kişileri telefon, Google ve diğer hesaplarınız arasında taşıyın; karşıda olanlar birleştirilir</string>
+    <string name="move_note">Kişilerin nereden nereye gideceğini seçin. Karşı tarafta aynı numara ya da e-postayla zaten olan kişi onunla birleştirilir; çakışan bilgilerde geldiği yerdeki geçerli olur. Kişilerin fotoğrafı, yıldızı, etiketleri ve zil sesi korunur. Kartım yerinde kalır.</string>
+    <string name="move_from">Kaynak</string>
+    <string name="move_to">Hedef</string>
+    <string name="move_swap">Yer değiştir</string>
+    <string name="move_counting">Sayılıyor…</string>
+    <string name="move_allow_access">Hesabı seçmek için dokunun</string>
+    <string name="move_action">Taşı</string>
+    <string name="move_checking">Karşıda olan kişilere bakılıyor…</string>
+    <string name="move_phone_not_allowed">Bu telefon yeni kişileri bulut hesabına kaydediyor, bu yüzden kişiler telefona taşınamıyor.</string>
+    <string name="move_running">Kişiler taşınıyor</string>
+    <string name="move_progress">%1$d / %2$d</string>
+    <plurals name="move_count">
+        <item quantity="one">%d kişi</item>
+        <item quantity="other">%d kişi</item>
+    </plurals>
+    <plurals name="move_question">
+        <item quantity="one">%2$s kaynağındaki %1$d kişi %3$s hedefine taşınsın mı? Taşınanlar %2$s kaynağından kaldırılır.</item>
+        <item quantity="other">%2$s kaynağındaki %1$d kişi %3$s hedefine taşınsın mı? Taşınanlar %2$s kaynağından kaldırılır.</item>
+    </plurals>
+    <plurals name="move_matches">
+        <item quantity="one">Bunlardan %1$d kişi %2$s hedefinde aynı numara ya da e-postayla zaten var: onlarla birleştirilecek, çakışan bilgilerde %3$s kaynağındaki geçerli olacak.</item>
+        <item quantity="other">Bunlardan %1$d kişi %2$s hedefinde aynı numara ya da e-postayla zaten var: onlarla birleştirilecek, çakışan bilgilerde %3$s kaynağındaki geçerli olacak.</item>
+    </plurals>
+    <plurals name="move_moved">
+        <item quantity="one">%d taşındı</item>
+        <item quantity="other">%d taşındı</item>
+    </plurals>
+    <plurals name="move_merged">
+        <item quantity="one">%d birleştirildi</item>
+        <item quantity="other">%d birleştirildi</item>
+    </plurals>
+    <plurals name="move_failed">
+        <item quantity="one">%d taşınamadı</item>
+        <item quantity="other">%d taşınamadı</item>
+    </plurals>
+    <string name="name_order_title">Ad biçimi</string>
+    <string name="name_order_body">Kişi adları listelerde, çağrılarda ve aramada böyle görünür; listeler de buna göre sıralanır</string>
+    <string name="name_order_given">Ad Soyad</string>
+    <string name="name_order_family">Soyad, Ad</string>
+    <string name="export_title">Kişileri dışarı aktar</string>
+    <string name="export_body">Kişileri vCard ya da CSV dosyasına kaydedin</string>
+    <string name="export_note">Dosya seçtiğiniz yere kaydedilir: telefon, Drive ya da başka bir yer. Dosyayı dikkatli saklayın, herkesin numarası içinde.</string>
+    <string name="export_which">Kişiler</string>
+    <string name="export_all">Tüm kişiler</string>
+    <string name="export_vcf">vCard</string>
+    <string name="export_csv">CSV</string>
+    <string name="export_vcf_hint">Telefonlar, Google Kişiler ve iCloud içe aktarabilir; fotoğraflar dahil.</string>
+    <string name="export_csv_hint">Google Kişiler düzeninde: Google Kişiler ve Outlook içe aktarabilir, Excel açar. Fotoğraf içermez.</string>
+    <string name="export_action">Dışarı aktar</string>
+    <string name="export_running">Dışarı aktarılıyor</string>
+    <plurals name="export_done">
+        <item quantity="one">%d kişi kaydedildi</item>
+        <item quantity="other">%d kişi kaydedildi</item>
+    </plurals>
+    <string name="export_failed">Dosya yazılamadı.</string>
 </resources>

@@ -2,7 +2,6 @@
 <resources>
     <string name="tab_home">الرئيسية</string>
     <string name="favorites">المفضلة</string>
-    <string name="favorites_empty">لا توجد مفضلة بعد. أضفها بالنجمة في صفحة جهة الاتصال.</string>
     <string name="action_favorite">إضافة إلى المفضلة</string>
     <string name="action_unfavorite">إزالة من المفضلة</string>
     <string name="tab_keypad">لوحة المفاتيح</string>
@@ -396,6 +395,7 @@
     <string name="settings_whatsapp_pill_body">أنهِ المكالمة وشغّل مكبّر الصوت من الفقاعة، والمس الوقت للعودة إلى المكالمة. تظهر علامة صغيرة عندما يكون الصوت في سماعة الرأس.</string>
     <string name="settings_whatsapp_late">قد يوقف تحسين البطارية التطبيق في الخلفية، وعندها لا تظهر الفقاعة في مكالمات واتساب ولا تُسجَّل المكالمات. أوقفه لهذا التطبيق: في معلومات التطبيق، ضمن البطارية، اختر «غير مقيّد» أو «عدم التحسين». وقد يوقفه وضع توفير الطاقة رغم ذلك.</string>
     <string name="settings_whatsapp_late_open">فتح إعدادات التطبيق</string>
+    <string name="settings_whatsapp_no_access">الوصول إلى الإشعارات متوقف، لذلك لا تصل مكالمات WhatsApp إلى السجل.</string>
     <string name="call_end_spam">الإبلاغ عن إزعاج وإنهاء المكالمة</string>
     <string name="spam_reported">تم الإبلاغ عن الرقم كمزعج</string>
     <string name="settings_group_calls">المكالمات</string>
@@ -441,6 +441,18 @@
     <string name="contact_info">معلومات جهة الاتصال</string>
     <string name="settings_group_contacts">جهات الاتصال</string>
     <string name="labels_body">كل التصنيفات مع عدد الأشخاص في كل منها</string>
+    <string name="block_abroad_title">حظر المكالمات من الخارج</string>
+    <string name="block_abroad_body">تُرفض المكالمات من رموز الدول غير الموجودة في القائمة دون رنين. تبقى في سجل المكالمات، دون إشعار. جهات الاتصال المحفوظة ترن دائمًا.</string>
+    <string name="block_abroad_home">رمز دولتك: +%1$s</string>
+    <string name="block_abroad_allowed">المكالمات من هذه الرموز ترن:</string>
+    <string name="block_abroad_add_hint">+49</string>
+    <string name="block_abroad_add">إضافة</string>
+    <string name="block_abroad_remove">إزالة +%1$s</string>
+    <string name="block_abroad_invalid">اكتب رمز دولة، مثل +49.</string>
+    <string name="block_spam_title">حظر المكالمات المزعجة</string>
+    <string name="block_spam_body">تُرفض الأرقام التي وسمها عدد كافٍ من الناس كمزعجة دون رنين. تبقى في سجل المكالمات، دون إشعار. جهات الاتصال المحفوظة ترن دائمًا.</string>
+    <string name="block_spam_votes">عدد أصوات الإزعاج المطلوبة</string>
+    <string name="block_spam_lookup_off">البحث السحابي عن الإزعاج ومعرّف المتصل متوقف، لذلك تُفحص فقط الأرقام المعروفة على هذا الهاتف.</string>
     <string name="blocked_title">الأرقام المحظورة</string>
     <string name="blocked_body">اعرض الأرقام التي حظرتها، أو ألغِ حظرها، أو أضف رقمًا</string>
     <string name="blocked_empty">لا توجد أرقام محظورة.</string>
@@ -515,6 +527,8 @@
     <string name="tel_links_title">روابط الأرقام</string>
     <string name="tel_links_body">ما زالت روابط أرقام الهاتف في التطبيقات الأخرى تسأل عن التطبيق الذي يفتحها. اختر Better Call Soul ثم «دائمًا» في القائمة التي تظهر.</string>
     <string name="tel_links_action">اختيار</string>
+    <string name="tel_links_lost">روابط أرقام الهاتف في التطبيقات الأخرى تسأل مجددًا عن التطبيق الذي يفتحها. اختر Better Call Soul و«دائمًا» في القائمة التي ستفتح.</string>
+    <string name="tel_links_lost_other">روابط أرقام الهاتف في التطبيقات الأخرى تفتح الآن في %1$s. في صفحته التي ستفتح، امسح الإعدادات الافتراضية ضمن «الفتح تلقائيًا».</string>
     <string name="tel_links_row">روابط الأرقام</string>
     <string name="tel_links_asks">يسأل في كل مرة</string>
     <string name="tel_links_other">تُفتح في %1$s؛ هناك امسح الإعدادات الافتراضية من «الفتح تلقائيًا»</string>
@@ -522,6 +536,93 @@
     <string name="lock_calls_body">توقظ المكالمة الواردة الشاشة وتفتح فوق شاشة القفل. بدون ذلك تصل المكالمة إلى الهاتف المقفل كإشعار فقط.</string>
     <string name="lock_calls_prompt">لم يسمح Android لهذا التطبيق بفتح المكالمات فوق شاشة القفل، لذلك لن توقظ المكالمة الشاشة المطفأة. فعّل ذلك لـ Better Call Soul في الصفحة التي ستفتح.</string>
     <string name="lock_calls_action">تفعيل</string>
+    <string name="whatsapp_calls_prompt">مكالمات WhatsApp مفعّلة في الإعدادات، لكن التطبيق لا يملك الوصول إلى الإشعارات، لذلك لا تصل إلى السجل. فعّله لـ Better Call Soul في الصفحة التي ستفتح.</string>
+    <string name="setup_whatsapp_body">هل تريد ظهور مكالمات WhatsApp في السجل أيضًا؟ يقرأها التطبيق من إشعارات WhatsApp، لذلك يطلب Android الوصول إلى الإشعارات في الصفحة التي ستفتح. تُقرأ إشعارات WhatsApp فقط ولا يغادر شيء الهاتف.</string>
     <string name="setup_role_body">Better Call Soul تطبيق هاتف. عيّنه أولًا تطبيق الهاتف الافتراضي، ثم يطلب الإذن لعرض مكالماتك وسجل المكالمات وجهات الاتصال.</string>
     <string name="setup_role_settings">فتح التطبيقات الافتراضية</string>
+    <string name="move_title">نقل جهات الاتصال</string>
+    <string name="move_body">انقل جهات الاتصال بين الهاتف وGoogle وحساباتك الأخرى، مع دمج الموجودة مسبقًا</string>
+    <string name="move_note">اختر من أين تُنقل جهات الاتصال وإلى أين. جهة الاتصال الموجودة مسبقًا في الوجهة بالرقم نفسه أو البريد نفسه تُدمج معها، وتكون الأولوية لبيانات المصدر. تحتفظ جهات الاتصال بصورتها ونجمتها وتصنيفاتها ونغمتها. تبقى بطاقتي في مكانها.</string>
+    <string name="move_from">من</string>
+    <string name="move_to">إلى</string>
+    <string name="move_swap">تبديل</string>
+    <string name="move_counting">جارٍ العد…</string>
+    <string name="move_allow_access">انقر لاختيار الحساب</string>
+    <string name="move_action">نقل</string>
+    <string name="move_checking">جارٍ البحث عن جهات الاتصال الموجودة مسبقًا…</string>
+    <string name="move_phone_not_allowed">يحفظ هذا الهاتف جهات الاتصال الجديدة في حساب سحابي، لذلك لا يمكن نقلها إلى الهاتف.</string>
+    <string name="move_running">جارٍ نقل جهات الاتصال</string>
+    <string name="move_progress">%1$d من %2$d</string>
+    <plurals name="move_count">
+        <item quantity="zero">%d جهة اتصال</item>
+        <item quantity="one">%d جهة اتصال</item>
+        <item quantity="two">%d جهة اتصال</item>
+        <item quantity="few">%d جهة اتصال</item>
+        <item quantity="many">%d جهة اتصال</item>
+        <item quantity="other">%d جهة اتصال</item>
+    </plurals>
+    <plurals name="move_question">
+        <item quantity="zero">نقل جهات الاتصال (%1$d) من %2$s إلى %3$s؟ ستُزال من %2$s.</item>
+        <item quantity="one">نقل جهات الاتصال (%1$d) من %2$s إلى %3$s؟ ستُزال من %2$s.</item>
+        <item quantity="two">نقل جهات الاتصال (%1$d) من %2$s إلى %3$s؟ ستُزال من %2$s.</item>
+        <item quantity="few">نقل جهات الاتصال (%1$d) من %2$s إلى %3$s؟ ستُزال من %2$s.</item>
+        <item quantity="many">نقل جهات الاتصال (%1$d) من %2$s إلى %3$s؟ ستُزال من %2$s.</item>
+        <item quantity="other">نقل جهات الاتصال (%1$d) من %2$s إلى %3$s؟ ستُزال من %2$s.</item>
+    </plurals>
+    <plurals name="move_matches">
+        <item quantity="zero">منها %1$d موجودة مسبقًا في %2$s بالرقم نفسه أو البريد نفسه: ستُدمج معها، والأولوية لبيانات %3$s.</item>
+        <item quantity="one">منها %1$d موجودة مسبقًا في %2$s بالرقم نفسه أو البريد نفسه: ستُدمج معها، والأولوية لبيانات %3$s.</item>
+        <item quantity="two">منها %1$d موجودة مسبقًا في %2$s بالرقم نفسه أو البريد نفسه: ستُدمج معها، والأولوية لبيانات %3$s.</item>
+        <item quantity="few">منها %1$d موجودة مسبقًا في %2$s بالرقم نفسه أو البريد نفسه: ستُدمج معها، والأولوية لبيانات %3$s.</item>
+        <item quantity="many">منها %1$d موجودة مسبقًا في %2$s بالرقم نفسه أو البريد نفسه: ستُدمج معها، والأولوية لبيانات %3$s.</item>
+        <item quantity="other">منها %1$d موجودة مسبقًا في %2$s بالرقم نفسه أو البريد نفسه: ستُدمج معها، والأولوية لبيانات %3$s.</item>
+    </plurals>
+    <plurals name="move_moved">
+        <item quantity="zero">نُقل: %d</item>
+        <item quantity="one">نُقل: %d</item>
+        <item quantity="two">نُقل: %d</item>
+        <item quantity="few">نُقل: %d</item>
+        <item quantity="many">نُقل: %d</item>
+        <item quantity="other">نُقل: %d</item>
+    </plurals>
+    <plurals name="move_merged">
+        <item quantity="zero">دُمج: %d</item>
+        <item quantity="one">دُمج: %d</item>
+        <item quantity="two">دُمج: %d</item>
+        <item quantity="few">دُمج: %d</item>
+        <item quantity="many">دُمج: %d</item>
+        <item quantity="other">دُمج: %d</item>
+    </plurals>
+    <plurals name="move_failed">
+        <item quantity="zero">تعذّر: %d</item>
+        <item quantity="one">تعذّر: %d</item>
+        <item quantity="two">تعذّر: %d</item>
+        <item quantity="few">تعذّر: %d</item>
+        <item quantity="many">تعذّر: %d</item>
+        <item quantity="other">تعذّر: %d</item>
+    </plurals>
+    <string name="name_order_title">تنسيق الاسم</string>
+    <string name="name_order_body">هكذا تظهر أسماء جهات الاتصال في القوائم والمكالمات والبحث؛ وتُرتَّب القوائم بالطريقة نفسها</string>
+    <string name="name_order_given">الاسم العائلة</string>
+    <string name="name_order_family">العائلة، الاسم</string>
+    <string name="export_title">تصدير جهات الاتصال</string>
+    <string name="export_body">احفظ جهات الاتصال في ملف vCard أو CSV</string>
+    <string name="export_note">يُحفظ الملف حيث تختار: على الهاتف أو في Drive أو في مكان آخر. احتفظ به بأمان، ففيه أرقام الجميع.</string>
+    <string name="export_which">جهات الاتصال</string>
+    <string name="export_all">كل جهات الاتصال</string>
+    <string name="export_vcf">vCard</string>
+    <string name="export_csv">CSV</string>
+    <string name="export_vcf_hint">تستورده الهواتف وجهات اتصال Google وiCloud، مع الصور.</string>
+    <string name="export_csv_hint">بتنسيق جهات اتصال Google: تستورده جهات اتصال Google وOutlook ويفتحه Excel. بلا صور.</string>
+    <string name="export_action">تصدير</string>
+    <string name="export_running">جارٍ التصدير</string>
+    <plurals name="export_done">
+        <item quantity="zero">حُفظ: %d</item>
+        <item quantity="one">حُفظ: %d</item>
+        <item quantity="two">حُفظ: %d</item>
+        <item quantity="few">حُفظ: %d</item>
+        <item quantity="many">حُفظ: %d</item>
+        <item quantity="other">حُفظ: %d</item>
+    </plurals>
+    <string name="export_failed">تعذّرت كتابة الملف.</string>
 </resources>

@@ -1,0 +1,1 @@
+Erste Version: Telefon und Kontakte in einem, Anrufen und Annehmen per Wischen, Labels für Nummern, Spam-Warnungen aus der Cloud, eine schwebende Anrufkapsel, zehn Sprachen.

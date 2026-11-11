@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="notification_answer">Rispondi</string>
+    <string name="notification_decline">Rifiuta</string>
+    <string name="notification_end">Termina chiamata</string>
+</resources>

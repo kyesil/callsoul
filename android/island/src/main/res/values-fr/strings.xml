@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="overlay_dialing">Appel en cours…</string>
+    <string name="overlay_open">Retour à l\'appel</string>
+    <string name="overlay_answer">Répondre</string>
+    <string name="overlay_end">Raccrocher</string>
+    <string name="overlay_speaker">Haut-parleur</string>
+</resources>

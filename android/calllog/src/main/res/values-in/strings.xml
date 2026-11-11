@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="type_mobile">Seluler</string>
+    <string name="type_home">Rumah</string>
+    <string name="type_work">Kantor</string>
+    <string name="type_other">Lainnya</string>
+    <string name="type_main">Utama</string>
+    <string name="type_fax_work">Faks kantor</string>
+    <string name="type_fax_home">Faks rumah</string>
+    <string name="type_pager">Pager</string>
+    <string name="type_birthday">Ulang tahun</string>
+    <string name="type_anniversary">Hari jadi</string>
+    <string name="type_homepage">Situs</string>
+    <string name="type_blog">Blog</string>
+    <string name="type_profile">Profil</string>
+    <string name="rel_assistant">Asisten</string>
+    <string name="rel_brother">Saudara laki-laki</string>
+    <string name="rel_child">Anak</string>
+    <string name="rel_domestic_partner">Pasangan serumah</string>
+    <string name="rel_father">Ayah</string>
+    <string name="rel_friend">Teman</string>
+    <string name="rel_manager">Manajer</string>
+    <string name="rel_mother">Ibu</string>
+    <string name="rel_parent">Orang tua</string>
+    <string name="rel_partner">Pasangan</string>
+    <string name="rel_referred_by">Dirujuk oleh</string>
+    <string name="rel_relative">Kerabat</string>
+    <string name="rel_sister">Saudara perempuan</string>
+    <string name="rel_spouse">Suami/istri</string>
+    <string name="source_phone">Ponsel</string>
+    <string name="source_sim">SIM</string>
+</resources>

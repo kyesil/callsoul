@@ -158,7 +158,7 @@ class CallLogRepository(context: Context) {
 
     private fun lookUp(number: String): KnownCaller? {
         val uri = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number))
-        val projection = arrayOf(PhoneLookup.DISPLAY_NAME, PhoneLookup.PHOTO_THUMBNAIL_URI)
+        val projection = arrayOf(NameOrder.nameColumn, PhoneLookup.PHOTO_THUMBNAIL_URI)
         return resolver.query(uri, projection, null, null, null)?.use {
             if (it.moveToFirst()) it.getStringOrNull(0)?.takeIf(String::isNotBlank)?.let { name -> KnownCaller(name, it.getStringOrNull(1)) } else null
         }

@@ -12,6 +12,9 @@
 
     <!-- To see which app opens tel: links, so the app can tell whether it is the one. -->
     <queries>
+        <!-- Whether WhatsApp is here, before asking for notification access for its calls. -->
+        <package android:name="com.whatsapp" />
+        <package android:name="com.whatsapp.w4b" />
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="tel" />
@@ -139,6 +142,16 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/log_paths" />
         </provider>
+
+        <!-- Android asks the default phone app about each incoming call; see CallBlocker. -->
+        <service
+            android:name=".CallBlocker"
+            android:exported="true"
+            android:permission="android.permission.BIND_SCREENING_SERVICE">
+            <intent-filter>
+                <action android:name="android.telecom.CallScreeningService" />
+            </intent-filter>
+        </service>
 
         <service
             android:name=".WhatsAppCallListener"

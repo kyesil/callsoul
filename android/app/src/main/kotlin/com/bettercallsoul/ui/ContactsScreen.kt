@@ -101,7 +101,11 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -155,7 +159,9 @@ fun ContactsScreen(
 
     val profile by app.profileRow.collectAsStateWithLifecycle()
 
-    val pool = remember(contacts, inSource) { inSource?.let { ids -> contacts.filter { it.id in ids } } ?: contacts }
+    // The contact standing for My card is shown at the top as My card, not again in the list.
+    val listed = remember(contacts, profile) { contacts.filter { it.id != profile?.id } }
+    val pool = remember(listed, inSource) { inSource?.let { ids -> listed.filter { it.id in ids } } ?: listed }
     val shown = remember(pool, query) {
         val text = query.trim()
         if (text.isEmpty()) pool else pool.filter { it.name.contains(text, ignoreCase = true) }
@@ -414,8 +420,15 @@ private fun ContactListRow(row: ContactRow, selected: Boolean = false, onLongCli
     ) {
         if (selected) SelectedMark(38.dp) else Avatar(row.name, row.photoUri, 38.dp)
         Spacer(Modifier.width(14.dp))
+        // After the name, as much as fits of what the call screen shows under it: small, light and faint.
+        val faint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f)
         Text(
-            row.name,
+            buildAnnotatedString {
+                append(row.name)
+                row.subtitle?.let {
+                    withStyle(SpanStyle(fontSize = 13.sp, fontWeight = FontWeight.Light, color = faint)) { append("  $it") }
+                }
+            },
             fontSize = 17.sp,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -440,6 +453,7 @@ fun ContactDetailScreen(contactId: Long, onCall: (String) -> Unit, onOpen: (Rout
     val cantDelete = stringResource(R.string.contact_not_editable)
     var confirmDelete by remember { mutableStateOf(false) }
     var showQr by remember { mutableStateOf(false) }
+    var showPhoto by remember { mutableStateOf(false) }
     var talked by remember { mutableLongStateOf(0L) }
     val ringtoneTitle = stringResource(R.string.ringtone_title)
     // The system's own picker; its "Default" takes the contact's ringtone away again.
@@ -465,6 +479,7 @@ fun ContactDetailScreen(contactId: Long, onCall: (String) -> Unit, onOpen: (Rout
         // The calls with any of the contact's numbers.
         history = app.callHistory(loaded.phones.map { it.number }, loaded.name)
     }
+    val myCard by app.profileRow.collectAsStateWithLifecycle()
     // Until the contact is read, the bar with the way back, so the page isn't blank.
     val detail = contact ?: run {
         Column(Modifier.fillMaxSize().statusBarsPadding()) { DetailToolbar(onBack) }
@@ -472,7 +487,8 @@ fun ContactDetailScreen(contactId: Long, onCall: (String) -> Unit, onOpen: (Rout
     }
 
     Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState())) {
-        val own = ContactsContract.isProfileId(detail.id)
+        // My card: the profile, or the contact standing for it where the phone hides the profile.
+        val own = ContactsContract.isProfileId(detail.id) || detail.id == myCard?.id
         DetailToolbar(onBack) {
             if (!own) ToolbarIcon(
                 if (detail.starred) Icons.Filled.Star else Icons.Filled.StarBorder,
@@ -505,7 +521,11 @@ fun ContactDetailScreen(contactId: Long, onCall: (String) -> Unit, onOpen: (Rout
             }
         }
         Column(Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Avatar(detail.name, detail.photoUri, 132.dp)
+            // A tap opens the photo at full size, to zoom into.
+            Avatar(
+                detail.name, detail.photoUri, 132.dp,
+                modifier = if (detail.photoUri != null) Modifier.clip(CircleShape).clickable { showPhoto = true } else Modifier,
+            )
             Spacer(Modifier.height(12.dp))
             Text(detail.name, fontSize = 27.sp, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onBackground, modifier = Modifier.padding(horizontal = 16.dp))
             detail.nickname?.let {
@@ -674,6 +694,7 @@ fun ContactDetailScreen(contactId: Long, onCall: (String) -> Unit, onOpen: (Rout
     }
 
     if (showQr) ContactQrDialog(detail) { showQr = false }
+    if (showPhoto) detail.photoUri?.let { PhotoViewer(it, detail.name) { showPhoto = false } }
     if (confirmDelete) {
         ConfirmDialog(
             message = pluralStringResource(R.plurals.delete_contacts_question, 1, 1),

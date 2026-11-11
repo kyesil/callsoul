@@ -45,6 +45,8 @@ import com.bettercallsoul.calllog.DuplicateGroup
 import com.bettercallsoul.calllog.DuplicatePerson
 import com.bettercallsoul.calllog.DuplicateReason
 import com.bettercallsoul.container
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.text.style.TextAlign
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -61,7 +63,7 @@ fun DuplicatesScreen(onOpen: (Route) -> Unit, onBack: () -> Unit) {
     val context = LocalContext.current
     val app = context.container
     val scope = rememberCoroutineScope()
-    val finder = remember { DuplicateContacts(context.contentResolver) }
+    val finder = remember { DuplicateContacts(context.contentResolver, context.container.contacts::sourceShortLabel) }
     var groups by remember { mutableStateOf<List<DuplicateGroup>?>(null) }
     var reload by remember { mutableIntStateOf(0) }
     var askAll by remember { mutableStateOf(false) }
@@ -145,7 +147,6 @@ fun DuplicatesScreen(onOpen: (Route) -> Unit, onBack: () -> Unit) {
 
 @Composable
 private fun DuplicateCard(group: DuplicateGroup, onPerson: (DuplicatePerson) -> Unit, onKeepApart: () -> Unit, onMerge: () -> Unit) {
-    val phone = stringResource(R.string.storage_phone)
     Card {
         Text(
             stringResource(if (group.reason == DuplicateReason.SameNumber) R.string.dup_same_number else R.string.dup_similar_name),
@@ -165,9 +166,22 @@ private fun DuplicateCard(group: DuplicateGroup, onPerson: (DuplicatePerson) -> 
                 Spacer(Modifier.width(14.dp))
                 Column(Modifier.weight(1f)) {
                     Text(person.name, fontSize = 17.sp, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurface)
-                    val details = (person.numbers + person.accounts.map { it ?: phone }.distinct()).joinToString(" · ")
-                    Text(details, fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    if (person.numbers.isNotEmpty()) {
+                        Text(person.numbers.joinToString(" · "), fontSize = 13.sp, maxLines = 2, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
+                // Where this copy comes from, so the same name in Google and in Telegram tell apart.
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    person.sources.joinToString("\n"),
+                    fontSize = 12.sp,
+                    lineHeight = 15.sp,
+                    textAlign = TextAlign.End,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.widthIn(max = 110.dp),
+                )
             }
         }
         Row(

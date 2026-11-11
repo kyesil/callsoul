@@ -1,5 +1,6 @@
 package com.bettercallsoul.ui
 
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.lifecycle.compose.LifecycleStartEffect
 import com.bettercallsoul.container
@@ -103,32 +104,35 @@ sealed interface Route {
     data object Labels : Route
     data object Blocked : Route
     data object Duplicates : Route
+    data object MoveContacts : Route
+    data object ExportContacts : Route
 
     /** A new contact filled from the business card in a scanned QR code; [raw] is the code's text. */
     data class ScannedContact(val raw: String) : Route
 }
 
+/** A page as text: for keeping the open pages, and for keeping each page's own state while it is covered. */
+private fun Route.key(): String = when (this) {
+    is Route.Contact -> "contact:$id"
+    is Route.Number -> "number:$number"
+    is Route.NewContact -> "new:${number.orEmpty()}"
+    is Route.EditContact -> "edit:$id"
+    Route.NewProfile -> "profile"
+    is Route.SearchLabel -> "label:$label"
+    Route.Settings -> "settings"
+    Route.Trash -> "trash"
+    Route.Stats -> "stats"
+    Route.Labels -> "labels"
+    Route.Blocked -> "blocked"
+    Route.Duplicates -> "duplicates"
+    Route.MoveContacts -> "move-contacts"
+    Route.ExportContacts -> "export-contacts"
+    is Route.ScannedContact -> "scan:$raw"
+}
+
 /** Keeps the open screens across a theme or language change, which recreates the activity. */
 private val RouteStackSaver = listSaver<SnapshotStateList<Route>, String>(
-    save = { stack ->
-        stack.map {
-            when (it) {
-                is Route.Contact -> "contact:${it.id}"
-                is Route.Number -> "number:${it.number}"
-                is Route.NewContact -> "new:${it.number.orEmpty()}"
-                is Route.EditContact -> "edit:${it.id}"
-                Route.NewProfile -> "profile"
-                is Route.SearchLabel -> "label:${it.label}"
-                Route.Settings -> "settings"
-                Route.Trash -> "trash"
-                Route.Stats -> "stats"
-                Route.Labels -> "labels"
-                Route.Blocked -> "blocked"
-                Route.Duplicates -> "duplicates"
-                is Route.ScannedContact -> "scan:${it.raw}"
-            }
-        }
-    },
+    save = { stack -> stack.map { it.key() } },
     restore = { saved ->
         saved.mapNotNull {
             val value = it.substringAfter(':', "")
@@ -144,6 +148,8 @@ private val RouteStackSaver = listSaver<SnapshotStateList<Route>, String>(
                 "labels" -> Route.Labels
                 "blocked" -> Route.Blocked
                 "duplicates" -> Route.Duplicates
+                "move-contacts" -> Route.MoveContacts
+                "export-contacts" -> Route.ExportContacts
                 "scan" -> Route.ScannedContact(value)
                 else -> null
             }
@@ -154,9 +160,9 @@ private val RouteStackSaver = listSaver<SnapshotStateList<Route>, String>(
 private enum class Tab(val label: Int, val icon: ImageVector) {
     Home(R.string.tab_home, Icons.Outlined.Home),
     Keypad(R.string.tab_keypad, Icons.Outlined.Dialpad),
+    Search(R.string.tab_search, Icons.Outlined.Search),
     Recents(R.string.tab_recents, Icons.AutoMirrored.Outlined.PhoneCallback),
     Contacts(R.string.tab_contacts, Icons.Outlined.PersonOutline),
-    Search(R.string.tab_search, Icons.Outlined.Search),
 }
 
 @Composable
@@ -172,6 +178,9 @@ fun MainScreen(
     openRequest: Route? = null,
     onOpenRequestHandled: () -> Unit = {},
     lastTouch: () -> Offset = { Offset.Zero },
+    suggestion: Suggestion? = null,
+    onSuggestion: (Suggestion) -> Unit = {},
+    onCloseSuggestion: (Suggestion) -> Unit = {},
 ) {
     val context = LocalContext.current
     var tab by rememberSaveable { mutableStateOf(Tab.Home) }
@@ -183,6 +192,15 @@ fun MainScreen(
     var beforeSearch by rememberSaveable { mutableStateOf(Tab.Home) }
     val stack = rememberSaveable(saver = RouteStackSaver) { mutableStateListOf() }
     val tabStates = rememberSaveableStateHolder()
+    // Each open page keeps its own state while another lies over it (Settings its open group, a list
+    // its scroll), and forgets it once closed.
+    val routeStates = rememberSaveableStateHolder()
+    val liveRoutes = stack.mapIndexed { depth, route -> "$depth:${route.key()}" }
+    var shownRoutes by remember { mutableStateOf(emptyList<String>()) }
+    SideEffect {
+        (shownRoutes - liveRoutes.toSet()).forEach(routeStates::removeState)
+        shownRoutes = liveRoutes
+    }
     // Counts the taps on a tab that is already shown; a new count sends its list to the top.
     var toTop by remember { mutableStateOf(emptyMap<Tab, Int>()) }
     // Closed on Home it stays away only until the app is opened again.
@@ -279,6 +297,9 @@ fun MainScreen(
                         askDefault = !isDefaultDialer && !defaultBannerClosed,
                         onRequestDefault = onRequestDefault,
                         onCloseDefault = { defaultBannerClosed = true },
+                        suggestion = suggestion,
+                        onSuggestion = onSuggestion,
+                        onCloseSuggestion = onCloseSuggestion,
                     )
                     Tab.Keypad -> KeypadScreen(
                         digits = digits,
@@ -329,17 +350,23 @@ fun MainScreen(
                 if (!motion) {
                     (EnterTransition.None togetherWith ExitTransition.None) using null
                 } else {
-                    // Deeper pages come in from the trailing edge, going back reverses it.
+                    // A deeper page comes in from the trailing edge over the one it covers, and going
+                    // back it leaves the same way. Only that upper page moves and fades: the one under
+                    // it stays still and solid, or the tabs below both would show through for a moment.
                     val forward = targetState.first > initialState.first
-                    val sign = (if (forward) 1 else -1) * (if (rtl) -1 else 1)
-                    ((slideInHorizontally(spring(dampingRatio = 0.86f, stiffness = Spring.StiffnessMediumLow)) { it * sign / 3 } +
-                        fadeIn(tween(220))) togetherWith
-                        (slideOutHorizontally(tween(220)) { -it * sign / 8 } + fadeOut(tween(160)))) using null
+                    val edge = if (rtl) -1 else 1
+                    if (forward) {
+                        (slideInHorizontally(spring(dampingRatio = 0.86f, stiffness = Spring.StiffnessMediumLow)) { it * edge / 3 } +
+                            fadeIn(tween(220))) togetherWith ExitTransition.KeepUntilTransitionsFinished
+                    } else {
+                        EnterTransition.None togetherWith
+                            (slideOutHorizontally(tween(220)) { it * edge / 3 } + fadeOut(tween(220)))
+                    }.apply { targetContentZIndex = if (forward) 1f else -1f } using null
                 }
             },
             label = "route",
-        ) { (_, route) ->
-            if (route != null) {
+        ) { (size, route) ->
+            if (route != null) routeStates.SaveableStateProvider("${size - 1}:${route.key()}") {
                 BackHandler(onBack = back)
                 Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).pointerInput(Unit) { }) {
                     when (route) {
@@ -360,6 +387,8 @@ fun MainScreen(
                     Route.Labels -> LabelsScreen(onOpen = open, onBack = back)
                     Route.Blocked -> BlockedScreen(onOpen = open, onBack = back)
                     Route.Duplicates -> DuplicatesScreen(onOpen = open, onBack = back)
+                    Route.MoveContacts -> MoveContactsScreen(onBack = back)
+                    Route.ExportContacts -> ExportContactsScreen(onBack = back)
                     is Route.ScannedContact -> ContactEditorScreen(null, null, scanned = route.raw, onDone = back)
                     }
                 }

@@ -4,8 +4,10 @@ import android.app.Notification
 import android.app.Person
 import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.provider.Settings
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import androidx.core.app.NotificationManagerCompat
@@ -92,7 +94,7 @@ class WhatsAppCallListener : NotificationListenerService() {
 
     override fun onNotificationRemoved(sbn: StatusBarNotification) {
         // Also with the switch turned off in the middle of a call, when no notice comes out of it.
-        if (sbn.packageName in packages() && !callStillShown()) pill.hide()
+        if (sbn.packageName in watched() && !callStillShown()) pill.hide()
         val notice = notice(sbn) ?: return
         if (notice.phase == CallPhase.Missed) return
         // One stage of a call may give way to the next as a separate notification: the call goes on.
@@ -109,7 +111,7 @@ class WhatsAppCallListener : NotificationListenerService() {
     }
 
     private fun notice(sbn: StatusBarNotification): CallNotice? {
-        if (sbn.packageName !in packages() || !container.whatsAppCallsEnabled) return null
+        if (sbn.packageName !in watched() || !container.whatsAppCallsEnabled) return null
         val notification = sbn.notification
         val extras = notification.extras
         val notice = WhatsAppNotices.read(
@@ -137,8 +139,6 @@ class WhatsAppCallListener : NotificationListenerService() {
         return id?.removeSuffix(WHATSAPP_ID)?.takeIf { it.all(Char::isDigit) }?.let { "+$it" }.orEmpty()
     }
 
-    private fun packages() = if (BuildConfig.DEBUG) WHATSAPP_PACKAGES + "com.android.shell" else WHATSAPP_PACKAGES
-
     private fun store(call: FinishedCall) {
         val known = WhatsAppTelecomCalls.covers(call.date)
         DebugLog.i(TAG, "call ${call.outcome} video=${call.video} seconds=${call.seconds} telecomHasIt=$known")
@@ -156,12 +156,30 @@ class WhatsAppCallListener : NotificationListenerService() {
         private const val LATE_MILLIS = 10_000L
         private const val ANY_LATE_MILLIS = 30_000L
 
+        /** Debug builds also take the shell's test notifications for WhatsApp's. */
+        private fun watched() = if (BuildConfig.DEBUG) WHATSAPP_PACKAGES + "com.android.shell" else WHATSAPP_PACKAGES
+
         @Volatile
         private var connected = false
 
         /** Whether the user has given this app notification access in Android's settings. */
         fun hasAccess(context: Context): Boolean =
             context.packageName in NotificationManagerCompat.getEnabledListenerPackages(context)
+
+        /** Whether WhatsApp or WhatsApp Business is on the phone, so there is something to listen to. */
+        fun whatsAppInstalled(context: Context): Boolean = watched().any { app ->
+            runCatching { context.packageManager.getPackageInfo(app, 0) }.isSuccess
+        }
+
+        /** Only the user can give notification access, on Android's page for this listener. */
+        fun openAccess(context: Context) {
+            val listener = ComponentName(context, WhatsAppCallListener::class.java)
+            val detail = Intent(Settings.ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS)
+                .putExtra(Settings.EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME, listener.flattenToString())
+            val list = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && runCatching { context.startActivity(detail) }.isSuccess) return
+            runCatching { context.startActivity(list) }
+        }
 
         /**
          * Some phones, Honor's among them, don't connect a listener again after the app was updated

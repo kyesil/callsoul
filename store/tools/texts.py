@@ -16,12 +16,26 @@ SHORT = {
     "en-US": "Phone and contacts in one: labels, spam warnings and swipe to call.",
     "ar": "الهاتف وجهات الاتصال معًا: تسميات وتحذير من المزعج واتصال بالسحب.",
     "ru-RU": "Звонилка и контакты вместе: метки, антиспам и звонок смахиванием.",
+    "de-DE": "Telefon und Kontakte in einem: Labels, Spam-Warnungen und Wischen zum Anrufen.",
+    "es-ES": "Teléfono y contactos en uno: etiquetas, avisos de spam y desliza para llamar.",
+    "es-419": "Teléfono y contactos en uno: etiquetas, avisos de spam y desliza para llamar.",
+    "fr-FR": "Téléphone et contacts réunis : libellés, alertes spam et balayage pour appeler.",
+    "it-IT": "Telefono e contatti in uno: etichette, avvisi di spam e scorri per chiamare.",
+    "pt-BR": "Telefone e contatos juntos: marcadores, alertas de spam e deslize para ligar.",
+    "id": "Telepon dan kontak jadi satu: label, peringatan spam, dan geser untuk memanggil.",
 }
 RELEASE = {
-    "tr-TR": "İlk sürüm: telefon ve rehber bir arada, kaydırarak arama ve cevaplama, numara etiketleri, bulut spam uyarısı, arama hapı, dört dil.",
-    "en-US": "First release: phone and contacts in one, swipe to call and answer, number labels, cloud spam warnings, a floating call pill, four languages.",
-    "ar": "الإصدار الأول: الهاتف وجهات الاتصال معًا، الاتصال والرد بالسحب، تسميات الأرقام، تحذير من المكالمات المزعجة، فقاعة المكالمة، أربع لغات.",
-    "ru-RU": "Первая версия: звонилка и контакты вместе, звонок и ответ смахиванием, метки номеров, облачный антиспам, плашка вызова, четыре языка.",
+    "tr-TR": "İlk sürüm: telefon ve rehber bir arada, kaydırarak arama ve cevaplama, numara etiketleri, bulut spam uyarısı, arama hapı, on dil.",
+    "en-US": "First release: phone and contacts in one, swipe to call and answer, number labels, cloud spam warnings, a floating call pill, ten languages.",
+    "ar": "الإصدار الأول: الهاتف وجهات الاتصال معًا، الاتصال والرد بالسحب، تسميات الأرقام، تحذير من المكالمات المزعجة، فقاعة المكالمة، عشر لغات.",
+    "ru-RU": "Первая версия: звонилка и контакты вместе, звонок и ответ смахиванием, метки номеров, облачный антиспам, плашка вызова, десять языков.",
+    "de-DE": "Erste Version: Telefon und Kontakte in einem, Anrufen und Annehmen per Wischen, Labels für Nummern, Spam-Warnungen aus der Cloud, eine schwebende Anrufkapsel, zehn Sprachen.",
+    "es-ES": "Primera versión: teléfono y contactos en uno, desliza para llamar y responder, etiquetas para números, avisos de spam en la nube, una píldora de llamada flotante, diez idiomas.",
+    "fr-FR": "Première version : téléphone et contacts réunis, balayer pour appeler et répondre, libellés pour les numéros, alertes spam dans le cloud, une pastille d'appel flottante, dix langues.",
+    "it-IT": "Prima versione: telefono e contatti in uno, scorri per chiamare e rispondere, etichette per i numeri, avvisi di spam dal cloud, una pillola di chiamata mobile, dieci lingue.",
+    "pt-BR": "Primeira versão: telefone e contatos juntos, deslize para ligar e atender, marcadores para números, alertas de spam na nuvem, uma cápsula de chamada flutuante, dez idiomas.",
+    "id": "Versi pertama: telepon dan kontak jadi satu, geser untuk memanggil dan menjawab, label untuk nomor, peringatan spam dari cloud, pil panggilan mengambang, sepuluh bahasa.",
+    "es-419": "Primera versión: teléfono y contactos en uno, desliza para llamar y responder, etiquetas para números, avisos de spam en la nube, una píldora de llamada flotante, diez idiomas.",
 }
 
 for lang in SHORT:

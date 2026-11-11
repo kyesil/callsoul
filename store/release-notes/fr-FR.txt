@@ -1,0 +1,1 @@
+Première version : téléphone et contacts réunis, balayer pour appeler et répondre, libellés pour les numéros, alertes spam dans le cloud, une pastille d'appel flottante, dix langues.

@@ -8,6 +8,7 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Rect
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.content.ContextCompat
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.createBitmap
@@ -25,24 +26,52 @@ import kotlinx.coroutines.withContext
 object FavoriteShortcuts {
     const val ACTION_CALL = "dev.yesil.callsoul.action.CALL_FAVORITE"
     const val EXTRA_CONTACT = "contact_id"
+    const val ACTION_ADD_CONTACT = "dev.yesil.callsoul.action.ADD_CONTACT"
+    private const val ID_ADD_CONTACT = "add-contact"
+    private const val ADD_COLOR = 0xFF3B6FD4.toInt()
 
     /** An adaptive icon is 108dp, and the launcher's mask shows the middle of it. */
     private const val ICON_DP = 108
 
+    /**
+     * "Add contact" comes first, so the launcher puts it nearest the icon; it is there with no
+     * favourites too, so the menu is never empty. The favourites follow.
+     */
     suspend fun update(context: Context, favorites: List<ContactRow>) = withContext(Dispatchers.IO) {
         val limit = ShortcutManagerCompat.getMaxShortcutCountPerActivity(context)
-        val shortcuts = favorites.take(limit).mapIndexed { rank, contact ->
+        val add = ShortcutInfoCompat.Builder(context, ID_ADD_CONTACT)
+            .setShortLabel(context.getString(R.string.action_add_contact))
+            .setIcon(IconCompat.createWithAdaptiveBitmap(addIcon(context)))
+            .setRank(0)
+            .setIntent(Intent(context, MainActivity::class.java).setAction(ACTION_ADD_CONTACT))
+            .build()
+        val people = favorites.take(limit - 1).mapIndexed { rank, contact ->
             val call = Intent(context, MainActivity::class.java)
                 .setAction(ACTION_CALL)
                 .putExtra(EXTRA_CONTACT, contact.id)
             ShortcutInfoCompat.Builder(context, id(contact.id))
                 .setShortLabel(contact.name)
                 .setIcon(IconCompat.createWithAdaptiveBitmap(icon(context, contact)))
-                .setRank(rank)
+                .setRank(rank + 1)
                 .setIntent(call)
                 .build()
         }
-        ShortcutManagerCompat.setDynamicShortcuts(context, shortcuts)
+        ShortcutManagerCompat.setDynamicShortcuts(context, listOf(add) + people)
+    }
+
+    /** The person with a plus, white on the app's blue, the size of an adaptive icon. */
+    private fun addIcon(context: Context): Bitmap {
+        val size = (ICON_DP * context.resources.displayMetrics.density).roundToInt()
+        val bitmap = createBitmap(size, size)
+        val canvas = Canvas(bitmap)
+        canvas.drawColor(ADD_COLOR)
+        val glyph = (size * 0.36f).roundToInt()
+        val start = (size - glyph) / 2
+        ContextCompat.getDrawable(context, R.drawable.ic_shortcut_add_contact)?.run {
+            setBounds(start, start, start + glyph, start + glyph)
+            draw(canvas)
+        }
+        return bitmap
     }
 
     /** Tells the launcher which ones get used, so it can rank them. */

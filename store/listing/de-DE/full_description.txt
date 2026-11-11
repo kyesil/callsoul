@@ -1,0 +1,55 @@
+Better Call Soul vereint Telefon und Kontakte in einer ruhigen, schnellen App. Keine Werbung, keine Extra-Bildschirme. Große, ruhige Layouts für eine Hand: Finde sofort, wen du suchst, und sieh auf einen Blick, wer anruft.
+
+KONTAKTE AUFGERÄUMT HALTEN
+Der Kurier, der Hausverwalter, der Klempner von neulich: Sie gehören nicht in dein Adressbuch. Gib jeder Nummer ein eigenes Label, und sie erscheint beim nächsten Mal unter diesem Namen. Labels bleiben außerhalb deiner Kontakte, die Liste bleibt übersichtlich.
+
+WISCHEN ZUM ANRUFEN
+• Wische eine Zeile nach rechts zum Anrufen, nach links für Nachrichten. Links öffnet WhatsApp oder SMS, nach Wahl.
+• Scrollbare Leisten mit Favoriten und deinen häufigsten Kontakten: Tippen öffnet das Profil, doppelt tippen ruft an.
+• Halte das App-Symbol gedrückt, und deine Favoriten sind sofort da.
+• Der Tab „Suche“ durchsucht Kontakte und Anrufe gleichzeitig und hebt Treffer hervor.
+• Auf der Tastatur werden Namen (T9) und Nummern schon beim Tippen gefunden.
+
+LAUTSPRECHER MIT EINEM TIPP
+Ein Tipp schaltet auf Lautsprecher, auch wenn Bluetooth verbunden ist, ein zweiter wieder zurück. Kein Suchen in Audiomenüs.
+
+DIE ANRUFKAPSEL
+Während eines Anrufs in eine andere App gewechselt? Eine kleine Anrufkapsel begleitet dich am Bildschirmrand. Lautsprecher an, auflegen oder zurück zum Anruf, mit einem Tipp. Seite, Größe, Tastenreihenfolge und Transparenz bestimmst du.
+
+GEGEN SPAM
+• Ruft eine unbekannte Nummer an, siehst du Spam-Meldungen und, falls bekannt, den Anrufernamen.
+• Mitten im Gespräch durchschaut? „Als Spam melden und auflegen“ beendet den Anruf und meldet die Nummer mit einem Tipp.
+• Die Frage „War das Spam?“ nach dem Anruf lässt die Daten wachsen.
+• Nummern aus deinen Kontakten werden nie gesendet; die Funktion ist in den Einstellungen abschaltbar.
+
+IN DEN EINSTELLUNGEN
+• Lautlos, wenn umgedreht: Liegt das Telefon mit dem Display nach unten, klingelt es nicht; Umdrehen macht einen klingelnden Anruf stumm.
+• Mit Nachricht ablehnen: Schreib deine eigenen SMS-Schnellantworten.
+• WhatsApp-Anrufe in der Anrufliste, mit Symbol für Sprach- oder Videoanruf. Optional; dafür ist Benachrichtigungszugriff nötig.
+• Wie weit vom Rand Wischgesten beginnen, damit sie nie mit Androids Zurück-Geste kollidieren.
+• Aussehen der Anrufkapsel, Animationen und vier Sprachen: Türkisch, Englisch, Arabisch und Russisch.
+
+STATISTIK
+Sieh nach Woche, Monat und Jahr, wie lange du telefoniert hast, mit wie vielen Leuten, wie viel davon mit Nummern außerhalb deiner Kontakte und mit wem du am meisten sprichst. Alles bleibt auf deinem Telefon, höchstens ein Jahr lang.
+
+WENN EIN ANRUF KOMMT
+• Nutzt du das Telefon, kommt eine kleine Benachrichtigung statt Vollbild, damit nichts unterbrochen wird.
+• Zum Annehmen oder Ablehnen wischen, damit es nicht versehentlich in der Tasche passiert.
+• Mit einem Tipp aus der Benachrichtigung zum entgangenen Anruf zurückrufen.
+
+WÄHREND EINES ANRUFS
+• Halten, Anruf hinzufügen, zwischen Anrufen wechseln und sie zusammenführen.
+• Weitere Nummern, E-Mail, Arbeitsdaten und Notiz des Kontakts stehen dezent unter dem Namen.
+• Der Bildschirm geht aus, wenn du das Telefon ans Ohr hältst.
+
+KONTAKTE
+• Alle Felder von Google Kontakte: Telefon, E-Mail, Adresse, Geburtstag, Beziehungen, eigene Felder, Labels, Notizen und ein Foto von der Kamera.
+• In einem deiner Google-Konten oder auf dem Telefon speichern und Kontakte zwischen ihnen verschieben.
+• Mehrere auswählen und löschen; gelöschte Kontakte warten 30 Tage im Papierkorb.
+• Eine Nummer zu einem vorhandenen Kontakt hinzufügen und einen Kontakt als Karte teilen.
+• QR-Code einer Visitenkarte scannen, und der neue Kontakt füllt sich selbst aus.
+
+DATENSCHUTZ
+Deine Kontakte und dein Anrufverlauf bleiben auf deinem Telefon. Die Cloud-Spamabfrage betrifft nur Nummern außerhalb deiner Kontakte und lässt sich ausschalten. Details stehen in der Datenschutzerklärung.
+
+Um Better Call Soul zu nutzen, lege es als Standard-Telefon-App fest.

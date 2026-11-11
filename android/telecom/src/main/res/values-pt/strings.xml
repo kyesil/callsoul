@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="notification_answer">Atender</string>
+    <string name="notification_decline">Recusar</string>
+    <string name="notification_end">Encerrar chamada</string>
+</resources>

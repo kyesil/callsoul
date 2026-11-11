@@ -30,6 +30,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -232,6 +233,8 @@ fun LazyListScope.recentCalls(
         item(key = "group-$day") {
             Card {
                 rows.forEach { row ->
+                    // Each row keeps its own state and gestures when the list reorders.
+                    key(row.key) {
                     CallRow(
                         entry = row.entry,
                         count = row.count,
@@ -243,6 +246,7 @@ fun LazyListScope.recentCalls(
                         selected = row.key in picked,
                         onPick = { onPick(row) },
                     )
+                    }
                 }
             }
         }

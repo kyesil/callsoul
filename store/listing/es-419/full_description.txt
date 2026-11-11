@@ -1,0 +1,55 @@
+Better Call Soul reúne tu teléfono y tus contactos en una app tranquila y rápida. Sin anuncios ni pantallas de más. Diseños grandes y serenos para una mano: encuentra al instante a quien buscas y sabe de un vistazo quién te llama.
+
+CONTACTOS SIEMPRE ORDENADOS
+El repartidor, el administrador del edificio, aquel técnico que vino una sola vez: no tienen por qué estar en tu agenda. Ponle tu propia etiqueta a cualquier número y la próxima vez aparecerá con ese nombre. Las etiquetas quedan fuera de tus contactos y tu lista sigue limpia.
+
+DESLIZA PARA LLAMAR
+• Desliza una fila a la derecha para llamar y a la izquierda para enviar un mensaje. A la izquierda se abre WhatsApp o SMS, como prefieras.
+• Filas deslizables con tus favoritos y las personas con las que más hablas: toca para ver el perfil y toca dos veces para llamar.
+• Mantén presionado el icono de la app y tendrás tus favoritos a mano.
+• La pestaña Buscar busca en contactos y llamadas a la vez y resalta la coincidencia.
+• En el teclado, los nombres (T9) y los números aparecen mientras escribes.
+
+ALTAVOZ CON UN TOQUE
+Un toque activa el altavoz aunque haya Bluetooth conectado, y otro lo desactiva. Sin rebuscar en menús de audio.
+
+LA PÍLDORA DE LLAMADA
+¿Te cambiaste a otra app durante una llamada? Una pequeña píldora de llamada te acompaña en el borde de la pantalla. Activa el altavoz, cuelga o vuelve a la llamada con un toque. Tú eliges su lado, tamaño, orden de los botones y transparencia.
+
+CONTRA EL SPAM
+• Cuando llama un número desconocido, ves los avisos de spam y el nombre de quien llama, si lo hay.
+• ¿Te diste cuenta a mitad de la llamada? "Marcar como spam y colgar" termina la llamada e informa del número con un toque.
+• La pregunta "¿Era spam?" después de la llamada ayuda a que crezcan los datos.
+• Los números de tus contactos nunca se envían, y puedes desactivar la función en Ajustes.
+
+QUÉ HAY EN AJUSTES
+• Silencio boca abajo: un teléfono boca abajo no suena, y al darle la vuelta se silencia una llamada que está sonando.
+• Rechazar con un mensaje: escribe tus propias respuestas rápidas por SMS.
+• Ve las llamadas de WhatsApp en tus recientes, con un icono de voz o video. Es opcional y necesita acceso a las notificaciones.
+• A qué distancia del borde empiezan los deslizamientos, para que nunca choquen con el gesto Atrás de Android.
+• El aspecto de la píldora de llamada, las animaciones y cuatro idiomas: turco, inglés, árabe y ruso.
+
+ESTADÍSTICAS
+Consulta por semana, mes y año cuánto hablaste, con cuántas personas, cuánto fue con números fuera de tus contactos y con quién hablas más. Todo se queda en tu teléfono y se guarda un año como máximo.
+
+CUANDO ENTRA UNA LLAMADA
+• Si estás usando el teléfono, una pequeña notificación en vez de la pantalla completa, para que nada se interrumpa.
+• Desliza para responder o rechazar, así no pasa por accidente en el bolsillo.
+• Devuelve la llamada desde la notificación de llamada perdida con un toque.
+
+DURANTE UNA LLAMADA
+• Retener, agregar una llamada, alternar entre llamadas y combinarlas.
+• Otros números, correo, datos de trabajo y nota del contacto, discretamente bajo el nombre.
+• La pantalla se apaga cuando acercas el teléfono a la oreja.
+
+CONTACTOS
+• Todos los campos de Contactos de Google: teléfono, correo, dirección, cumpleaños, relaciones, campos personalizados, etiquetas, notas y una foto de la cámara.
+• Guarda en cualquiera de tus cuentas de Google o en el teléfono, y mueve contactos entre ellas.
+• Selecciona varios y elimínalos; los eliminados esperan 30 días en la papelera.
+• Agrega un número a un contacto existente y comparte un contacto como tarjeta.
+• Escanea el código QR de una tarjeta de visita y el nuevo contacto se completa solo.
+
+PRIVACIDAD
+Tus contactos y tu historial de llamadas se quedan en tu teléfono. La consulta de spam en la nube solo abarca números fuera de tus contactos y se puede desactivar. Más detalles en la política de privacidad.
+
+Para usar Better Call Soul, hazla tu app de teléfono predeterminada.

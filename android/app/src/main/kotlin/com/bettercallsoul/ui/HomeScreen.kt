@@ -108,6 +108,9 @@ fun HomeScreen(
     askDefault: Boolean = false,
     onRequestDefault: () -> Unit = {},
     onCloseDefault: () -> Unit = {},
+    suggestion: Suggestion? = null,
+    onSuggestion: (Suggestion) -> Unit = {},
+    onCloseSuggestion: (Suggestion) -> Unit = {},
     toTop: Int = 0,
 ) {
     val list = rememberLazyListState()
@@ -158,18 +161,15 @@ fun HomeScreen(
         item { LargeTitle(stringResource(R.string.title_phone), null, height = HomeTitleHeight) }
         if (askDefault) {
             item(key = "default-app") { DefaultDialerBanner(onRequestDefault, onClose = onCloseDefault) }
-        }
-        item { DayHeader(stringResource(R.string.favorites)) }
-        if (favorites.isEmpty()) {
-            item {
-                Text(
-                    stringResource(R.string.favorites_empty),
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 22.dp, vertical = 8.dp),
-                )
+        } else if (suggestion != null) {
+            // Once the app is the default, the next step of the setup in the same place, one at a time.
+            item(key = "suggestion-${suggestion.name}") {
+                SuggestionBanner(suggestion, onAccept = { onSuggestion(suggestion) }, onClose = { onCloseSuggestion(suggestion) })
             }
-        } else {
+        }
+        // Without favourites the block isn't shown at all; the star on a contact adds one.
+        if (favorites.isNotEmpty()) {
+            item { DayHeader(stringResource(R.string.favorites)) }
             item(key = "favorites") {
                 Card {
                     FavoritesRow(
@@ -265,7 +265,9 @@ private fun PersonTile(
             }
         }
         Spacer(Modifier.height(6.dp))
-        // A name too long for the tile slides along to show the rest; with animations off it is cut short.
+        // A name too long for the tile slides along to show the rest, twice and then rests: sliding for
+        // ever would redraw the screen many times a second, under every page laid over it too, costing
+        // battery and slowing work like a move of contacts. With animations off it is cut short.
         val motion = LocalMotion.current
         Text(
             name,
@@ -274,7 +276,7 @@ private fun PersonTile(
             overflow = if (motion) TextOverflow.Clip else TextOverflow.Ellipsis,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = if (motion) Modifier.basicMarquee(iterations = Int.MAX_VALUE) else Modifier,
+            modifier = if (motion) Modifier.basicMarquee(iterations = 2) else Modifier,
         )
     }
 }

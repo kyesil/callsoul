@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -70,6 +71,10 @@ fun SwipeRow(onCall: () -> Unit, onMessage: () -> Unit, enabled: Boolean = true,
     var rowLeft by remember { mutableFloatStateOf(0f) }
     val armed by remember { derivedStateOf { width > 0 && abs(offset) >= width * THRESHOLD } }
     val settling = remember { arrayOfNulls<Job>(1) }
+    // The gesture below is set up once and outlives a change of row: a list that reorders puts another
+    // person here, so it must call whoever the row shows now, not whoever it showed first.
+    val call by rememberUpdatedState(onCall)
+    val message by rememberUpdatedState(onMessage)
 
     LaunchedEffect(armed) {
         if (armed) haptics.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
@@ -77,7 +82,7 @@ fun SwipeRow(onCall: () -> Unit, onMessage: () -> Unit, enabled: Boolean = true,
 
     fun settle(act: Boolean) {
         if (act && armed) {
-            if (offset > 0) onCall() else onMessage()
+            if (offset > 0) call() else message()
         }
         settling[0]?.cancel()
         settling[0] = scope.launch {

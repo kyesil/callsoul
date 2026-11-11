@@ -19,7 +19,10 @@ enum class ThemeChoice { System, Light, Dark }
  */
 object AppLook {
     /** The languages the app is written in, by tag; the empty tag follows the phone. */
-    val LANGUAGES = listOf("", "en", "tr", "ru", "ar")
+    val LANGUAGES = listOf("", "en", "tr", "de", "es", "fr", "it", "pt", "id", "ru", "ar")
+
+    /** Android may still call Indonesian by its old code, "in". */
+    private fun normal(language: String) = if (language == "in") "id" else language
 
     private const val PREFS = "settings"
     private const val KEY_LANGUAGE = "app_language"
@@ -38,7 +41,7 @@ object AppLook {
     fun language(context: Context): String =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             context.getSystemService(LocaleManager::class.java).applicationLocales
-                .takeUnless { it.isEmpty }?.get(0)?.language.orEmpty()
+                .takeUnless { it.isEmpty }?.get(0)?.language.orEmpty().let(::normal)
         } else {
             context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY_LANGUAGE, "").orEmpty()
         }
@@ -54,8 +57,10 @@ object AppLook {
         }
     }
 
-    /** Before Android 13: the activity's context in the picked language. */
+    /** Before Android 13: the activity's context in the picked language. Dates follow it on every version. */
     fun wrap(base: Context): Context {
+        // Android sets the phone's language as the default again whenever an activity starts.
+        matchFormats(base)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) return base
         val tag = base.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY_LANGUAGE, "").orEmpty()
         if (tag.isEmpty()) return base
@@ -65,6 +70,24 @@ object AppLook {
             setLayoutDirection(locale)
         }
         return base.createConfigurationContext(config)
+    }
+
+    /**
+     * Dates, times and numbers in the language the app's words are in. On a phone in a language the
+     * app isn't written in (German, say) Android shows the English words, but would still write
+     * dates the German way; this makes them English too. With several phone languages the first one
+     * the app knows wins, as it does for the words.
+     */
+    fun matchFormats(context: Context) {
+        val chosen = formatLocale(context)
+        if (Locale.getDefault() != chosen) Locale.setDefault(chosen)
+    }
+
+    /** The locale to write dates and numbers in: the first of [context]'s the app is written in, else English. */
+    fun formatLocale(context: Context): Locale {
+        val locales = context.resources.configuration.locales
+        val known = LANGUAGES.filter(String::isNotEmpty).toSet()
+        return (0 until locales.size()).map(locales::get).firstOrNull { normal(it.language) in known } ?: Locale.ENGLISH
     }
 
     /** A language's name in that language, or [system] for the empty tag. */

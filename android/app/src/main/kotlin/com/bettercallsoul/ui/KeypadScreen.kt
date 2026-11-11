@@ -1,5 +1,6 @@
 package com.bettercallsoul.ui
 
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.outlined.PersonAddAlt
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.SpanStyle
@@ -372,17 +373,29 @@ fun DefaultDialerBanner(onRequestDefault: () -> Unit, onClose: (() -> Unit)? = n
         }
         return
     }
+    SetupBanner(R.string.setup_default_title, stringResource(R.string.setup_default_body), R.string.setup_default_action, onRequestDefault, onClose)
+}
+
+/** A card on top of the home screen that suggests one step of the setup: a title, a line, a button. */
+@Composable
+fun SetupBanner(
+    @StringRes title: Int,
+    body: String,
+    @StringRes action: Int,
+    onAction: () -> Unit,
+    onClose: (() -> Unit)? = null,
+) {
     Card(Modifier.padding(top = 4.dp)) {
         Box {
             Column(Modifier.padding(start = 20.dp, end = if (onClose != null) 44.dp else 20.dp, top = 14.dp, bottom = 14.dp)) {
-                Text(stringResource(R.string.setup_default_title), color = MaterialTheme.colorScheme.onSurface)
+                Text(stringResource(title), color = MaterialTheme.colorScheme.onSurface)
                 Text(
-                    stringResource(R.string.setup_default_body),
+                    body,
                     fontSize = 13.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                TextButton(onClick = onRequestDefault, modifier = Modifier.align(Alignment.End)) {
-                    Text(stringResource(R.string.setup_default_action))
+                TextButton(onClick = onAction, modifier = Modifier.align(Alignment.End)) {
+                    Text(stringResource(action))
                 }
             }
             if (onClose != null) {

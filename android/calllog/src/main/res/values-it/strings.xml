@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="type_mobile">Cellulare</string>
+    <string name="type_home">Casa</string>
+    <string name="type_work">Lavoro</string>
+    <string name="type_other">Altro</string>
+    <string name="type_main">Principale</string>
+    <string name="type_fax_work">Fax lavoro</string>
+    <string name="type_fax_home">Fax casa</string>
+    <string name="type_pager">Cercapersone</string>
+    <string name="type_birthday">Compleanno</string>
+    <string name="type_anniversary">Anniversario</string>
+    <string name="type_homepage">Sito web</string>
+    <string name="type_blog">Blog</string>
+    <string name="type_profile">Profilo</string>
+    <string name="rel_assistant">Assistente</string>
+    <string name="rel_brother">Fratello</string>
+    <string name="rel_child">Figlio</string>
+    <string name="rel_domestic_partner">Convivente</string>
+    <string name="rel_father">Padre</string>
+    <string name="rel_friend">Amico</string>
+    <string name="rel_manager">Manager</string>
+    <string name="rel_mother">Madre</string>
+    <string name="rel_parent">Genitore</string>
+    <string name="rel_partner">Partner</string>
+    <string name="rel_referred_by">Presentato da</string>
+    <string name="rel_relative">Parente</string>
+    <string name="rel_sister">Sorella</string>
+    <string name="rel_spouse">Coniuge</string>
+    <string name="source_phone">Telefono</string>
+    <string name="source_sim">SIM</string>
+</resources>

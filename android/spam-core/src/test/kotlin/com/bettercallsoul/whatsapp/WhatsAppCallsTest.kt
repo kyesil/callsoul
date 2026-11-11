@@ -46,6 +46,31 @@ class WhatsAppNoticesTest {
         assertEquals(CallNotice("Ali", video = false, phase = CallPhase.Ringing), read("Ali", "Eingehender Sprachanruf"))
     }
 
+    /** The newer languages, in the words WhatsApp uses for them. */
+    @Test
+    fun theOtherLanguages() {
+        val ringing = CallNotice("Ali", video = false, phase = CallPhase.Ringing)
+        assertEquals(ringing, read("Ali", "Llamada de voz entrante"))
+        assertEquals(ringing, read("Ali", "Chamada de voz recebida"))
+        assertEquals(ringing, read("Ali", "Appel vocal entrant"))
+        assertEquals(ringing, read("Ali", "Chiamata vocale in arrivo"))
+        assertEquals(ringing, read("Ali", "Panggilan suara masuk"))
+        assertEquals(true, read("Ali", "Videollamada entrante")?.video)
+        assertEquals(true, read("Ali", "Chamada de vídeo recebida")?.video)
+        assertEquals(true, read("Ali", "Appel vidéo entrant")?.video)
+        assertEquals(true, read("Ali", "Eingehender Videoanruf")?.video)
+        assertEquals(CallPhase.Missed, read("Ali", "Verpasster Sprachanruf", category = null)?.phase)
+        assertEquals(CallPhase.Missed, read("Llamada perdida", "Ali", category = null)?.phase)
+        assertEquals(CallPhase.Missed, read("Ali", "Appel vocal manqué", category = null)?.phase)
+        assertEquals(CallPhase.Missed, read("Ali", "Chiamata vocale persa", category = null)?.phase)
+        assertEquals(CallPhase.Missed, read("Ali", "Panggilan suara tak terjawab", category = null)?.phase)
+        assertEquals(CallPhase.Ongoing, read("Ali", "Llamada de voz en curso")?.phase)
+        assertEquals(CallPhase.Ongoing, read("Ali", "Chiamata vocale in corso")?.phase)
+        assertEquals(CallPhase.Dialing, read("Ali", "Llamando…")?.phase)
+        assertEquals(CallPhase.Dialing, read("Ali", "Squilla…")?.phase)
+        assertEquals(CallPhase.Dialing, read("Ali", "Memanggil…")?.phase)
+    }
+
     @Test
     fun messagesAreNotCalls() {
         assertNull(read("Ali", "Cevapsız arama için özür dilerim", category = "msg"))

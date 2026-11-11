@@ -79,7 +79,7 @@ class TelecomCoverage {
 
 /**
  * Reads a WhatsApp notification. WhatsApp offers no other way to learn about its calls, so this goes
- * by the notification's category and the words of its text, in the app's four languages. The words
+ * by the notification's category and the words of its text, in the app's languages. The words
  * are a guess at WhatsApp's own: a call in another language still counts, as a voice call.
  */
 object WhatsAppNotices {
@@ -88,12 +88,19 @@ object WhatsAppNotices {
     private const val CATEGORY_MESSAGE = "msg"
     private const val LONGEST_LABEL = 40
 
-    private val VIDEO = words("video", "görüntülü", "فيديو", "видео")
-    private val CALL = words("call", "arama", "aranıyor", "çalıyor", "مكالمة", "вызов", "звонок")
-    private val MISSED = words("missed", "cevapsız", "فائت", "пропущ")
-    private val INCOMING = words("incoming", "gelen", "وارد", "входящ")
-    private val ONGOING = words("ongoing", "devam eden", "جارية", "текущ")
-    private val DIALING = words("calling", "ringing", "aranıyor", "çalıyor", "جارٍ الاتصال", "вызов", "звонок")
+    // English, Turkish, Arabic, Russian, then German, Spanish, French, Italian, Portuguese, Indonesian.
+    private val VIDEO = words("video", "görüntülü", "فيديو", "видео", "vídeo", "vidéo")
+    private val CALL = words(
+        "call", "arama", "aranıyor", "çalıyor", "مكالمة", "вызов", "звонок",
+        "anruf", "llamada", "llamando", "appel", "chiamata", "chamada", "chamando", "panggilan", "memanggil",
+    )
+    private val MISSED = words("missed", "cevapsız", "فائت", "пропущ", "verpasst", "perdida", "manqué", "persa", "tak terjawab")
+    private val INCOMING = words("incoming", "gelen", "وارد", "входящ", "eingehend", "entrante", "entrant", "in arrivo", "recebida", "masuk")
+    private val ONGOING = words("ongoing", "devam eden", "جارية", "текущ", "laufend", "aktuell", "en curso", "en cours", "in corso", "em andamento", "berlangsung")
+    private val DIALING = words(
+        "calling", "ringing", "aranıyor", "çalıyor", "جارٍ الاتصال", "вызов", "звонок",
+        "klingelt", "wird angerufen", "llamando", "sonando", "sonnerie", "squilla", "chiamando", "chamando", "tocando", "memanggil", "berdering",
+    )
 
     private fun words(vararg list: String) = list.map(SearchText::fold)
 

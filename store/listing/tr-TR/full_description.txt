@@ -27,7 +27,7 @@ AYARLARDA NELER VAR
 • Mesajla reddet: hazır SMS listeni kendin yaz.
 • WhatsApp aramalarını son aramalarda gör: simge sesli mi görüntülü mü olduğunu söyler. İsteğe bağlıdır, bildirim erişimi ister.
 • Kaydırmanın ekran kenarına uzaklığı: Android'in geri hareketiyle çakışmaz.
-• Arama hapının görünümü, animasyonlar, dört dil: Türkçe, İngilizce, Arapça, Rusça.
+• Arama hapının görünümü, animasyonlar ve Türkçeden Endonezceye on dil.
 
 İSTATİSTİKLER
 Haftalık, aylık ve yıllık olarak ne kadar konuştuğunu, kaç kişiyle konuştuğunu, rehberinde olmayanlarla ne kadar görüştüğünü ve en çok kiminle konuştuğunu gör. Veriler telefonda kalır ve en fazla bir yıl tutulur.

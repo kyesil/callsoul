@@ -18,8 +18,8 @@ data class DuplicatePerson(
     val name: String,
     val photoUri: String?,
     val numbers: List<String>,
-    /** The accounts holding its copies; null for the phone's own storage. */
-    val accounts: List<String?>,
+    /** Where its copies live, by short name: "Google", "Phone", "Telegram". */
+    val sources: List<String>,
     val rawIds: List<Long>,
 )
 
@@ -35,19 +35,27 @@ data class DuplicateGroup(val people: List<DuplicatePerson>, val reason: Duplica
  * the copies stay as they are and Android shows them as a single contact. Contacts that share a
  * number go together; so does a contact without a number whose name matches another one's.
  */
-class DuplicateContacts(private val resolver: ContentResolver) {
+class DuplicateContacts(
+    private val resolver: ContentResolver,
+    /** A short name for an account, by its type and name. */
+    private val sourceName: (type: String?, name: String?) -> String,
+) {
 
     suspend fun find(): List<DuplicateGroup> = withContext(Dispatchers.IO) {
         val names = mutableMapOf<Long, Pair<String, String?>>()
-        resolver.query(Contacts.CONTENT_URI, arrayOf(Contacts._ID, Contacts.DISPLAY_NAME_PRIMARY, Contacts.PHOTO_URI), null, null, null)?.use {
+        resolver.query(Contacts.CONTENT_URI, arrayOf(Contacts._ID, NameOrder.nameColumn, Contacts.PHOTO_URI), null, null, null)?.use {
             while (it.moveToNext()) names[it.getLong(0)] = (it.getString(1).orEmpty()) to it.getString(2)
         }
-        val raws = mutableMapOf<Long, MutableList<Pair<Long, String?>>>()
+        val raws = mutableMapOf<Long, MutableList<Pair<Long, String>>>()
+        val labels = HashMap<Pair<String?, String?>, String>()
         resolver.query(
-            RawContacts.CONTENT_URI, arrayOf(RawContacts._ID, RawContacts.CONTACT_ID, RawContacts.ACCOUNT_NAME),
+            RawContacts.CONTENT_URI, arrayOf(RawContacts._ID, RawContacts.CONTACT_ID, RawContacts.ACCOUNT_TYPE, RawContacts.ACCOUNT_NAME),
             "${RawContacts.DELETED} = 0", null, null,
         )?.use {
-            while (it.moveToNext()) raws.getOrPut(it.getLong(1)) { mutableListOf() } += it.getLong(0) to it.getString(2)
+            while (it.moveToNext()) {
+                val account = it.getString(2) to it.getString(3)
+                raws.getOrPut(it.getLong(1)) { mutableListOf() } += it.getLong(0) to labels.getOrPut(account) { sourceName(account.first, account.second) }
+            }
         }
         val numbers = mutableMapOf<Long, MutableList<String>>()
         resolver.query(Phone.CONTENT_URI, arrayOf(Phone.CONTACT_ID, Phone.NUMBER), null, null, null)?.use {

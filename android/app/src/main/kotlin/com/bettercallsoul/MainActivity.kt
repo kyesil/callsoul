@@ -33,8 +33,8 @@ import com.bettercallsoul.ui.BcsTheme
 import com.bettercallsoul.ui.DefaultPhonePrompt
 import com.bettercallsoul.ui.MainScreen
 import com.bettercallsoul.ui.SetupScreen
-import com.bettercallsoul.ui.LockCallsPrompt
-import com.bettercallsoul.ui.TelLinksPrompt
+import com.bettercallsoul.ui.Suggestion
+import com.bettercallsoul.ui.SetupStep
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 import com.bettercallsoul.calllog.ContactRow
@@ -51,11 +51,14 @@ class MainActivity : ComponentActivity() {
     private var isDefaultDialer by mutableStateOf(false)
     private var askForDefault by mutableStateOf(false)
 
-    /** Once the role is here: links from other apps still ask which app, until one is picked. */
-    private var askForTelLinks by mutableStateOf(false)
+    /** The welcome screen's step now, or none once the app is set up; see [refreshSetup]. */
+    private var setupStep by mutableStateOf<SetupStep?>(SetupStep.Role)
 
-    /** Once the role is here: without this, a call doesn't wake a sleeping, locked phone. */
-    private var askForLockCalls by mutableStateOf(false)
+    /** A permission gone missing after the setup, for the home screen's banner; see [refreshSuggestion]. */
+    private var suggestion by mutableStateOf<Suggestion?>(null)
+
+    /** A banner or the default-app question sent the user to a page: look again once back from it. */
+    private var recheckSuggestion = false
 
     /** The role was asked for on the setup screen and not given. */
     private var roleDeclined by mutableStateOf(false)
@@ -84,14 +87,13 @@ class MainActivity : ComponentActivity() {
                 // On the setup screen: with the role, straight on to the permissions.
                 if (isDefaultDialer) requestPermissions.launch(REQUIRED_PERMISSIONS) else roleDeclined = true
             }
-            offerLockCalls()
-            offerTelLinks()
         }
 
     override fun attachBaseContext(newBase: Context) = super.attachBaseContext(AppLook.wrap(newBase))
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AppLook.matchFormats(this)
         enableEdgeToEdge()
         if (BuildConfig.DEBUG) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         // Recreated for a theme change, the activity gets the same intent again: not a new request.
@@ -100,14 +102,15 @@ class MainActivity : ComponentActivity() {
         // Known before the first frame, so the question doesn't flash up for an app that already has the role.
         isDefaultDialer = holdsDialerRole()
         askForDefault = !container.defaultPhoneAsked
-        // Also for those who made it the default before this question existed.
-        if (isDefaultDialer) {
-            offerLockCalls()
-            offerTelLinks()
-        }
+        // Known before the first frame too, so the welcome doesn't flash up for an app already set up.
+        permissionsGranted = REQUIRED_PERMISSIONS.all { checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED }
+        container.noteSetupStart(alreadySetUp = permissionsGranted)
+        refreshSetup()
+        refreshSuggestion()
         setContent {
             BcsTheme {
-                if (permissionsGranted) {
+                val step = setupStep
+                if (step == null) {
                     MainScreen(
                         isDefaultDialer = isDefaultDialer,
                         dialRequest = dialRequest,
@@ -120,6 +123,9 @@ class MainActivity : ComponentActivity() {
                         openRequest = openRequest,
                         onOpenRequestHandled = { openRequest = null },
                         lastTouch = { lastTouch },
+                        suggestion = suggestion,
+                        onSuggestion = ::acceptSuggestion,
+                        onCloseSuggestion = ::closeSuggestion,
                     )
                     if (askForDefault && !isDefaultDialer) {
                         DefaultPhonePrompt(
@@ -130,31 +136,15 @@ class MainActivity : ComponentActivity() {
                             onDismiss = ::answerDefaultQuestion,
                         )
                     }
-                    // One question at a time; the links one waits behind this.
-                    if (askForLockCalls) {
-                        LockCallsPrompt(
-                            onAccept = {
-                                askForLockCalls = false
-                                LockScreenCalls.open(this)
-                            },
-                            onDismiss = { askForLockCalls = false },
-                        )
-                    } else if (askForTelLinks) {
-                        TelLinksPrompt(
-                            onAccept = {
-                                askForTelLinks = false
-                                TelLinks.choose(this)
-                            },
-                            onDismiss = { askForTelLinks = false },
-                        )
-                    }
                 } else {
                     SetupScreen(
-                        isDefaultDialer = isDefaultDialer,
+                        step = step,
                         roleDeclined = roleDeclined,
                         onRequestRole = ::askForDialerRole,
                         onOpenDefaultApps = ::openDefaultApps,
                         onRequestPermissions = { requestPermissions.launch(REQUIRED_PERMISSIONS) },
+                        onAccept = ::acceptStep,
+                        onSkip = ::skipStep,
                     )
                 }
             }
@@ -196,6 +186,9 @@ class MainActivity : ComponentActivity() {
                 else dialRequest = intent.data?.schemeSpecificPart
             Intent.ACTION_DIAL -> dialRequest = intent.data?.schemeSpecificPart
             FavoriteShortcuts.ACTION_CALL -> callFavorite(intent)
+            // Opened again from the recent apps, the shortcut's intent comes back: that isn't a new contact.
+            FavoriteShortcuts.ACTION_ADD_CONTACT ->
+                if (intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY == 0) openRequest = Route.NewContact(null)
             WidgetActionActivity.ACTION_OPEN -> {
                 val contact = intent.getLongExtra(WidgetActionActivity.EXTRA_CONTACT, -1)
                 val number = intent.getStringExtra(WidgetActionActivity.EXTRA_NUMBER).orEmpty()
@@ -211,6 +204,16 @@ class MainActivity : ComponentActivity() {
     private fun refresh() {
         permissionsGranted = REQUIRED_PERMISSIONS.all { checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED }
         isDefaultDialer = holdsDialerRole()
+        // The welcome screen follows each step as it is done. The home screen's banners are looked at
+        // only when the app opens, and once more on coming back from a page one of them opened.
+        if (setupStep != null) {
+            refreshSetup()
+            if (setupStep == null) refreshSuggestion()
+        }
+        if (recheckSuggestion) {
+            recheckSuggestion = false
+            refreshSuggestion()
+        }
         if (permissionsGranted) {
             // A phone that refuses the contact must not take the app down with it, as One UI 9 did.
             lifecycleScope.launch { runCatching { seedOwnNumber(this@MainActivity) } }
@@ -278,18 +281,91 @@ class MainActivity : ComponentActivity() {
 
     private fun holdsDialerRole() = getSystemService(RoleManager::class.java).isRoleHeld(RoleManager.ROLE_DIALER)
 
-    /** Asked once only; Settings keeps the way to it after that. */
-    private fun offerTelLinks() {
-        if (container.telLinksAsked || !holdsDialerRole() || TelLinks.holder(this) == TelLinks.Holder.Us) return
-        container.telLinksAsked = true
-        askForTelLinks = true
+    /**
+     * The welcome screen's step, in [SetupStep]'s order: the role, the permissions, then each of the
+     * rest only while it is still needed and wasn't skipped. Back from a step's settings page with it
+     * done, the next one comes; once none is left the setup is over for good.
+     */
+    private fun refreshSetup() {
+        setupStep = when {
+            !permissionsGranted -> if (isDefaultDialer) SetupStep.Permissions else SetupStep.Role
+            container.setupDone || !isDefaultDialer -> null
+            !container.lockCallsAsked && !LockScreenCalls.allowed(this) -> SetupStep.LockCalls
+            !container.whatsAppAccessAsked && !WhatsAppCallListener.hasAccess(this) &&
+                WhatsAppCallListener.whatsAppInstalled(this) -> SetupStep.WhatsApp
+            !container.telLinksAsked && TelLinks.holder(this) != TelLinks.Holder.Us -> SetupStep.TelLinks
+            else -> {
+                container.setupDone = true
+                null
+            }
+        }
     }
 
-    /** Asked once only; Settings keeps the way to it after that. */
-    private fun offerLockCalls() {
-        if (container.lockCallsAsked || !holdsDialerRole() || LockScreenCalls.allowed(this)) return
-        container.lockCallsAsked = true
-        askForLockCalls = true
+    private fun acceptStep(step: SetupStep) {
+        when (step) {
+            SetupStep.Role, SetupStep.Permissions -> {}
+            SetupStep.LockCalls -> LockScreenCalls.open(this)
+            SetupStep.WhatsApp -> {
+                container.saveWhatsAppCalls(true)
+                WhatsAppCallListener.openAccess(this)
+            }
+            SetupStep.TelLinks -> TelLinks.choose(this)
+        }
+    }
+
+    /** Skipped, a step's feature counts as not wanted, so no banner asks for it later either. */
+    private fun skipStep(step: SetupStep) {
+        when (step) {
+            SetupStep.Role, SetupStep.Permissions -> {}
+            SetupStep.LockCalls -> container.lockCallsAsked = true
+            SetupStep.WhatsApp -> {
+                container.whatsAppAccessAsked = true
+                container.saveWhatsAppCalls(false)
+            }
+            SetupStep.TelLinks -> container.telLinksAsked = true
+        }
+        refresh()
+    }
+
+    /**
+     * After the setup: a permission gone while its feature is still wanted, in [Suggestion]'s order.
+     * Calls on the lock screen are wanted unless skipped; WhatsApp calls while Settings' switch is on;
+     * links to numbers once they have opened here.
+     */
+    private fun refreshSuggestion() {
+        // Once allowed, however it came (the setup, Settings, the phone itself), losing it is a problem.
+        if (container.lockCallsAsked && LockScreenCalls.allowed(this) && setupStep == null) container.lockCallsAsked = false
+        // Links count as wanted once they open here; losing that afterwards (a new app that opens
+        // links resets the choice) is a problem too.
+        val links = TelLinks.holder(this)
+        if (links == TelLinks.Holder.Us && !container.telLinksWanted) container.telLinksWanted = true
+        suggestion = when {
+            setupStep != null || !isDefaultDialer -> null
+            !container.lockCallsAsked && !LockScreenCalls.allowed(this) -> Suggestion.LockCalls
+            container.whatsAppCallsEnabled && !WhatsAppCallListener.hasAccess(this) &&
+                WhatsAppCallListener.whatsAppInstalled(this) -> Suggestion.WhatsApp
+            links != TelLinks.Holder.Us && container.telLinksWanted -> Suggestion.TelLinks
+            else -> null
+        }
+    }
+
+    private fun acceptSuggestion(step: Suggestion) {
+        recheckSuggestion = true
+        when (step) {
+            Suggestion.LockCalls -> LockScreenCalls.open(this)
+            Suggestion.WhatsApp -> WhatsAppCallListener.openAccess(this)
+            Suggestion.TelLinks -> TelLinks.choose(this)
+        }
+    }
+
+    /** The cross gives the feature up; Settings turns it back on. */
+    private fun closeSuggestion(step: Suggestion) {
+        when (step) {
+            Suggestion.LockCalls -> container.lockCallsAsked = true
+            Suggestion.WhatsApp -> container.saveWhatsAppCalls(false)
+            Suggestion.TelLinks -> container.telLinksWanted = false
+        }
+        refreshSuggestion()
     }
 
     private fun openDefaultApps() {
@@ -302,6 +378,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun askForDialerRole() {
+        recheckSuggestion = true
         requestRole.launch(getSystemService(RoleManager::class.java).createRequestRoleIntent(RoleManager.ROLE_DIALER))
     }
 
