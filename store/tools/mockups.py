@@ -34,6 +34,7 @@ CAPTIONS = {
         "8-stats": "İstatistikler ve akıllı arama",
         "8b-stats-year": "Haftalık, aylık ve yıllık istatistikler",
         "8c-stats-profile": "Kimle ne kadar konuştuğunu gör",
+        "9-move": "Kişileri hesaplar arasında taşı, birleştir",
     },
     "en": {
         "1-home": "Favourites, icon shortcuts, swipe to call",
@@ -47,10 +48,11 @@ CAPTIONS = {
         "8-stats": "Statistics and smart search",
         "8b-stats-year": "Weekly, monthly and yearly statistics",
         "8c-stats-profile": "See who you talk to, and for how long",
+        "9-move": "Move and merge contacts across accounts",
     },
 }
 # The call pill's styles, each caught on the home screen.
-PILL_TOP = 1330
+PILL_TOP = 330
 PILL_TILES = ["5-ring-h", "5-talk-h", "5-ring-v", "5-talk-v"]
 PILL_LABELS = {
     "tr": ["Gelen arama", "Konuşmada", "Dikey, gelen arama", "Dikey, konuşmada"],
@@ -68,6 +70,7 @@ COLLAGES = {
     "8-stats": ["8-stats", "8c-search"],
     "8b-stats-year": ["8-stats", "8b-stats-year"],
     "8c-stats-profile": ["8-stats", "2-profile"],
+    "9-move": ["15-move", "15b-merge"],
 }
 FEATURE = {
     "tr": "Telefon ve rehber, sade ve hızlı",
@@ -192,9 +195,9 @@ def tile(canvas, raw, box, x, y, width):
 
 def home_tiles(canvas, images):
     home, menu, swipe = images
-    bottom = tile(canvas, home, (0, 650, 1280, 1540), 60, 380, 960) + 30
-    tile(canvas, menu, (430, 1400, 1240, 2480), 60, bottom, 465)
-    tile(canvas, swipe, (0, 640, 800, 1706), 555, bottom, 465)
+    bottom = tile(canvas, home, (0, 540, 1280, 1460), 60, 380, 960) + 30
+    tile(canvas, menu, (60, 880, 800, 2030), 60, bottom, 465)
+    tile(canvas, swipe, (0, 600, 800, 1680), 555, bottom, 465)
 
 
 def speaker_tiles(canvas, images):
@@ -205,9 +208,9 @@ def speaker_tiles(canvas, images):
 
 def spam_tiles(canvas, images):
     warning, talking, question = images
-    bottom = tile(canvas, warning, (0, 250, 1280, 1000), 60, 390, 960) + 30
-    bottom = tile(canvas, talking, (0, 1560, 1280, 1960), 60, bottom, 960) + 30
-    tile(canvas, question, (0, 2020, 1280, 2560), 60, bottom, 960)
+    bottom = tile(canvas, warning, (0, 250, 1280, 680), 60, 390, 960) + 30
+    bottom = tile(canvas, talking, (0, 1650, 1280, 2740), 60, bottom, 960) + 30
+    tile(canvas, question, (0, 2110, 1280, 2480), 60, bottom, 960)
 
 
 def settings_tiles(canvas, images):
