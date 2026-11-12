@@ -103,6 +103,7 @@
     <string name="spam_cat_other">Altro</string>
     <string name="caller_question">Chi ha chiamato?</string>
     <string name="caller_hint">Azienda o ente</string>
+    <string name="caller_label_note">Salvato come etichetta di questo numero, solo su questo telefono.</string>
     <string name="spam_disclosure">La tua risposta viene inviata con il numero al server di Better Call Soul.</string>
     <string name="setup_title">Ti diamo il benvenuto in Better Call Soul</string>
     <string name="setup_body">Serve un\'autorizzazione per mostrare chiamate, recenti e contatti.</string>
@@ -110,8 +111,8 @@
     <string name="setup_default_title">Impostala come app Telefono predefinita</string>
     <string name="setup_default_body">La schermata di chiamata si apre solo se questa è l\'app Telefono predefinita.</string>
     <string name="setup_default_action">Imposta come predefinita</string>
-    <string name="settings_lookup_title">Spam e ID chiamante dal cloud</string>
-    <string name="settings_lookup_body">Se attivo, quando chiama un numero che non è nei tuoi contatti, nel cloud se ne cerca lo stato di spam e, se noto, il nome di chi chiama. I numeri nei tuoi contatti non vengono mai inviati.</string>
+    <string name="settings_lookup_title">Controllo spam nel cloud</string>
+    <string name="settings_lookup_body">Se attivo, quando chiama un numero non presente nei contatti vengono cercate nel cloud le sue segnalazioni di spam. I numeri dei tuoi contatti non vengono mai inviati.</string>
     <string name="settings_face_down_title">Squillo silenzioso se capovolto</string>
     <string name="settings_face_down_body">Una chiamata che arriva mentre il telefono è a faccia in giù squilla senza suono e lo schermo resta acceso.</string>
     <string name="settings_overlay_title">Mostra sopra altre app</string>
@@ -319,7 +320,7 @@
     <string name="block_spam_title">Blocca chiamate di spam</string>
     <string name="block_spam_body">I numeri segnalati come spam da abbastanza persone vengono respinti senza squillare. Restano nel registro chiamate, senza notifica. I contatti salvati squillano sempre.</string>
     <string name="block_spam_votes">Segnalazioni spam necessarie</string>
-    <string name="block_spam_lookup_off">Spam e ID chiamante dal cloud è disattivato, quindi vengono controllati solo i numeri già noti su questo telefono.</string>
+    <string name="block_spam_lookup_off">Il controllo spam nel cloud è disattivato, quindi vengono controllati solo i numeri già noti a questo telefono.</string>
     <string name="block_prefix_title">Blocca prefissi di numero</string>
     <string name="block_prefix_body">Le chiamate da numeri che iniziano con un prefisso in elenco, ad esempio +90 850, vengono respinte senza squillare. Restano nel registro chiamate, senza notifica. I contatti salvati squillano sempre.</string>
     <string name="block_prefix_list">Vengono respinti i numeri che iniziano con:</string>

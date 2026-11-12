@@ -54,7 +54,7 @@ Moved to another app during a call? A small call pill comes with you at the edge
 
 ### Against spam
 
-- When an unknown number calls, you see spam reports and the caller's name if there is one.
+- When an unknown number calls, you see its spam reports. After a call you can say who it was; that stays on your phone as the number's label.
 - Worked it out mid-call? "Report spam and hang up" ends the call and reports the number in one tap.
 - A "Was this spam?" question after the call helps the data grow.
 - Numbers in your contacts are never sent, and you can turn the feature off in Settings.

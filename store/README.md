@@ -37,10 +37,13 @@ Data collected (sent off the device):
 
 | Data type | Collected | Shared | Optional | Why |
 |---|---|---|---|---|
-| Phone number of an unknown caller (see note) | Yes | No | Yes (setting) | App functionality: spam warning and caller ID |
-| Spam answer, category, suggested caller name | Yes | No | Yes (only when the user answers) | App functionality |
-| Suggested caller name (Personal info > Name) | Yes | No | Yes | App functionality |
-| Unknown caller's number and suggested name (Contacts) | Yes | No | Yes | App functionality; Play's quick check asks for this type |
+| Phone number of an unknown caller (see note) | Yes | No | Yes (setting) | App functionality: spam warning |
+| Spam answer and category | Yes | No | Yes (only when the user answers) | App functionality |
+| Unknown caller's number (Contacts) | Yes | No | Yes | App functionality; Play's quick check asks for this type |
+
+Since 2026-11-12 the "Who was calling?" answer stays on the phone as a label, and the server
+neither stores nor returns caller names, so no text written by users reaches other users
+(content rating: no user interaction).
 | Random install ID (Device or other IDs) | Yes | No | Yes | Fraud prevention: one vote per install |
 
 Note: Google's form has no exact category for "a third party's phone number looked up for caller

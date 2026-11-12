@@ -17,7 +17,7 @@ LA PILLOLA DI CHIAMATA
 Sei passato a un'altra app durante una chiamata? Una piccola pillola di chiamata ti segue sul bordo dello schermo. Attiva l'altoparlante, riaggancia o torna alla chiamata con un tocco. Lato, dimensioni, ordine dei pulsanti e trasparenza li scegli tu.
 
 CONTRO LO SPAM
-• Quando chiama un numero sconosciuto, vedi le segnalazioni di spam e il nome di chi chiama, se c'è.
+• Per i numeri sconosciuti vedi le segnalazioni di spam; poi puoi salvare chi era come etichetta.
 • Te ne sei accorto durante la chiamata? "Segnala spam e riaggancia" chiude la chiamata e segnala il numero con un tocco.
 • Una domanda "Era spam?" dopo la chiamata aiuta i dati a crescere.
 • I numeri nei tuoi contatti non vengono mai inviati, e puoi disattivare la funzione nelle Impostazioni.

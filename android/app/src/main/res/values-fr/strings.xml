@@ -103,6 +103,7 @@
     <string name="spam_cat_other">Autre</string>
     <string name="caller_question">Qui appelait ?</string>
     <string name="caller_hint">Entreprise ou organisme</string>
+    <string name="caller_label_note">Enregistré comme libellé de ce numéro, sur ce téléphone uniquement.</string>
     <string name="spam_disclosure">Votre réponse est envoyée avec le numéro au serveur de Better Call Soul.</string>
     <string name="setup_title">Bienvenue dans Better Call Soul</string>
     <string name="setup_body">Une autorisation est nécessaire pour afficher vos appels, récents et contacts.</string>
@@ -110,8 +111,8 @@
     <string name="setup_default_title">Définir comme appli Téléphone par défaut</string>
     <string name="setup_default_body">L\'écran d\'appel ne s\'ouvre que si c\'est l\'appli Téléphone par défaut.</string>
     <string name="setup_default_action">Définir par défaut</string>
-    <string name="settings_lookup_title">Spam et identification de l\'appelant (cloud)</string>
-    <string name="settings_lookup_body">Si cette option est activée, un appel d\'un numéro absent de vos contacts est vérifié dans le cloud : statut de spam et, s\'il est connu, nom de l\'appelant. Les numéros de vos contacts ne sont jamais envoyés.</string>
+    <string name="settings_lookup_title">Vérification du spam dans le cloud</string>
+    <string name="settings_lookup_body">Si activée, quand un numéro absent de vos contacts appelle, ses signalements de spam sont recherchés dans le cloud. Les numéros de vos contacts ne sont jamais envoyés.</string>
     <string name="settings_face_down_title">Sonnerie silencieuse écran retourné</string>
     <string name="settings_face_down_body">Un appel reçu quand le téléphone est posé écran vers le bas sonne sans bruit et l\'écran reste allumé.</string>
     <string name="settings_overlay_title">Afficher par-dessus d\'autres applis</string>
@@ -319,7 +320,7 @@
     <string name="block_spam_title">Bloquer les appels de spam</string>
     <string name="block_spam_body">Les numéros signalés comme spam par suffisamment de personnes sont rejetés sans sonner. Ils restent visibles dans le journal d\'appels, sans notification. Les contacts enregistrés sonnent toujours.</string>
     <string name="block_spam_votes">Signalements requis</string>
-    <string name="block_spam_lookup_off">Spam et identification de l\'appelant (cloud) est désactivé : seuls les numéros déjà connus sur ce téléphone sont vérifiés.</string>
+    <string name="block_spam_lookup_off">La vérification du spam dans le cloud est désactivée : seuls les numéros déjà connus de ce téléphone sont vérifiés.</string>
     <string name="block_prefix_title">Bloquer des préfixes de numéro</string>
     <string name="block_prefix_body">Les appels des numéros qui commencent par un préfixe de la liste, comme +90 850, sont rejetés sans sonner. Ils restent visibles dans le journal d\'appels, sans notification. Les contacts enregistrés sonnent toujours.</string>
     <string name="block_prefix_list">Les numéros commençant par ceux-ci sont rejetés :</string>

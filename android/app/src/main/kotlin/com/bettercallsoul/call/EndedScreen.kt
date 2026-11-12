@@ -147,13 +147,16 @@ internal fun endAsSpam(app: AppContainer, number: String) {
     reportScope.launch {
         app.store.markAnswered(AnsweredNumber(CallerDirectory.keyOf(number), System.currentTimeMillis()))
         withContext(Dispatchers.Main) { CallManager.hangUp() }
-        app.spam.report(SpamReport(e164, app.deviceId, true, null, null))
+        app.spam.report(SpamReport(e164, app.deviceId, true))
     }
 }
 
 private enum class Step { Spam, Category, Caller }
 
-/** After a call from an unknown number: was it spam, and if not, who was it? */
+/**
+ * After a call from an unknown number: was it spam, and if not, who was it? The spam answer goes to
+ * the server; who it was stays on the phone as the number's label.
+ */
 @Composable
 fun SpamQuestion(number: String, onFinished: () -> Unit) {
     val app = LocalContext.current.container
@@ -166,12 +169,12 @@ fun SpamQuestion(number: String, onFinished: () -> Unit) {
         onFinished()
     }
 
-    fun send(isSpam: Boolean, category: SpamCategory? = null, callerName: String? = null) {
+    fun send(isSpam: Boolean, category: SpamCategory? = null, label: String? = null) {
         val e164 = PhoneNumbers.toE164(number)
-        if (e164 != null) {
-            reportScope.launch {
-                app.spam.report(SpamReport(e164, app.deviceId, isSpam, category, callerName))
-            }
+        val name = label?.trim()?.take(40)?.takeIf { it.isNotEmpty() }
+        reportScope.launch {
+            if (name != null) app.store.saveTag(NumberTag(CallerDirectory.keyOf(number), name, System.currentTimeMillis()))
+            if (e164 != null) app.spam.report(SpamReport(e164, app.deviceId, isSpam, category))
         }
         finish()
     }
@@ -206,15 +209,17 @@ fun SpamQuestion(number: String, onFinished: () -> Unit) {
             Step.Caller -> {
                 Text(stringResource(R.string.caller_question), fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurface)
                 Spacer(Modifier.height(8.dp))
+                Text(stringResource(R.string.caller_label_note), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.height(6.dp))
                 CompactTextField(
                     value = caller,
-                    onValueChange = { caller = it },
+                    onValueChange = { caller = it.take(40) },
                     placeholder = stringResource(R.string.caller_hint),
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                     TextButton(onClick = { send(false) }) { Text(stringResource(R.string.action_skip)) }
-                    TextButton(onClick = { send(false, callerName = caller) }) { Text(stringResource(R.string.action_send)) }
+                    TextButton(onClick = { send(false, label = caller) }, enabled = caller.isNotBlank()) { Text(stringResource(R.string.action_save)) }
                 }
             }
         }

@@ -17,7 +17,7 @@ PIL PANGGILAN
 Pindah ke aplikasi lain saat menelepon? Pil panggilan kecil ikut bersama Anda di tepi layar. Nyalakan speaker, tutup telepon, atau kembali ke panggilan dengan sekali ketuk. Sisi, ukuran, urutan tombol, dan transparansinya bisa Anda atur.
 
 MELAWAN SPAM
-• Saat nomor tak dikenal menelepon, Anda melihat laporan spam dan nama penelepon jika ada.
+• Untuk nomor tak dikenal Anda melihat laporan spam; lalu simpan siapa penelepon sebagai label.
 • Sadar di tengah panggilan? "Laporkan spam dan tutup" mengakhiri panggilan dan melaporkan nomornya dengan sekali ketuk.
 • Pertanyaan "Apakah ini spam?" setelah panggilan membantu datanya terus bertambah.
 • Nomor di kontak Anda tidak pernah dikirim, dan Anda bisa menonaktifkan fitur ini di Setelan.

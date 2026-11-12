@@ -17,7 +17,7 @@ DIE ANRUFKAPSEL
 Während eines Anrufs in eine andere App gewechselt? Eine kleine Anrufkapsel begleitet dich am Bildschirmrand. Lautsprecher an, auflegen oder zurück zum Anruf, mit einem Tipp. Seite, Größe, Tastenreihenfolge und Transparenz bestimmst du.
 
 GEGEN SPAM
-• Ruft eine unbekannte Nummer an, siehst du Spam-Meldungen und, falls bekannt, den Anrufernamen.
+• Bei unbekannten Nummern siehst du Spam-Meldungen; wer es war, kannst du danach als Label speichern.
 • Mitten im Gespräch durchschaut? „Als Spam melden und auflegen“ beendet den Anruf und meldet die Nummer mit einem Tipp.
 • Die Frage „War das Spam?“ nach dem Anruf lässt die Daten wachsen.
 • Nummern aus deinen Kontakten werden nie gesendet; die Funktion ist in den Einstellungen abschaltbar.

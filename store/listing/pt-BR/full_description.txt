@@ -17,7 +17,7 @@ A CÁPSULA DE CHAMADA
 Foi para outro app durante uma chamada? Uma pequena cápsula de chamada vai com você na borda da tela. Ative o alto-falante, desligue ou volte à chamada com um toque. O lado, o tamanho, a ordem dos botões e a transparência ficam por sua conta.
 
 CONTRA O SPAM
-• Quando um número desconhecido liga, você vê as denúncias de spam e o nome de quem liga, se houver.
+• Com números desconhecidos você vê as denúncias de spam; depois pode salvar quem era como rótulo.
 • Percebeu no meio da chamada? "Denunciar spam e desligar" encerra a chamada e denuncia o número com um toque.
 • Uma pergunta "Era spam?" depois da chamada ajuda os dados a crescer.
 • Os números dos seus contatos nunca são enviados, e você pode desativar o recurso nas Configurações.

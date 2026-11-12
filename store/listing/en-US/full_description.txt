@@ -17,7 +17,7 @@ THE CALL PILL
 Moved to another app during a call? A small call pill comes with you at the edge of the screen. Turn on the speaker, hang up, or jump back to the call in one tap. Its side, size, button order and transparency are up to you.
 
 AGAINST SPAM
-• When an unknown number calls, you see spam reports and the caller's name if there is one.
+• When an unknown number calls, you see its spam reports; after the call, say who it was and it becomes the number's label.
 • Worked it out mid-call? "Report spam and hang up" ends the call and reports the number in one tap.
 • A "Was this spam?" question after the call helps the data grow.
 • Numbers in your contacts are never sent, and you can turn the feature off in Settings.

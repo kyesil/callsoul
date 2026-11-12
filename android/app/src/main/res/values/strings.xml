@@ -104,6 +104,7 @@
     <string name="spam_cat_other">Other</string>
     <string name="caller_question">Who was calling?</string>
     <string name="caller_hint">Company or organisation</string>
+    <string name="caller_label_note">Saved as this number\'s label, on this phone only.</string>
     <string name="spam_disclosure">Your answer is sent with the number to the Better Call Soul server.</string>
     <string name="setup_title">Welcome to Better Call Soul</string>
     <string name="setup_body">Permission is needed to show your calls, recents and contacts.</string>
@@ -111,8 +112,8 @@
     <string name="setup_default_title">Make it the default phone app</string>
     <string name="setup_default_body">The call screen only opens once this is the default phone app.</string>
     <string name="setup_default_action">Make default</string>
-    <string name="settings_lookup_title">Cloud spam and caller ID</string>
-    <string name="settings_lookup_body">When on, a call from a number that isn\'t in your contacts is looked up in the cloud for its spam status and, if known, the caller\'s name. Numbers in your contacts are never sent.</string>
+    <string name="settings_lookup_title">Cloud spam check</string>
+    <string name="settings_lookup_body">When on, a call from a number that isn\'t in your contacts is checked in the cloud for spam reports. Numbers in your contacts are never sent.</string>
     <string name="settings_face_down_title">Ring silently when face down</string>
     <string name="settings_face_down_body">A call that arrives while the phone lies face down rings without sound and keeps the screen on.</string>
     <string name="settings_overlay_title">Show over other apps</string>
@@ -390,7 +391,7 @@
     <string name="block_spam_title">Block spam calls</string>
     <string name="block_spam_body">Numbers that enough people marked as spam are turned away without ringing. They still show in the call log, with no notification. Saved contacts always ring.</string>
     <string name="block_spam_votes">Spam votes needed</string>
-    <string name="block_spam_lookup_off">Cloud spam and caller ID is off, so only numbers already known on this phone are checked.</string>
+    <string name="block_spam_lookup_off">Cloud spam check is off, so only numbers already known on this phone are checked.</string>
     <string name="block_prefix_title">Block number prefixes</string>
     <string name="block_prefix_body">Calls from numbers that begin with a prefix in the list, such as +90 850, are turned away without ringing. They still show in the call log, with no notification. Saved contacts always ring.</string>
     <string name="block_prefix_list">Numbers beginning with these are turned away:</string>

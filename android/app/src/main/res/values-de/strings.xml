@@ -103,6 +103,7 @@
     <string name="spam_cat_other">Sonstiges</string>
     <string name="caller_question">Wer hat angerufen?</string>
     <string name="caller_hint">Firma oder Organisation</string>
+    <string name="caller_label_note">Wird als Label dieser Nummer gespeichert, nur auf diesem Telefon.</string>
     <string name="spam_disclosure">Deine Antwort wird mit der Nummer an den Server von Better Call Soul gesendet.</string>
     <string name="setup_title">Willkommen bei Better Call Soul</string>
     <string name="setup_body">Um deine Anrufe, die Anrufliste und Kontakte zu zeigen, ist eine Berechtigung nötig.</string>
@@ -110,8 +111,8 @@
     <string name="setup_default_title">Als Standard-Telefon-App festlegen</string>
     <string name="setup_default_body">Der Anrufbildschirm öffnet sich erst, wenn dies die Standard-Telefon-App ist.</string>
     <string name="setup_default_action">Als Standard</string>
-    <string name="settings_lookup_title">Cloud-Spam und Anrufer-ID</string>
-    <string name="settings_lookup_body">Wenn aktiv, wird bei einem Anruf von einer Nummer, die nicht in deinen Kontakten ist, in der Cloud nach dem Spam-Status und, falls bekannt, dem Namen des Anrufers gesucht. Nummern aus deinen Kontakten werden nie gesendet.</string>
+    <string name="settings_lookup_title">Cloud-Spamprüfung</string>
+    <string name="settings_lookup_body">Wenn aktiv, wird bei einem Anruf von einer Nummer, die nicht in deinen Kontakten ist, in der Cloud nach Spam-Meldungen gesucht. Nummern aus deinen Kontakten werden nie gesendet.</string>
     <string name="settings_face_down_title">Lautlos, wenn umgedreht</string>
     <string name="settings_face_down_body">Ein Anruf, während das Telefon mit dem Display nach unten liegt, klingelt ohne Ton und der Bildschirm bleibt an.</string>
     <string name="settings_overlay_title">Über anderen Apps einblenden</string>
@@ -319,7 +320,7 @@
     <string name="block_spam_title">Spam-Anrufe blockieren</string>
     <string name="block_spam_body">Nummern, die genug Leute als Spam markiert haben, werden ohne Klingeln abgewiesen. Sie erscheinen weiter in der Anrufliste, ohne Benachrichtigung. Gespeicherte Kontakte klingeln immer.</string>
     <string name="block_spam_votes">Nötige Spam-Stimmen</string>
-    <string name="block_spam_lookup_off">Cloud-Spam und Anrufer-ID ist aus, daher werden nur Nummern geprüft, die dieses Telefon schon kennt.</string>
+    <string name="block_spam_lookup_off">Die Cloud-Spamprüfung ist aus, daher werden nur Nummern geprüft, die dieses Telefon schon kennt.</string>
     <string name="block_prefix_title">Rufnummernpräfixe blockieren</string>
     <string name="block_prefix_body">Anrufe von Nummern, die mit einem Präfix aus der Liste beginnen, z. B. +90 850, werden ohne Klingeln abgewiesen. Sie erscheinen weiter in der Anrufliste, ohne Benachrichtigung. Gespeicherte Kontakte klingeln immer.</string>
     <string name="block_prefix_list">Nummern mit diesen Anfängen werden abgewiesen:</string>

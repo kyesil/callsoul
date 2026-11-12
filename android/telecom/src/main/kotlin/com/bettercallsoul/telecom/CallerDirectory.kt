@@ -59,8 +59,8 @@ class CallerDirectory(
         val cached = store.cached(key)
         val base = CallerInfo(
             number = number,
-            title = tag?.label ?: cached?.callerName ?: number,
-            subtitle = if (tag != null || cached?.callerName != null) number else null,
+            title = tag?.label ?: number,
+            subtitle = if (tag != null) number else null,
             isTagged = tag != null,
             lastCallAt = lastCallAt,
         )
@@ -84,10 +84,7 @@ class CallerDirectory(
         )
         result ?: return info
         store.saveCached(result.toCache(keyOf(info.number)))
-        val name = result.callerName.takeUnless { info.isTagged }
         return info.copy(
-            title = name ?: info.title,
-            subtitle = if (name != null) info.number else info.subtitle,
             verdict = result.verdict,
             category = result.category,
             spamVotes = result.spamVotes,
@@ -99,7 +96,7 @@ class CallerDirectory(
         verdict = verdict.name,
         spamVotes = spamVotes,
         category = category?.name,
-        callerName = callerName,
+        callerName = null,
         fetchedAt = System.currentTimeMillis(),
     )
 

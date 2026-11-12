@@ -17,7 +17,7 @@ LA PASTILLE D'APPEL
 Vous passez à une autre appli pendant un appel ? Une petite pastille vous suit au bord de l'écran. Haut-parleur, raccrocher ou retour à l'appel en une pression. Côté, taille, ordre des boutons et transparence : à vous de choisir.
 
 CONTRE LE SPAM
-• Quand un numéro inconnu appelle, vous voyez les signalements de spam et le nom de l'appelant s'il est connu.
+• Pour un numéro inconnu, vous voyez les signalements de spam ; ensuite, enregistrez qui c'était comme libellé.
 • Vous avez compris en plein appel ? « Signaler comme spam et raccrocher » raccroche et signale le numéro en une pression.
 • La question « Était-ce du spam ? » après l'appel aide à enrichir les données.
 • Les numéros de vos contacts ne sont jamais envoyés, et la fonction se désactive dans les paramètres.

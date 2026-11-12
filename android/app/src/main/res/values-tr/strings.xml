@@ -103,6 +103,7 @@
     <string name="spam_cat_other">Diğer</string>
     <string name="caller_question">Arayan kimdi?</string>
     <string name="caller_hint">Firma veya kurum adı</string>
+    <string name="caller_label_note">Numaranın etiketi olarak yalnızca bu telefona kaydedilir.</string>
     <string name="spam_disclosure">Yanıtın numarayla birlikte Better Call Soul sunucusuna gönderilir.</string>
     <string name="setup_title">Better Call Soul\'a hoş geldin</string>
     <string name="setup_body">Aramaları, son aramaları ve rehberini gösterebilmek için izin gerekiyor.</string>
@@ -110,8 +111,8 @@
     <string name="setup_default_title">Varsayılan telefon uygulaması yap</string>
     <string name="setup_default_body">Arama ekranı ancak varsayılan telefon uygulaması olunca açılır.</string>
     <string name="setup_default_action">Varsayılan yap</string>
-    <string name="settings_lookup_title">Bulut spam ve arayan kimliği</string>
-    <string name="settings_lookup_body">Açıkken, rehberde olmayan numaradan arama gelince numara buluta sorulur; spam durumu ve varsa arayan adı buradan alınır. Rehberindeki numaralar gönderilmez.</string>
+    <string name="settings_lookup_title">Bulut spam kontrolü</string>
+    <string name="settings_lookup_body">Açıkken, rehberde olmayan numaradan arama gelince numara için buluttaki spam bildirimlerine bakılır. Rehberindeki numaralar gönderilmez.</string>
     <string name="settings_face_down_title">Yüzü kapalıyken sessiz çal</string>
     <string name="settings_face_down_body">Telefon yüzüstüyken gelen arama zil çalmadan, ekran açık bekler.</string>
     <string name="settings_overlay_title">Uygulamaların üzerinde göster</string>
@@ -389,7 +390,7 @@
     <string name="block_spam_title">Spam aramaları engelle</string>
     <string name="block_spam_body">Yeterince kişinin spam olarak işaretlediği numaralar çalmadan reddedilir. Arama kaydında görünür, bildirim gelmez. Rehberdeki kişiler her zaman çalar.</string>
     <string name="block_spam_votes">Gereken spam oyu</string>
-    <string name="block_spam_lookup_off">Bulut spam ve arayan kimliği kapalı; yalnızca bu telefonun zaten bildiği numaralara bakılır.</string>
+    <string name="block_spam_lookup_off">Bulut spam kontrolü kapalı; yalnızca bu telefonun zaten bildiği numaralara bakılır.</string>
     <string name="block_prefix_title">Numara öneklerini engelle</string>
     <string name="block_prefix_body">Listedeki bir önekle başlayan numaralardan, örneğin +90 850, gelen aramalar çalmadan reddedilir. Arama kaydında görünür, bildirim gelmez. Rehberdeki kişiler her zaman çalar.</string>
     <string name="block_prefix_list">Bu öneklerle başlayan numaralar reddedilir:</string>

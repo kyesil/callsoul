@@ -103,6 +103,7 @@
     <string name="spam_cat_other">أخرى</string>
     <string name="caller_question">من كان المتصل؟</string>
     <string name="caller_hint">اسم الشركة أو الجهة</string>
+    <string name="caller_label_note">يُحفظ كتسمية لهذا الرقم، على هذا الهاتف فقط.</string>
     <string name="spam_disclosure">تُرسل إجابتك مع الرقم إلى خادم Better Call Soul.</string>
     <string name="setup_title">مرحبًا بك في Better Call Soul</string>
     <string name="setup_body">يلزم الإذن لعرض مكالماتك وسجل المكالمات وجهات الاتصال.</string>
@@ -110,8 +111,8 @@
     <string name="setup_default_title">تعيينه تطبيق الهاتف الافتراضي</string>
     <string name="setup_default_body">لا تظهر شاشة المكالمة إلا بعد تعيينه تطبيق الهاتف الافتراضي.</string>
     <string name="setup_default_action">تعيين كافتراضي</string>
-    <string name="settings_lookup_title">كشف المكالمات المزعجة وهوية المتصل عبر السحابة</string>
-    <string name="settings_lookup_body">عند التفعيل، يُستعلم في السحابة عن أي رقم غير موجود في جهات اتصالك لمعرفة إن كان مزعجًا واسم المتصل إن عُرف. لا تُرسل أرقام جهات اتصالك أبدًا.</string>
+    <string name="settings_lookup_title">فحص الإزعاج عبر السحابة</string>
+    <string name="settings_lookup_body">عند التفعيل، يُبحث في السحابة عن بلاغات الإزعاج لأي رقم غير موجود في جهات اتصالك عند اتصاله. لا تُرسل أرقام جهات اتصالك أبدًا.</string>
     <string name="settings_face_down_title">رنين صامت عندما يكون الهاتف مقلوبًا</string>
     <string name="settings_face_down_body">المكالمة التي تصل والهاتف مقلوب ترن دون صوت مع إبقاء الشاشة مضاءة.</string>
     <string name="settings_overlay_title">العرض فوق التطبيقات الأخرى</string>
@@ -453,7 +454,7 @@
     <string name="block_spam_title">حظر المكالمات المزعجة</string>
     <string name="block_spam_body">تُرفض الأرقام التي وسمها عدد كافٍ من الناس كمزعجة دون رنين. تبقى في سجل المكالمات، دون إشعار. جهات الاتصال المحفوظة ترن دائمًا.</string>
     <string name="block_spam_votes">عدد أصوات الإزعاج المطلوبة</string>
-    <string name="block_spam_lookup_off">البحث السحابي عن الإزعاج ومعرّف المتصل متوقف، لذلك تُفحص فقط الأرقام المعروفة على هذا الهاتف.</string>
+    <string name="block_spam_lookup_off">فحص الإزعاج عبر السحابة متوقف، لذلك تُفحص فقط الأرقام المعروفة على هذا الهاتف.</string>
     <string name="block_prefix_title">حظر بادئات الأرقام</string>
     <string name="block_prefix_body">تُرفض دون رنين المكالمات من الأرقام التي تبدأ ببادئة من القائمة، مثل ‎+90 850‎. تبقى في سجل المكالمات، دون إشعار. جهات الاتصال المحفوظة ترن دائمًا.</string>
     <string name="block_prefix_list">تُرفض الأرقام التي تبدأ بهذه البادئات:</string>

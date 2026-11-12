@@ -103,6 +103,7 @@
     <string name="spam_cat_other">Otro</string>
     <string name="caller_question">¿Quién llamaba?</string>
     <string name="caller_hint">Empresa u organización</string>
+    <string name="caller_label_note">Se guarda como etiqueta de este número, solo en este teléfono.</string>
     <string name="spam_disclosure">Tu respuesta se envía con el número al servidor de Better Call Soul.</string>
     <string name="setup_title">Te damos la bienvenida a Better Call Soul</string>
     <string name="setup_body">Se necesita permiso para mostrar tus llamadas, recientes y contactos.</string>
@@ -110,8 +111,8 @@
     <string name="setup_default_title">Usar como app de teléfono predeterminada</string>
     <string name="setup_default_body">La pantalla de llamada solo se abre si esta es la app de teléfono predeterminada.</string>
     <string name="setup_default_action">Usar como predeterminada</string>
-    <string name="settings_lookup_title">Spam e identificación en la nube</string>
-    <string name="settings_lookup_body">Si está activado, cuando te llama un número que no está en tus contactos, se consulta en la nube si es spam y, si se conoce, el nombre de quien llama. Los números de tus contactos nunca se envían.</string>
+    <string name="settings_lookup_title">Comprobación de spam en la nube</string>
+    <string name="settings_lookup_body">Si está activado, cuando llama un número que no está en tus contactos se buscan en la nube sus denuncias de spam. Los números de tus contactos nunca se envían.</string>
     <string name="settings_face_down_title">Sonar en silencio boca abajo</string>
     <string name="settings_face_down_body">Si llega una llamada con el teléfono boca abajo, entra sin sonido y la pantalla sigue encendida.</string>
     <string name="settings_overlay_title">Mostrar sobre otras apps</string>
@@ -319,7 +320,7 @@
     <string name="block_spam_title">Bloquear llamadas de spam</string>
     <string name="block_spam_body">Los números que suficientes personas marcaron como spam se rechazan sin sonar. Siguen apareciendo en el registro de llamadas, sin notificación. Los contactos guardados siempre suenan.</string>
     <string name="block_spam_votes">Votos de spam necesarios</string>
-    <string name="block_spam_lookup_off">Spam e identificación en la nube está desactivado, así que solo se comprueban los números ya conocidos en este teléfono.</string>
+    <string name="block_spam_lookup_off">La comprobación de spam en la nube está desactivada, así que solo se revisan los números que este teléfono ya conoce.</string>
     <string name="block_prefix_title">Bloquear prefijos de número</string>
     <string name="block_prefix_body">Las llamadas de números que empiezan por un prefijo de la lista, como +90 850, se rechazan sin sonar. Siguen apareciendo en el registro de llamadas, sin notificación. Los contactos guardados siempre suenan.</string>
     <string name="block_prefix_list">Se rechazan los números que empiezan por:</string>

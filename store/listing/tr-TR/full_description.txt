@@ -17,7 +17,7 @@ ARAMA HAPI
 Konuşurken başka uygulamaya mı geçtin? Ekranın kenarındaki küçük arama hapı seninle gelir. Hoparlörü aç, aramayı kapat ya da tek dokunuşla aramaya dön. Yönü, boyutu, düğme sırası ve saydamlığı sana kalmış.
 
 SPAM'E KARŞI
-• Bilinmeyen bir numara aradığında spam bildirimleri ve varsa arayan adı görünür.
+• Bilinmeyen bir numara aradığında spam bildirimleri görünür; aramadan sonra kim olduğunu yazarsan numaranın etiketi olur.
 • Konuşurken anladın mı? "Spam olarak bildir ve kapat" tek dokunuşla aramayı bitirir ve numarayı bildirir.
 • Arama sonunda "spam mıydı?" sorusuyla veri topluca büyür.
 • Rehberindeki numaralar hiçbir zaman gönderilmez; bu özelliği Ayarlar'dan kapatabilirsin.

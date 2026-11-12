@@ -28,6 +28,7 @@ data class SpamCacheEntry(
     val verdict: String,
     val spamVotes: Int,
     val category: String?,
+    /** No longer filled: the server stopped sending caller names. Kept so the table needs no migration. */
     val callerName: String?,
     val fetchedAt: Long,
 )

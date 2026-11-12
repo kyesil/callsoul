@@ -34,7 +34,6 @@ data class LookupResult(
     val spamVotes: Int,
     val safeVotes: Int,
     val category: SpamCategory? = null,
-    val callerName: String? = null,
 )
 
 @Serializable
@@ -43,7 +42,6 @@ data class SpamReport(
     val deviceId: String,
     val isSpam: Boolean,
     val category: SpamCategory? = null,
-    val callerName: String? = null,
 )
 
 @Serializable

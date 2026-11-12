@@ -103,6 +103,7 @@
     <string name="spam_cat_other">Другое</string>
     <string name="caller_question">Кто звонил?</string>
     <string name="caller_hint">Компания или организация</string>
+    <string name="caller_label_note">Сохраняется как метка этого номера, только на этом телефоне.</string>
     <string name="spam_disclosure">Ваш ответ вместе с номером отправляется на сервер Better Call Soul.</string>
     <string name="setup_title">Добро пожаловать в Better Call Soul</string>
     <string name="setup_body">Нужно разрешение, чтобы показывать вызовы, недавние и контакты.</string>
@@ -110,8 +111,8 @@
     <string name="setup_default_title">Сделать приложением для звонков по умолчанию</string>
     <string name="setup_default_body">Экран вызова открывается, только когда это приложение для звонков по умолчанию.</string>
     <string name="setup_default_action">Сделать по умолчанию</string>
-    <string name="settings_lookup_title">Облачный антиспам и определитель номера</string>
-    <string name="settings_lookup_body">Если включено, номер не из ваших контактов проверяется в облаке на спам и, если известно, на имя звонящего. Номера из контактов никогда не отправляются.</string>
+    <string name="settings_lookup_title">Облачная проверка на спам</string>
+    <string name="settings_lookup_body">Если включено, при звонке с номера не из ваших контактов в облаке проверяются жалобы на спам. Номера из ваших контактов никогда не отправляются.</string>
     <string name="settings_face_down_title">Без звука, если лежит экраном вниз</string>
     <string name="settings_face_down_body">Вызов, пришедший, когда телефон лежит экраном вниз, идёт без звука, а экран остаётся включённым.</string>
     <string name="settings_overlay_title">Показывать поверх других приложений</string>
@@ -421,7 +422,7 @@
     <string name="block_spam_title">Блокировать спам-вызовы</string>
     <string name="block_spam_body">Номера, которые достаточно людей отметили как спам, отклоняются без звонка. Они остаются в журнале вызовов, без уведомления. Контакты из адресной книги звонят всегда.</string>
     <string name="block_spam_votes">Нужно голосов «спам»</string>
-    <string name="block_spam_lookup_off">Облачная проверка спама и определитель выключены, поэтому проверяются только номера, уже известные телефону.</string>
+    <string name="block_spam_lookup_off">Облачная проверка на спам выключена, поэтому проверяются только номера, уже известные этому телефону.</string>
     <string name="block_prefix_title">Блокировать префиксы номеров</string>
     <string name="block_prefix_body">Вызовы с номеров, которые начинаются с префикса из списка, например +90 850, отклоняются без звонка. Они остаются в журнале вызовов, без уведомления. Контакты из адресной книги звонят всегда.</string>
     <string name="block_prefix_list">Номера, начинающиеся с этих префиксов, отклоняются:</string>

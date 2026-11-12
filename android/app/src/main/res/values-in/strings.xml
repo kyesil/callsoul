@@ -103,6 +103,7 @@
     <string name="spam_cat_other">Lainnya</string>
     <string name="caller_question">Siapa yang menelepon?</string>
     <string name="caller_hint">Perusahaan atau organisasi</string>
+    <string name="caller_label_note">Disimpan sebagai label nomor ini, hanya di ponsel ini.</string>
     <string name="spam_disclosure">Jawaban Anda dikirim bersama nomornya ke server Better Call Soul.</string>
     <string name="setup_title">Selamat datang di Better Call Soul</string>
     <string name="setup_body">Izin diperlukan untuk menampilkan panggilan, daftar terbaru, dan kontak Anda.</string>
@@ -110,8 +111,8 @@
     <string name="setup_default_title">Jadikan aplikasi telepon default</string>
     <string name="setup_default_body">Layar panggilan baru terbuka setelah aplikasi ini menjadi aplikasi telepon default.</string>
     <string name="setup_default_action">Jadikan default</string>
-    <string name="settings_lookup_title">Spam dan ID penelepon dari cloud</string>
-    <string name="settings_lookup_body">Jika aktif, panggilan dari nomor yang tidak ada di kontak Anda dicek di cloud untuk status spam dan, jika diketahui, nama peneleponnya. Nomor di kontak Anda tidak pernah dikirim.</string>
+    <string name="settings_lookup_title">Pemeriksaan spam cloud</string>
+    <string name="settings_lookup_body">Jika aktif, saat nomor yang tidak ada di kontak Anda menelepon, laporan spam nomor itu dicari di cloud. Nomor di kontak Anda tidak pernah dikirim.</string>
     <string name="settings_face_down_title">Dering senyap saat telungkup</string>
     <string name="settings_face_down_body">Panggilan yang masuk saat ponsel telungkup berdering tanpa suara dan layar tetap menyala.</string>
     <string name="settings_overlay_title">Tampilkan di atas aplikasi lain</string>
@@ -319,7 +320,7 @@
     <string name="block_spam_title">Blokir panggilan spam</string>
     <string name="block_spam_body">Nomor yang ditandai spam oleh cukup banyak orang ditolak tanpa berdering. Panggilan tetap muncul di log panggilan, tanpa notifikasi. Kontak tersimpan selalu berdering.</string>
     <string name="block_spam_votes">Suara spam yang diperlukan</string>
-    <string name="block_spam_lookup_off">Spam dan ID penelepon dari cloud nonaktif, jadi hanya nomor yang sudah dikenal di ponsel ini yang dicek.</string>
+    <string name="block_spam_lookup_off">Pemeriksaan spam cloud nonaktif, jadi hanya nomor yang sudah dikenal ponsel ini yang diperiksa.</string>
     <string name="block_prefix_title">Blokir awalan nomor</string>
     <string name="block_prefix_body">Panggilan dari nomor yang diawali awalan di daftar, misalnya +90 850, ditolak tanpa berdering. Panggilan tetap muncul di log panggilan, tanpa notifikasi. Kontak tersimpan selalu berdering.</string>
     <string name="block_prefix_list">Nomor dengan awalan ini ditolak:</string>

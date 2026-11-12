@@ -2,9 +2,7 @@ import { createHash } from "node:crypto";
 import { and, count, desc, eq, isNotNull, sql } from "drizzle-orm";
 import { db } from "./db/client.js";
 import { numbers, reports } from "./db/schema.js";
-import { cleanName, isCategory, isDeviceId, isE164, verdictOf, voteDelta } from "./rules.js";
-
-const MIN_NAME_AGREEMENT = 2;
+import { isCategory, isDeviceId, isE164, verdictOf, voteDelta } from "./rules.js";
 
 const json = (body: unknown, status = 200) => Response.json(body, { status });
 const invalid = (field: string) => json({ error: `invalid ${field}` }, 400);
@@ -40,7 +38,8 @@ export async function lookup(request: Request): Promise<Response> {
     spamVotes: row?.spamVotes ?? 0,
     safeVotes: row?.safeVotes ?? 0,
     category: row?.category ?? null,
-    callerName: row?.callerName ?? null,
+    // Names typed by users are no longer collected or shown to others; the field stays for older apps.
+    callerName: null,
   });
 }
 
@@ -54,7 +53,8 @@ export async function report(request: Request): Promise<Response> {
   const number = body.number;
   const isSpam = body.isSpam;
   const category = isSpam && isCategory(body.category) ? body.category : null;
-  const callerName = isSpam ? null : cleanName(body.callerName);
+  // A caller name sent by an older app is ignored: the app now keeps it as a label on the phone.
+  const callerName = null;
   const deviceHash = hashDevice(body.deviceId);
   const updatedAt = new Date();
 
@@ -86,22 +86,13 @@ export async function report(request: Request): Promise<Response> {
       .orderBy(desc(count()))
       .limit(1);
 
-    // A name is only shown once several devices agree on it.
-    const [topName] = await tx
-      .select({ value: reports.callerName, total: count() })
-      .from(reports)
-      .where(and(eq(reports.number, number), isNotNull(reports.callerName)))
-      .groupBy(reports.callerName)
-      .orderBy(desc(count()))
-      .limit(1);
-
     await tx
       .update(numbers)
       .set({
         spamVotes: sql`${numbers.spamVotes} + ${delta.spam}`,
         safeVotes: sql`${numbers.safeVotes} + ${delta.safe}`,
         category: topCategory?.value ?? null,
-        callerName: topName && topName.total >= MIN_NAME_AGREEMENT ? topName.value : null,
+        callerName: null,
         updatedAt,
       })
       .where(eq(numbers.number, number));

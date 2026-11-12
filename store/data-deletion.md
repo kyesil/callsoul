@@ -9,7 +9,7 @@ Better Call Soul'da hesap yoktur. Sunucuda tutulan tek kişisel veri, gönderdi�
 
 **Nasıl istenir.** Uygulamada Ayarlar > Hata ayıklama günlüğü > Paylaş ile oluşan dosyanın başındaki rastgele kimliği (Install ID) kopyala ve solidect38@gmail.com adresine "Verilerimi sil" konusuyla gönder.
 
-**Ne silinir.** Bu kimlikle gönderdiğin spam bildirimleri, seçtiğin kategoriler ve önerdiğin arayan adları 30 gün içinde silinir.
+**Ne silinir.** Bu kimlikle gönderdiğin spam bildirimleri, seçtiğin kategoriler ve eski sürümlerin gönderdiği arayan adları 30 gün içinde silinir.
 
 **Ne kalır.** Başka kullanıcıların aynı numara için gönderdiği bildirimler ve bir kimlikle ilişkilendirilemeyen toplam oy sayıları kalır.
 
@@ -21,7 +21,7 @@ Better Call Soul has no accounts. The only personal data kept on the server is t
 
 **How to ask.** In the app, copy the random Install ID at the top of the file made by Settings > Debug log > Share, and send it to solidect38@gmail.com with the subject "Delete my data".
 
-**What is deleted.** The spam reports sent with that ID, the categories you chose and the caller names you suggested are deleted within 30 days.
+**What is deleted.** The spam reports sent with that ID, the categories you chose and any caller names older versions sent are deleted within 30 days.
 
 **What stays.** Reports other users sent about the same number, and vote totals that can't be tied to an ID, stay.
 

@@ -17,7 +17,7 @@ LA PÍLDORA DE LLAMADA
 ¿Te cambiaste a otra app durante una llamada? Una pequeña píldora de llamada te acompaña en el borde de la pantalla. Activa el altavoz, cuelga o vuelve a la llamada con un toque. Tú eliges su lado, tamaño, orden de los botones y transparencia.
 
 CONTRA EL SPAM
-• Cuando llama un número desconocido, ves los avisos de spam y el nombre de quien llama, si lo hay.
+• Con números desconocidos ves los avisos de spam; luego puedes guardar quién era como etiqueta.
 • ¿Te diste cuenta a mitad de la llamada? "Marcar como spam y colgar" termina la llamada e informa del número con un toque.
 • La pregunta "¿Era spam?" después de la llamada ayuda a que crezcan los datos.
 • Los números de tus contactos nunca se envían, y puedes desactivar la función en Ajustes.
