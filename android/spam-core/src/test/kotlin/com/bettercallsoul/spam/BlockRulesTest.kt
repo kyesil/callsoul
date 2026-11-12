@@ -58,4 +58,44 @@ class BlockRulesTest {
         assertEquals(BlockReason.Spam, spam.reason("05321234567", isContact = false) { 3 })
         assertNull(spam.reason("05321234567", isContact = true) { 30 })
     }
+
+    @Test
+    fun typedPrefixesAreCleaned() {
+        assertEquals("90850", cleanPrefix("+90 850", "90"))
+        assertEquals("90850", cleanPrefix("0090850", "90"))
+        assertEquals("90850", cleanPrefix("0850", "90"))
+        assertEquals("90850", cleanPrefix("850", "90"))
+        assertEquals("49151", cleanPrefix("+49 151", "90"))
+        assertNull(cleanPrefix("", "90"))
+        assertNull(cleanPrefix("+", "90"))
+        assertNull(cleanPrefix("0", "90"))
+        assertNull(cleanPrefix("abc", "90"))
+        assertEquals("+90 850", prefixLabel("90850"))
+        assertEquals("+44 70", prefixLabel("4470"))
+        assertEquals("+1 900", prefixLabel("1900"))
+        assertEquals("+90", prefixLabel("90"))
+    }
+
+    @Test
+    fun numbersAreMatchedByPrefix() {
+        val p = listOf("90850")
+        assertTrue(startsWithAny("+908501234567", p, "90"))
+        assertTrue(startsWithAny("00908501234567", p, "90"))
+        assertTrue(startsWithAny("0850 123 45 67", p, "90"))
+        assertTrue(startsWithAny("8501234567", p, "90"))
+        assertTrue(startsWithAny("908501234567", p, "90"))
+        assertFalse(startsWithAny("05321234567", p, "90"))
+        assertFalse(startsWithAny("+498501234567", p, "90"))
+        assertFalse(startsWithAny("", p, "90"))
+    }
+
+    @Test
+    fun prefixRuleDecides() = runBlocking {
+        val rules = BlockRules(blockPrefixes = true, prefixes = listOf("90850"), homeCode = "90")
+        assertEquals(BlockReason.Prefix, rules.reason("08501234567", isContact = false) { 0 })
+        assertNull(rules.reason("08501234567", isContact = true) { 0 })
+        assertNull(rules.reason("05321234567", isContact = false) { 0 })
+        assertNull(rules.copy(blockPrefixes = false).reason("08501234567", isContact = false) { 0 })
+        assertFalse(BlockRules(blockPrefixes = true, homeCode = "90").any)
+    }
 }

@@ -281,6 +281,7 @@
     <string name="call_end_spam">Als Spam melden und auflegen</string>
     <string name="spam_reported">Als Spam gemeldet</string>
     <string name="settings_group_calls">Anrufe</string>
+    <string name="settings_group_spam">Spam</string>
     <string name="settings_group_looks">Aussehen und Gesten</string>
     <string name="settings_group_storage">Verlauf und Speicher</string>
     <string name="settings_group_about">Diagnose und Info</string>
@@ -319,6 +320,11 @@
     <string name="block_spam_body">Nummern, die genug Leute als Spam markiert haben, werden ohne Klingeln abgewiesen. Sie erscheinen weiter in der Anrufliste, ohne Benachrichtigung. Gespeicherte Kontakte klingeln immer.</string>
     <string name="block_spam_votes">Nötige Spam-Stimmen</string>
     <string name="block_spam_lookup_off">Cloud-Spam und Anrufer-ID ist aus, daher werden nur Nummern geprüft, die dieses Telefon schon kennt.</string>
+    <string name="block_prefix_title">Rufnummernpräfixe blockieren</string>
+    <string name="block_prefix_body">Anrufe von Nummern, die mit einem Präfix aus der Liste beginnen, z. B. +90 850, werden ohne Klingeln abgewiesen. Sie erscheinen weiter in der Anrufliste, ohne Benachrichtigung. Gespeicherte Kontakte klingeln immer.</string>
+    <string name="block_prefix_list">Nummern mit diesen Anfängen werden abgewiesen:</string>
+    <string name="block_prefix_remove">%1$s entfernen</string>
+    <string name="block_prefix_invalid">Gib den Anfang einer Nummer ein, z. B. +90 850 oder 0850.</string>
     <string name="blocked_title">Blockierte Nummern</string>
     <string name="blocked_body">Blockierte Nummern ansehen, freigeben oder neue hinzufügen</string>
     <string name="blocked_empty">Keine blockierten Nummern.</string>

@@ -5,16 +5,16 @@ Better Call Soul brings your phone and contacts together in one calm, fast app. 
 **[Website](https://callsoul.yesil.dev)** · **[Download APK](https://github.com/kyesil/callsoul/releases/latest)** · **[Google Play](https://play.google.com/store/apps/details?id=dev.yesil.callsoul)**
 
 <p>
-  <img src="store/graphics/screenshots/en/1-home.png" width="200" alt="">
-  <img src="store/graphics/screenshots/en/2-contact.png" width="200" alt="">
-  <img src="store/graphics/screenshots/en/3-labels.png" width="200" alt="">
-  <img src="store/graphics/screenshots/en/4-call.png" width="200" alt="">
+  <img src="server/public/assets/shots/en-1-home.jpg" width="200" alt="">
+  <img src="server/public/assets/shots/en-2-contact.jpg" width="200" alt="">
+  <img src="server/public/assets/shots/en-3-labels.jpg" width="200" alt="">
+  <img src="server/public/assets/shots/en-4-call.jpg" width="200" alt="">
 </p>
 <p>
-  <img src="store/graphics/screenshots/en/5-pill.png" width="200" alt="">
-  <img src="store/graphics/screenshots/en/6-spam.png" width="200" alt="">
-  <img src="store/graphics/screenshots/en/7-settings.png" width="200" alt="">
-  <img src="store/graphics/screenshots/en/8-stats.png" width="200" alt="">
+  <img src="server/public/assets/shots/en-5-pill.jpg" width="200" alt="">
+  <img src="server/public/assets/shots/en-6-spam.jpg" width="200" alt="">
+  <img src="server/public/assets/shots/en-7-settings.jpg" width="200" alt="">
+  <img src="server/public/assets/shots/en-8-stats.jpg" width="200" alt="">
 </p>
 
 The people and numbers on these screens are fictional.

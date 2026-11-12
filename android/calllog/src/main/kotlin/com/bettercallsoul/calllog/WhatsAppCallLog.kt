@@ -24,7 +24,7 @@ class WhatsAppCallLog(
             val known = callLog.knownCallers(rows.mapTo(HashSet()) { it.number })
             rows.map { row ->
                 val caller = known[row.number]
-                entry(row, caller?.name ?: row.name, caller?.photoUri)
+                entry(row, caller?.name ?: shownName(row), caller?.photoUri)
             }
         }
         .flowOn(Dispatchers.IO)
@@ -34,12 +34,19 @@ class WhatsAppCallLog(
         val tails = numbers.mapTo(HashSet(), ::tail)
         dao.whatsAppCalls()
             .filter { row -> if (row.number.isBlank()) row.name == name else tail(row.number) in tails }
-            .map { row -> entry(row, row.name, null) }
+            .map { row -> entry(row, shownName(row), null) }
     }
+
+    /**
+     * Someone who isn't saved comes from WhatsApp with their number as the name: that is left out, so
+     * the row shows the label given to the number, or the number itself, like any other unsaved caller.
+     */
+    private fun shownName(row: WhatsAppCall): String? =
+        row.name.takeUnless { row.number.isNotBlank() && looksLikeNumber(it) }
 
     private fun tail(number: String) = number.filter(Char::isDigit).takeLast(10)
 
-    private fun entry(row: WhatsAppCall, name: String, photoUri: String?) = CallEntry(
+    private fun entry(row: WhatsAppCall, name: String?, photoUri: String?) = CallEntry(
         id = -row.id,
         number = row.number,
         name = name,
@@ -63,7 +70,7 @@ class WhatsAppCallLog(
      */
     suspend fun save(call: FinishedCall): Unit = withContext(Dispatchers.IO) {
         val number = call.number.ifEmpty {
-            call.name.takeIf { name -> name.count(Char::isDigit) >= 7 && name.none(Char::isLetter) }
+            call.name.takeIf(::looksLikeNumber)
                 ?: contacts.numberOf(call.name).orEmpty()
         }
         dao.saveWhatsAppCall(
@@ -89,3 +96,6 @@ class WhatsAppCallLog(
         ids.chunked(500).forEach { chunk -> dao.deleteWhatsAppCalls(chunk.map { -it }) }
     }
 }
+
+/** A name that is only a phone number, as WhatsApp gives for someone who isn't saved ("+90 532 123 45 67"). */
+internal fun looksLikeNumber(name: String): Boolean = name.count(Char::isDigit) >= 7 && name.none(Char::isLetter)

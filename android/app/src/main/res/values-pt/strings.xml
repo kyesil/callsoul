@@ -281,6 +281,7 @@
     <string name="call_end_spam">Denunciar spam e desligar</string>
     <string name="spam_reported">Denunciado como spam</string>
     <string name="settings_group_calls">Chamadas</string>
+    <string name="settings_group_spam">Spam</string>
     <string name="settings_group_looks">Aparência e gestos</string>
     <string name="settings_group_storage">Histórico e armazenamento</string>
     <string name="settings_group_about">Diagnóstico e sobre</string>
@@ -319,6 +320,11 @@
     <string name="block_spam_body">Números que muitas pessoas marcaram como spam são recusados sem tocar. Eles ainda aparecem no registro de chamadas, sem notificação. Contatos salvos sempre tocam.</string>
     <string name="block_spam_votes">Votos de spam necessários</string>
     <string name="block_spam_lookup_off">Spam e identificador de chamadas na nuvem está desativado, então só os números já conhecidos neste telefone são verificados.</string>
+    <string name="block_prefix_title">Bloquear prefixos de número</string>
+    <string name="block_prefix_body">Chamadas de números que começam com um prefixo da lista, como +90 850, são recusadas sem tocar. Elas ainda aparecem no registro de chamadas, sem notificação. Contatos salvos sempre tocam.</string>
+    <string name="block_prefix_list">Números que começam com estes são recusados:</string>
+    <string name="block_prefix_remove">Remover %1$s</string>
+    <string name="block_prefix_invalid">Digite o começo de um número, como +90 850 ou 0850.</string>
     <string name="blocked_title">Números bloqueados</string>
     <string name="blocked_body">Veja os números que você bloqueou, desbloqueie ou adicione um</string>
     <string name="blocked_empty">Nenhum número bloqueado.</string>

@@ -237,7 +237,6 @@ class AppContainer(context: Context) {
             .firstNotNullOfOrNull { CallingCodes.of(it) } ?: "90"
     }
 
-    /** Off by default: calls from abroad turned away before they ring, logged with no notice. */
     /** Names family name first ("Arslan, Deniz") everywhere, lists sorted that way too; off for "Deniz Arslan". */
     var nameFamilyFirst by mutableStateOf(prefs.getBoolean(KEY_NAME_FAMILY_FIRST, false).also { NameOrder.familyFirst = it })
         private set
@@ -250,6 +249,7 @@ class AppContainer(context: Context) {
         callLog.refresh()
     }
 
+    /** Off by default: calls from abroad turned away before they ring, logged with no notice. */
     var blockAbroad by mutableStateOf(prefs.getBoolean(KEY_BLOCK_ABROAD, false))
         private set
 
@@ -286,8 +286,28 @@ class AppContainer(context: Context) {
         prefs.edit { putInt(KEY_SPAM_VOTES, spamBlockVotes) }
     }
 
+    /** Off by default: numbers that begin with one of [blockedPrefixes] turned away like [blockAbroad]. */
+    var blockPrefixes by mutableStateOf(prefs.getBoolean(KEY_BLOCK_PREFIXES, false))
+        private set
+
+    fun saveBlockPrefixes(on: Boolean) {
+        blockPrefixes = on
+        prefs.edit { putBoolean(KEY_BLOCK_PREFIXES, on) }
+    }
+
+    /** Number beginnings as full international digits ("90850" for +90 850); +90 850 to begin with, with the switch off. */
+    var blockedPrefixes by mutableStateOf(
+        prefs.getString(KEY_BLOCKED_PREFIXES, null)?.split(',')?.filter(String::isNotEmpty) ?: listOf("90850"),
+    )
+        private set
+
+    fun saveBlockedPrefixes(prefixes: List<String>) {
+        blockedPrefixes = prefixes.distinct()
+        prefs.edit { putString(KEY_BLOCKED_PREFIXES, blockedPrefixes.joinToString(",")) }
+    }
+
     val blockRules: BlockRules
-        get() = BlockRules(blockAbroad, allowedCodes, blockSpam, spamBlockVotes)
+        get() = BlockRules(blockAbroad, allowedCodes, blockSpam, spamBlockVotes, blockPrefixes, blockedPrefixes, homeCallingCode)
 
     /** The first-run question about being the default phone app has been answered, either way. */
     var defaultPhoneAsked: Boolean
@@ -462,6 +482,8 @@ class AppContainer(context: Context) {
         const val KEY_ALLOWED_CODES = "allowed_codes"
         const val KEY_BLOCK_SPAM = "block_spam"
         const val KEY_SPAM_VOTES = "spam_block_votes"
+        const val KEY_BLOCK_PREFIXES = "block_prefixes"
+        const val KEY_BLOCKED_PREFIXES = "blocked_prefixes"
         const val KEY_TEL_LINKS_WANTED = "tel_links_wanted"
         const val KEY_FACE_DOWN = "silent_face_down"
         const val KEY_TONE_CONNECT = "tone_on_connect"

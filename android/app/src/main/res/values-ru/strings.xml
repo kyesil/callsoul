@@ -371,6 +371,7 @@
     <string name="call_end_spam">Спам: сообщить и завершить</string>
     <string name="spam_reported">Отмечено как спам</string>
     <string name="settings_group_calls">Звонки</string>
+    <string name="settings_group_spam">Спам</string>
     <string name="settings_group_looks">Вид и жесты</string>
     <string name="settings_group_storage">История и хранилище</string>
     <string name="settings_group_about">Диагностика и о приложении</string>
@@ -421,6 +422,11 @@
     <string name="block_spam_body">Номера, которые достаточно людей отметили как спам, отклоняются без звонка. Они остаются в журнале вызовов, без уведомления. Контакты из адресной книги звонят всегда.</string>
     <string name="block_spam_votes">Нужно голосов «спам»</string>
     <string name="block_spam_lookup_off">Облачная проверка спама и определитель выключены, поэтому проверяются только номера, уже известные телефону.</string>
+    <string name="block_prefix_title">Блокировать префиксы номеров</string>
+    <string name="block_prefix_body">Вызовы с номеров, которые начинаются с префикса из списка, например +90 850, отклоняются без звонка. Они остаются в журнале вызовов, без уведомления. Контакты из адресной книги звонят всегда.</string>
+    <string name="block_prefix_list">Номера, начинающиеся с этих префиксов, отклоняются:</string>
+    <string name="block_prefix_remove">Удалить %1$s</string>
+    <string name="block_prefix_invalid">Введите начало номера, например +90 850 или 0850.</string>
     <string name="blocked_title">Заблокированные номера</string>
     <string name="blocked_body">Посмотрите заблокированные номера, разблокируйте или добавьте новый</string>
     <string name="blocked_empty">Заблокированных номеров нет.</string>

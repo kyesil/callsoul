@@ -61,6 +61,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
@@ -81,6 +82,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.SwapHoriz
@@ -115,6 +117,7 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Forum
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.SmartButton
 import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.material3.HorizontalDivider
@@ -130,12 +133,15 @@ import com.bettercallsoul.calllog.CallHistory
 import com.bettercallsoul.calllog.LocalDatabase
 import com.bettercallsoul.spam.SearchText
 import com.bettercallsoul.spam.cleanCountryCode
+import com.bettercallsoul.spam.cleanPrefix
+import com.bettercallsoul.spam.prefixLabel
 import androidx.compose.ui.text.input.KeyboardType
 import java.io.File
 
 /** The groups the settings are sorted into: the first page lists them and each opens a page of its own. */
 private enum class SettingsGroup(val title: Int, val icon: ImageVector) {
     Calls(R.string.settings_group_calls, Icons.Outlined.Call),
+    Spam(R.string.settings_group_spam, Icons.Outlined.Shield),
     Contacts(R.string.settings_group_contacts, Icons.Outlined.People),
     WhatsApp(R.string.whatsapp, Icons.Outlined.Forum),
     Pill(R.string.settings_pill_title, Icons.Outlined.SmartButton),
@@ -168,17 +174,18 @@ fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBac
     // Without WhatsApp on the phone its settings are left out, and its group with them.
     val entries = listOfNotNull(
         SettingEntry(SettingsGroup.Calls, listOf(R.string.lock_calls_title, R.string.lock_calls_body)) { LockCallsSettings(lockCallsAllowed) },
-        SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_lookup_title, R.string.settings_lookup_body)) { LookupSettings() },
+        SettingEntry(SettingsGroup.Spam, listOf(R.string.settings_lookup_title, R.string.settings_lookup_body)) { LookupSettings() },
+        SettingEntry(SettingsGroup.Spam, listOf(R.string.block_spam_title, R.string.block_spam_body)) { BlockSpamSettings() },
+        SettingEntry(SettingsGroup.Spam, listOf(R.string.blocked_title, R.string.blocked_body)) {
+            LinkCard(Icons.Outlined.Block, R.string.blocked_title, R.string.blocked_body) { onOpen(Route.Blocked) }
+        },
+        SettingEntry(SettingsGroup.Spam, listOf(R.string.block_abroad_title, R.string.block_abroad_body)) { BlockAbroadSettings() },
+        SettingEntry(SettingsGroup.Spam, listOf(R.string.block_prefix_title, R.string.block_prefix_body)) { BlockPrefixSettings() },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_face_down_title, R.string.settings_face_down_body)) { FaceDownSettings() },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_replies_title, R.string.settings_replies_body)) { QuickReplySettings() },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.key_decline_title, R.string.key_decline_body)) { KeySettings() },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.tone_connect_title, R.string.tone_connect_body, R.string.tone_end_title, R.string.tone_end_body)) { ToneSettings() },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.dnd_title, R.string.dnd_body)) { DndSettings() },
-        SettingEntry(SettingsGroup.Calls, listOf(R.string.block_abroad_title, R.string.block_abroad_body)) { BlockAbroadSettings() },
-        SettingEntry(SettingsGroup.Calls, listOf(R.string.block_spam_title, R.string.block_spam_body)) { BlockSpamSettings() },
-        SettingEntry(SettingsGroup.Calls, listOf(R.string.blocked_title, R.string.blocked_body)) {
-            LinkCard(Icons.Outlined.Block, R.string.blocked_title, R.string.blocked_body) { onOpen(Route.Blocked) }
-        },
         SettingEntry(SettingsGroup.Contacts, listOf(R.string.dup_title, R.string.dup_body)) {
             LinkCard(Icons.Outlined.JoinInner, R.string.dup_title, R.string.dup_body) { onOpen(Route.Duplicates) }
         },
@@ -218,7 +225,8 @@ fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBac
 
     // Each page starts at its top.
     key(groupName) {
-        Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState())) {
+        // imePadding lets the page scroll a field out from under the keyboard.
+        Column(Modifier.fillMaxSize().statusBarsPadding().imePadding().verticalScroll(rememberScrollState())) {
             DetailToolbar(onBack = { if (group != null) groupName = null else onBack() })
             LargeTitle(stringResource(group?.title ?: R.string.action_settings), null)
             if (group != null) {
@@ -567,11 +575,76 @@ private fun BlockAbroadSettings() {
                     },
                     placeholder = stringResource(R.string.block_abroad_add_hint),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { add() }),
                     modifier = Modifier.width(120.dp),
                 )
                 TextButton(onClick = ::add, enabled = typed.isNotBlank()) { Text(stringResource(R.string.block_abroad_add)) }
             }
             if (invalid) Text(stringResource(R.string.block_abroad_invalid), fontSize = 13.sp, color = MaterialTheme.colorScheme.error)
+        }
+    }
+}
+
+/**
+ * Calls from numbers that begin with a listed prefix ("+90 850") are turned away before they ring.
+ * A prefix typed the national way ("0850") is read with the phone's own country code.
+ */
+@Composable
+private fun BlockPrefixSettings() {
+    val app = LocalContext.current.container
+    var typed by remember { mutableStateOf("") }
+    var invalid by remember { mutableStateOf(false) }
+    fun add() {
+        val prefix = cleanPrefix(typed, app.homeCallingCode)
+        invalid = prefix == null
+        if (prefix != null) {
+            app.saveBlockedPrefixes(app.blockedPrefixes + prefix)
+            if (!app.blockPrefixes) app.saveBlockPrefixes(true)
+            typed = ""
+        }
+    }
+    Card {
+        Column(Modifier.fillMaxWidth().padding(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.block_prefix_title), fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
+                    Text(stringResource(R.string.block_prefix_body), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Spacer(Modifier.width(6.dp))
+                Switch(checked = app.blockPrefixes, onCheckedChange = app::saveBlockPrefixes)
+            }
+            if (app.blockedPrefixes.isNotEmpty()) {
+                Spacer(Modifier.height(8.dp))
+                Text(stringResource(R.string.block_prefix_list), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    app.blockedPrefixes.forEach { prefix ->
+                        val label = prefixLabel(prefix)
+                        FilterChip(
+                            selected = app.blockPrefixes,
+                            onClick = { app.saveBlockedPrefixes(app.blockedPrefixes - prefix) },
+                            label = { Text(label) },
+                            trailingIcon = {
+                                Icon(Icons.Filled.Close, stringResource(R.string.block_prefix_remove, label), modifier = Modifier.size(16.dp))
+                            },
+                        )
+                    }
+                }
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CompactTextField(
+                    value = typed,
+                    onValueChange = {
+                        typed = it.filter { c -> c.isDigit() || c == '+' || c == ' ' }.take(20)
+                        invalid = false
+                    },
+                    placeholder = stringResource(R.string.block_prefix_add_hint),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { add() }),
+                    modifier = Modifier.width(150.dp),
+                )
+                TextButton(onClick = ::add, enabled = typed.any(Char::isDigit)) { Text(stringResource(R.string.block_abroad_add)) }
+            }
+            if (invalid) Text(stringResource(R.string.block_prefix_invalid), fontSize = 13.sp, color = MaterialTheme.colorScheme.error)
         }
     }
 }

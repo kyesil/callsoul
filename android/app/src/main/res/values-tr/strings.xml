@@ -343,6 +343,7 @@
     <string name="call_end_spam">Spam olarak bildir ve kapat</string>
     <string name="spam_reported">Spam olarak bildirildi</string>
     <string name="settings_group_calls">Aramalar</string>
+    <string name="settings_group_spam">Spam</string>
     <string name="settings_group_looks">Görünüm ve hareketler</string>
     <string name="settings_group_storage">Geçmiş ve depolama</string>
     <string name="settings_group_about">Tanılama ve hakkında</string>
@@ -389,6 +390,11 @@
     <string name="block_spam_body">Yeterince kişinin spam olarak işaretlediği numaralar çalmadan reddedilir. Arama kaydında görünür, bildirim gelmez. Rehberdeki kişiler her zaman çalar.</string>
     <string name="block_spam_votes">Gereken spam oyu</string>
     <string name="block_spam_lookup_off">Bulut spam ve arayan kimliği kapalı; yalnızca bu telefonun zaten bildiği numaralara bakılır.</string>
+    <string name="block_prefix_title">Numara öneklerini engelle</string>
+    <string name="block_prefix_body">Listedeki bir önekle başlayan numaralardan, örneğin +90 850, gelen aramalar çalmadan reddedilir. Arama kaydında görünür, bildirim gelmez. Rehberdeki kişiler her zaman çalar.</string>
+    <string name="block_prefix_list">Bu öneklerle başlayan numaralar reddedilir:</string>
+    <string name="block_prefix_remove">%1$s kaldır</string>
+    <string name="block_prefix_invalid">+90 850 ya da 0850 gibi bir numara başı yazın.</string>
     <string name="blocked_title">Engelli numaralar</string>
     <string name="blocked_body">Engellediğin numaraları gör, engeli kaldır ya da yenisini ekle</string>
     <string name="blocked_empty">Engelli numara yok.</string>

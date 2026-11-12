@@ -281,6 +281,7 @@
     <string name="call_end_spam">Laporkan spam dan tutup</string>
     <string name="spam_reported">Dilaporkan sebagai spam</string>
     <string name="settings_group_calls">Panggilan</string>
+    <string name="settings_group_spam">Spam</string>
     <string name="settings_group_looks">Tampilan dan gestur</string>
     <string name="settings_group_storage">Histori dan penyimpanan</string>
     <string name="settings_group_about">Diagnostik dan tentang</string>
@@ -319,6 +320,11 @@
     <string name="block_spam_body">Nomor yang ditandai spam oleh cukup banyak orang ditolak tanpa berdering. Panggilan tetap muncul di log panggilan, tanpa notifikasi. Kontak tersimpan selalu berdering.</string>
     <string name="block_spam_votes">Suara spam yang diperlukan</string>
     <string name="block_spam_lookup_off">Spam dan ID penelepon dari cloud nonaktif, jadi hanya nomor yang sudah dikenal di ponsel ini yang dicek.</string>
+    <string name="block_prefix_title">Blokir awalan nomor</string>
+    <string name="block_prefix_body">Panggilan dari nomor yang diawali awalan di daftar, misalnya +90 850, ditolak tanpa berdering. Panggilan tetap muncul di log panggilan, tanpa notifikasi. Kontak tersimpan selalu berdering.</string>
+    <string name="block_prefix_list">Nomor dengan awalan ini ditolak:</string>
+    <string name="block_prefix_remove">Hapus %1$s</string>
+    <string name="block_prefix_invalid">Ketik awal nomor, misalnya +90 850 atau 0850.</string>
     <string name="blocked_title">Nomor yang diblokir</string>
     <string name="blocked_body">Lihat nomor yang Anda blokir, buka blokirnya, atau tambahkan nomor</string>
     <string name="blocked_empty">Tidak ada nomor yang diblokir.</string>

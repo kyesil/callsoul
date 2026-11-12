@@ -12,8 +12,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * Turns calls away before they ring, by the rules in Settings: from outside the allowed country
- * codes, or with enough spam votes. Android asks the default phone app about every incoming call;
+ * Turns calls away before they ring, by the rules in Settings: beginning with a blocked prefix, from
+ * outside the allowed country codes, or with enough spam votes. Android asks the default phone app about every incoming call;
  * a call turned away here shows in the call log as blocked, with no ring and no notification.
  */
 class CallBlocker : CallScreeningService() {

@@ -399,6 +399,7 @@
     <string name="call_end_spam">الإبلاغ عن إزعاج وإنهاء المكالمة</string>
     <string name="spam_reported">تم الإبلاغ عن الرقم كمزعج</string>
     <string name="settings_group_calls">المكالمات</string>
+    <string name="settings_group_spam">البريد المزعج</string>
     <string name="settings_group_looks">المظهر والإيماءات</string>
     <string name="settings_group_storage">السجل والتخزين</string>
     <string name="settings_group_about">التشخيص وحول التطبيق</string>
@@ -453,6 +454,11 @@
     <string name="block_spam_body">تُرفض الأرقام التي وسمها عدد كافٍ من الناس كمزعجة دون رنين. تبقى في سجل المكالمات، دون إشعار. جهات الاتصال المحفوظة ترن دائمًا.</string>
     <string name="block_spam_votes">عدد أصوات الإزعاج المطلوبة</string>
     <string name="block_spam_lookup_off">البحث السحابي عن الإزعاج ومعرّف المتصل متوقف، لذلك تُفحص فقط الأرقام المعروفة على هذا الهاتف.</string>
+    <string name="block_prefix_title">حظر بادئات الأرقام</string>
+    <string name="block_prefix_body">تُرفض دون رنين المكالمات من الأرقام التي تبدأ ببادئة من القائمة، مثل ‎+90 850‎. تبقى في سجل المكالمات، دون إشعار. جهات الاتصال المحفوظة ترن دائمًا.</string>
+    <string name="block_prefix_list">تُرفض الأرقام التي تبدأ بهذه البادئات:</string>
+    <string name="block_prefix_remove">إزالة %1$s</string>
+    <string name="block_prefix_invalid">اكتب بداية رقم، مثل ‎+90 850‎ أو 0850.</string>
     <string name="blocked_title">الأرقام المحظورة</string>
     <string name="blocked_body">اعرض الأرقام التي حظرتها، أو ألغِ حظرها، أو أضف رقمًا</string>
     <string name="blocked_empty">لا توجد أرقام محظورة.</string>

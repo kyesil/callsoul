@@ -344,6 +344,7 @@
     <string name="call_end_spam">Report spam and hang up</string>
     <string name="spam_reported">Reported as spam</string>
     <string name="settings_group_calls">Calls</string>
+    <string name="settings_group_spam">Spam</string>
     <string name="settings_group_looks">Looks and gestures</string>
     <string name="settings_group_storage">History and storage</string>
     <string name="settings_group_about">Diagnostics and about</string>
@@ -390,6 +391,12 @@
     <string name="block_spam_body">Numbers that enough people marked as spam are turned away without ringing. They still show in the call log, with no notification. Saved contacts always ring.</string>
     <string name="block_spam_votes">Spam votes needed</string>
     <string name="block_spam_lookup_off">Cloud spam and caller ID is off, so only numbers already known on this phone are checked.</string>
+    <string name="block_prefix_title">Block number prefixes</string>
+    <string name="block_prefix_body">Calls from numbers that begin with a prefix in the list, such as +90 850, are turned away without ringing. They still show in the call log, with no notification. Saved contacts always ring.</string>
+    <string name="block_prefix_list">Numbers beginning with these are turned away:</string>
+    <string name="block_prefix_remove">Remove %1$s</string>
+    <string name="block_prefix_invalid">Type the beginning of a number, such as +90 850 or 0850.</string>
+    <string name="block_prefix_add_hint" translatable="false">+90 850</string>
     <string name="blocked_title">Blocked numbers</string>
     <string name="blocked_body">See the numbers you blocked, unblock them or add one</string>
     <string name="blocked_empty">No blocked numbers.</string>
