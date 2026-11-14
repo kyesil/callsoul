@@ -4,6 +4,10 @@ import com.bettercallsoul.calllog.Birthday
 import com.bettercallsoul.calllog.NumberTag
 import com.bettercallsoul.calllog.ContactRow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -95,7 +99,19 @@ class AppContainer(context: Context) {
      */
     private val lists = CoroutineScope(SupervisorJob() + Dispatchers.Default + CoroutineExceptionHandler { _, error -> DebugLog.w("App", "list failed", error) })
     val contactRows: StateFlow<List<ContactRow>> by lazy { contacts.observe().stateIn(lists, SharingStarted.WhileSubscribed(KEEP_LISTS_MILLIS), emptyList()) }
-    val callRows: StateFlow<List<CallEntry>> by lazy { observeCalls(limit = 1000).stateIn(lists, SharingStarted.WhileSubscribed(KEEP_LISTS_MILLIS), emptyList()) }
+    val callRows: StateFlow<List<CallEntry>> by lazy {
+        observeCalls(limit = 1000).onEach { callReads.value++ }.stateIn(lists, SharingStarted.WhileSubscribed(KEEP_LISTS_MILLIS), emptyList())
+    }
+
+    /** How many times [callRows] has read the log; 0 while the first read is still running. */
+    val callReads = MutableStateFlow(0)
+
+    /** Reads the call log again and waits (at most a few seconds) until the new rows are in. */
+    suspend fun refreshCalls() {
+        val before = callReads.value
+        callLog.refresh()
+        withTimeoutOrNull(5_000) { callReads.first { it > before } }
+    }
     val tagRows: StateFlow<List<NumberTag>> by lazy { store.observeTags().stateIn(lists, SharingStarted.WhileSubscribed(KEEP_LISTS_MILLIS), emptyList()) }
     val profileRow: StateFlow<ContactRow?> by lazy { contacts.observeProfile().stateIn(lists, SharingStarted.WhileSubscribed(KEEP_LISTS_MILLIS), null) }
     val birthdayRows: StateFlow<List<Birthday>> by lazy { contacts.observeBirthdays().stateIn(lists, SharingStarted.WhileSubscribed(KEEP_LISTS_MILLIS), emptyList()) }

@@ -119,7 +119,7 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val contacts by app.contactRows.collectAsStateWithLifecycle()
     val favorites = remember(contacts) { contacts.favoritesInOrder() }
-    val recents = rememberRecents(limit = 30)
+    val recents = rememberRecents(limit = 60)
     val calls by app.callRows.collectAsStateWithLifecycle()
     val birthdays by app.birthdayRows.collectAsStateWithLifecycle()
     val talked = remember(calls, recents.labels, birthdays) { withBirthdays(mostTalked(calls, recents.labels), birthdays) }
@@ -142,6 +142,7 @@ fun HomeScreen(
 
     BackHandler(enabled = picked.isNotEmpty()) { picked = emptySet() }
     Box(Modifier.fillMaxSize().onGloballyPositioned { origin = it.positionInRoot() }) {
+    RefreshCalls {
     LazyColumn(Modifier.fillMaxSize(), state = list) {
         item {
             if (picked.isNotEmpty()) {
@@ -211,6 +212,7 @@ fun HomeScreen(
         recentCalls(recents, onCall, onOpen, onTag = { tagging = it }, picked = picked, onPick = { row ->
             picked = if (row.key in picked) picked - row.key else picked + row.key
         })
+    }
     }
     QuickMenuOverlay(menu, origin)
     }

@@ -24,7 +24,10 @@ import androidx.compose.material.icons.automirrored.filled.CallReceived
 import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -114,6 +117,7 @@ fun RecentsScreen(onCall: (String) -> Unit, onOpen: (Route) -> Unit, toTop: Int 
                 ToolbarIcon(Icons.Filled.Search, stringResource(R.string.search_calls)) { searching = true }
             }
         }
+        RefreshCalls {
         LazyColumn(Modifier.fillMaxSize(), state = list) {
             if (!searching) item { LargeTitle(stringResource(R.string.tab_recents), null) }
             item {
@@ -137,6 +141,7 @@ fun RecentsScreen(onCall: (String) -> Unit, onOpen: (Route) -> Unit, toTop: Int 
             recentCalls(recents, onCall, onOpen, onTag = { tagging = it }, picked = picked, onPick = { row ->
                 picked = if (row.key in picked) picked - row.key else picked + row.key
             })
+        }
         }
     }
     tagging?.let { TagDialog(number = it, onDismiss = { tagging = null }) }
@@ -185,7 +190,12 @@ class RecentRow(val entry: CallEntry, val ids: List<Long>) {
 }
 
 /** Calls grouped by day, repeats collapsed, and the labels given to numbers outside the contacts. */
-class RecentsState(val days: List<Pair<String, List<RecentRow>>>, val labels: Map<String, String>) {
+class RecentsState(
+    val days: List<Pair<String, List<RecentRow>>>,
+    val labels: Map<String, String>,
+    /** The first read of the call log is still running, which can take a while on a slow phone. */
+    val loading: Boolean = false,
+) {
     val rows: List<RecentRow> get() = days.flatMap { it.second }
 
     /** The call log ids behind the picked rows. */
@@ -197,6 +207,7 @@ fun rememberRecents(limit: Int? = null, query: String = "", kind: CallFilter = C
     val context = LocalContext.current
     val app = context.container
     val calls by app.callRows.collectAsStateWithLifecycle()
+    val reads by app.callReads.collectAsStateWithLifecycle()
     val tags by app.tagRows.collectAsStateWithLifecycle()
     val labels = remember(tags) { tags.associate { it.number to it.label } }
     val days = remember(calls, limit, query, kind, labels) {
@@ -214,7 +225,34 @@ fun rememberRecents(limit: Int? = null, query: String = "", kind: CallFilter = C
         val rows = collapseRepeats(shown).let { if (limit == null) it else it.take(limit) }
         rows.groupBy { dayHeader(context, it.entry.date) }.toList()
     }
-    return RecentsState(days, labels)
+    return RecentsState(days, labels, loading = reads == 0 && calls.isEmpty())
+}
+
+/**
+ * Pull down at the top of a list to read the call log again. On the home and recents tabs, which
+ * otherwise only re-read when the log or the contacts change.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RefreshCalls(content: @Composable () -> Unit) {
+    val app = LocalContext.current.container
+    val scope = rememberCoroutineScope()
+    var refreshing by remember { mutableStateOf(false) }
+    PullToRefreshBox(
+        isRefreshing = refreshing,
+        onRefresh = {
+            refreshing = true
+            scope.launch {
+                try {
+                    app.refreshCalls()
+                    app.contacts.refresh()
+                } finally {
+                    refreshing = false
+                }
+            }
+        },
+        modifier = Modifier.fillMaxSize(),
+    ) { content() }
 }
 
 fun LazyListScope.recentCalls(
@@ -226,7 +264,8 @@ fun LazyListScope.recentCalls(
     onPick: (RecentRow) -> Unit = {},
 ) {
     if (state.days.isEmpty()) {
-        item { EmptyRecents() }
+        // Until the log has been read once, a spinner, not "no calls yet".
+        item(key = "recents-empty") { if (state.loading) LoadingRecents() else EmptyRecents() }
     }
     state.days.forEach { (day, rows) ->
         item(key = "header-$day") { DayHeader(day) }
@@ -250,6 +289,13 @@ fun LazyListScope.recentCalls(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun LoadingRecents() {
+    Box(Modifier.fillMaxWidth().padding(vertical = 32.dp), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator(Modifier.size(32.dp), strokeWidth = 3.dp)
     }
 }
 
