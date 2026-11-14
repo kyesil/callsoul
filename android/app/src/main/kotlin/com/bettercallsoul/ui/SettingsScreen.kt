@@ -175,6 +175,10 @@ fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBac
     val entries = listOfNotNull(
         SettingEntry(SettingsGroup.Calls, listOf(R.string.lock_calls_title, R.string.lock_calls_body)) { LockCallsSettings(lockCallsAllowed) },
         SettingEntry(SettingsGroup.Spam, listOf(R.string.settings_lookup_title, R.string.settings_lookup_body)) { LookupSettings() },
+        SettingEntry(SettingsGroup.Spam, listOf(R.string.block_reported_title, R.string.block_reported_body)) {
+            val app = LocalContext.current.container
+            SwitchCard(R.string.block_reported_title, R.string.block_reported_body, app.blockReported, onChange = app::saveBlockReported)
+        },
         SettingEntry(SettingsGroup.Spam, listOf(R.string.block_spam_title, R.string.block_spam_body)) { BlockSpamSettings() },
         SettingEntry(SettingsGroup.Spam, listOf(R.string.blocked_title, R.string.blocked_body)) {
             LinkCard(Icons.Outlined.Block, R.string.blocked_title, R.string.blocked_body) { onOpen(Route.Blocked) }

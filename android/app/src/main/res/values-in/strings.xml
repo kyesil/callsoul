@@ -28,8 +28,6 @@
     <string name="action_settings">Setelan</string>
     <string name="action_done">Selesai</string>
     <string name="action_skip">Lewati</string>
-    <string name="action_yes">Ya</string>
-    <string name="action_no">Tidak</string>
     <string name="action_send">Kirim</string>
     <string name="search_hint">Telusuri kontak</string>
     <string name="field_phone">Telepon</string>
@@ -94,9 +92,13 @@
     <string name="channel_missed">Panggilan tak terjawab</string>
     <string name="missed_call">Panggilan tak terjawab</string>
     <string name="missed_call_back">Telepon balik</string>
+    <string name="missed_rang">Berdering %1$s</string>
+    <string name="number_blocked">Diblokir</string>
+    <string name="spam_blocked">Dilaporkan sebagai spam dan diblokir</string>
     <string name="spam_warning">Kemungkinan spam</string>
     <string name="spam_question">Apakah panggilan ini spam?</string>
-    <string name="spam_category_question">Panggilan apa itu?</string>
+    <string name="spam_question_block">Apakah panggilan ini spam? Blokir</string>
+    <string name="spam_not">Bukan spam</string>
     <string name="spam_cat_telemarketing">Telemarketing</string>
     <string name="spam_cat_scam">Penipuan</string>
     <string name="spam_cat_survey">Survei</string>
@@ -104,7 +106,6 @@
     <string name="caller_question">Siapa yang menelepon?</string>
     <string name="caller_hint">Perusahaan atau organisasi</string>
     <string name="caller_label_note">Disimpan sebagai label nomor ini, hanya di ponsel ini.</string>
-    <string name="spam_disclosure">Jawaban Anda dikirim bersama nomornya ke server Better Call Soul.</string>
     <string name="setup_title">Selamat datang di Better Call Soul</string>
     <string name="setup_body">Izin diperlukan untuk menampilkan panggilan, daftar terbaru, dan kontak Anda.</string>
     <string name="setup_permissions">Izinkan</string>
@@ -317,6 +318,8 @@
     <string name="block_abroad_add">Tambahkan</string>
     <string name="block_abroad_remove">Hapus +%1$s</string>
     <string name="block_abroad_invalid">Ketik kode negara, misalnya +49.</string>
+    <string name="block_reported_title">Blokir nomor yang Anda laporkan sebagai spam</string>
+    <string name="block_reported_body">Nomor yang Anda laporkan sebagai spam juga masuk daftar blokir dan tidak akan berdering lagi.</string>
     <string name="block_spam_title">Blokir panggilan spam</string>
     <string name="block_spam_body">Nomor yang ditandai spam oleh cukup banyak orang ditolak tanpa berdering. Panggilan tetap muncul di log panggilan, tanpa notifikasi. Kontak tersimpan selalu berdering.</string>
     <string name="block_spam_votes">Suara spam yang diperlukan</string>

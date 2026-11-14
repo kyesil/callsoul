@@ -4,8 +4,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.material.icons.automirrored.outlined.Label
-import android.content.ContentValues
-import android.provider.BlockedNumberContract.BlockedNumbers
+import com.bettercallsoul.BlockedList
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -53,10 +52,10 @@ import androidx.compose.ui.unit.sp
 import com.bettercallsoul.R
 import com.bettercallsoul.calllog.CallEntry
 import com.bettercallsoul.call.SpamBadge
+import com.bettercallsoul.call.showsSpamBadge
 import com.bettercallsoul.call.SpamQuestion
 import com.bettercallsoul.call.TagDialog
 import com.bettercallsoul.container
-import com.bettercallsoul.spam.Verdict
 import com.bettercallsoul.telecom.CallerInfo
 import kotlinx.coroutines.launch
 
@@ -93,6 +92,7 @@ private fun NumberDetailScreen(number: String, onCall: (String) -> Unit, onOpen:
         val local = app.directory.local(number)
         info = local
         history = app.callHistory(listOf(number), local.title)
+        blocked = BlockedList.isBlocked(context, number)
         info = app.directory.remote(local)
     }
     LaunchedEffect(number) {
@@ -129,7 +129,8 @@ private fun NumberDetailScreen(number: String, onCall: (String) -> Unit, onOpen:
                 info.subtitle?.let {
                     Text(it, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                if (info.verdict == Verdict.Spam) SpamBadge(info)
+                if (blocked) BlockedBadge()
+                if (showsSpamBadge(info)) SpamBadge(info)
                 TextButton(onClick = { editingTag = true }) {
                     Icon(Icons.Outlined.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(6.dp))
@@ -152,7 +153,10 @@ private fun NumberDetailScreen(number: String, onCall: (String) -> Unit, onOpen:
             if (reporting) {
                 Spacer(Modifier.height(6.dp))
                 Card {
-                    SpamQuestion(number = number, onFinished = { reporting = false })
+                    SpamQuestion(number = number, onFinished = {
+                        reporting = false
+                        scope.launch { load() }
+                    })
                 }
             }
             Spacer(Modifier.height(8.dp))
@@ -160,7 +164,9 @@ private fun NumberDetailScreen(number: String, onCall: (String) -> Unit, onOpen:
         Row(Modifier.fillMaxWidth().padding(vertical = 3.dp), horizontalArrangement = Arrangement.SpaceEvenly) {
             BarAction(Icons.Outlined.PersonAdd, R.string.action_add_to_contacts) { onOpen(Route.NewContact(number)) }
             BarAction(Icons.Filled.Block, if (blocked) R.string.action_unblock else R.string.action_block) {
-                blocked = toggleBlock(context, number, blocked)
+                scope.launch {
+                    blocked = if (blocked) !BlockedList.unblock(context, number) else BlockedList.block(context, number)
+                }
             }
             BarAction(Icons.Outlined.Flag, R.string.action_report) { reporting = true }
         }
@@ -177,19 +183,14 @@ private fun NumberDetailScreen(number: String, onCall: (String) -> Unit, onOpen:
     }
 }
 
-/** Only the default phone app may write here, so this quietly does nothing before that. */
-private fun toggleBlock(context: android.content.Context, number: String, blocked: Boolean): Boolean = try {
-    val resolver = context.contentResolver
-    if (blocked) {
-        resolver.delete(BlockedNumbers.CONTENT_URI, "${BlockedNumbers.COLUMN_ORIGINAL_NUMBER} = ?", arrayOf(number))
-        false
-    } else {
-        val values = ContentValues().apply { put(BlockedNumbers.COLUMN_ORIGINAL_NUMBER, number) }
-        resolver.insert(BlockedNumbers.CONTENT_URI, values)
-        true
+/** Under the name, so a number blocked from anywhere (this page, the list, a spam report) says so. */
+@Composable
+private fun BlockedBadge() {
+    Row(Modifier.padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+        Icon(Icons.Filled.Block, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp))
+        Spacer(Modifier.width(4.dp))
+        Text(stringResource(R.string.number_blocked), fontSize = 14.sp, color = MaterialTheme.colorScheme.error)
     }
-} catch (_: SecurityException) {
-    blocked
 }
 
 /** A number's or a contact's calls, with a thin line between them. */

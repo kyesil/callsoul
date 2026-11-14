@@ -26,6 +26,8 @@ data class CallerInfo(
     val lastCallAt: Long? = null,
     /** Set for saved contacts, so the call screen can show the rest of their card. */
     val contactId: Long? = null,
+    /** The contact's own labels, shown in the call notification. */
+    val labels: List<String> = emptyList(),
 )
 
 class CallerDirectory(
@@ -52,6 +54,7 @@ class CallerDirectory(
                 isContact = true,
                 lastCallAt = lastCallAt,
                 contactId = contact.id,
+                labels = contact.labels,
             )
         }
         val key = keyOf(number)

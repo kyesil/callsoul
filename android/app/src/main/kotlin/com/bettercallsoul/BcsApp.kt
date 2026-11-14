@@ -286,6 +286,15 @@ class AppContainer(context: Context) {
         prefs.edit { putInt(KEY_SPAM_VOTES, spamBlockVotes) }
     }
 
+    /** On by default: a number the user reports as spam goes on the phone's blocked list too. */
+    var blockReported by mutableStateOf(prefs.getBoolean(KEY_BLOCK_REPORTED, true))
+        private set
+
+    fun saveBlockReported(on: Boolean) {
+        blockReported = on
+        prefs.edit { putBoolean(KEY_BLOCK_REPORTED, on) }
+    }
+
     /** Off by default: numbers that begin with one of [blockedPrefixes] turned away like [blockAbroad]. */
     var blockPrefixes by mutableStateOf(prefs.getBoolean(KEY_BLOCK_PREFIXES, false))
         private set
@@ -483,6 +492,7 @@ class AppContainer(context: Context) {
         const val KEY_BLOCK_SPAM = "block_spam"
         const val KEY_SPAM_VOTES = "spam_block_votes"
         const val KEY_BLOCK_PREFIXES = "block_prefixes"
+        const val KEY_BLOCK_REPORTED = "block_reported"
         const val KEY_BLOCKED_PREFIXES = "blocked_prefixes"
         const val KEY_TEL_LINKS_WANTED = "tel_links_wanted"
         const val KEY_FACE_DOWN = "silent_face_down"

@@ -28,8 +28,6 @@
     <string name="action_settings">Настройки</string>
     <string name="action_done">Готово</string>
     <string name="action_skip">Пропустить</string>
-    <string name="action_yes">Да</string>
-    <string name="action_no">Нет</string>
     <string name="action_send">Отправить</string>
     <string name="search_hint">Поиск контактов</string>
     <string name="field_phone">Телефон</string>
@@ -94,9 +92,13 @@
     <string name="channel_missed">Пропущенные вызовы</string>
     <string name="missed_call">Пропущенный вызов</string>
     <string name="missed_call_back">Перезвонить</string>
+    <string name="missed_rang">Звонил %1$s</string>
+    <string name="number_blocked">Заблокирован</string>
+    <string name="spam_blocked">Отмечен как спам и заблокирован</string>
     <string name="spam_warning">Возможно, спам</string>
     <string name="spam_question">Это был спам?</string>
-    <string name="spam_category_question">Что это был за звонок?</string>
+    <string name="spam_question_block">Это был спам? Заблокировать</string>
+    <string name="spam_not">Не спам</string>
     <string name="spam_cat_telemarketing">Реклама</string>
     <string name="spam_cat_scam">Мошенничество</string>
     <string name="spam_cat_survey">Опрос</string>
@@ -104,7 +106,6 @@
     <string name="caller_question">Кто звонил?</string>
     <string name="caller_hint">Компания или организация</string>
     <string name="caller_label_note">Сохраняется как метка этого номера, только на этом телефоне.</string>
-    <string name="spam_disclosure">Ваш ответ вместе с номером отправляется на сервер Better Call Soul.</string>
     <string name="setup_title">Добро пожаловать в Better Call Soul</string>
     <string name="setup_body">Нужно разрешение, чтобы показывать вызовы, недавние и контакты.</string>
     <string name="setup_permissions">Разрешить</string>
@@ -419,6 +420,8 @@
     <string name="block_abroad_add">Добавить</string>
     <string name="block_abroad_remove">Удалить +%1$s</string>
     <string name="block_abroad_invalid">Введите код страны, например +49.</string>
+    <string name="block_reported_title">Блокировать номера, отмеченные как спам</string>
+    <string name="block_reported_body">Номер, который вы отметили как спам, также попадает в список заблокированных и больше не будет звонить.</string>
     <string name="block_spam_title">Блокировать спам-вызовы</string>
     <string name="block_spam_body">Номера, которые достаточно людей отметили как спам, отклоняются без звонка. Они остаются в журнале вызовов, без уведомления. Контакты из адресной книги звонят всегда.</string>
     <string name="block_spam_votes">Нужно голосов «спам»</string>

@@ -254,9 +254,12 @@ private fun CallerHeader(status: String, caller: CallerInfo, showPhoto: Boolean)
             Spacer(Modifier.height(6.dp))
             Text(it, color = Soft, fontSize = 16.sp, textAlign = TextAlign.Center)
         }
-        if (caller.verdict == Verdict.Spam) SpamBadge(caller)
+        if (showsSpamBadge(caller)) SpamBadge(caller)
     }
 }
+
+/** One or two reports may be a mistake or a grudge; the warning shows from the third on. */
+fun showsSpamBadge(caller: CallerInfo): Boolean = caller.verdict == Verdict.Spam && caller.spamVotes > 2
 
 @Composable
 fun SpamBadge(caller: CallerInfo) {
@@ -536,7 +539,7 @@ private fun EndAsSpam(number: String, modifier: Modifier) {
         color = SpamOrange.copy(alpha = 0.18f),
         modifier = modifier.clickable {
             Toast.makeText(context, reported, Toast.LENGTH_SHORT).show()
-            endAsSpam(context.container, number)
+            endAsSpam(context, context.container, number)
         },
     ) {
         Row(Modifier.padding(horizontal = 16.dp, vertical = 9.dp), verticalAlignment = Alignment.CenterVertically) {

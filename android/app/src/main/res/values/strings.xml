@@ -29,8 +29,6 @@
     <string name="action_settings">Settings</string>
     <string name="action_done">Done</string>
     <string name="action_skip">Skip</string>
-    <string name="action_yes">Yes</string>
-    <string name="action_no">No</string>
     <string name="action_send">Send</string>
     <string name="search_hint">Search contacts</string>
     <string name="field_phone">Phone</string>
@@ -95,9 +93,13 @@
     <string name="channel_missed">Missed calls</string>
     <string name="missed_call">Missed call</string>
     <string name="missed_call_back">Call back</string>
+    <string name="missed_rang">Rang %1$s</string>
+    <string name="number_blocked">Blocked</string>
+    <string name="spam_blocked">Reported as spam and blocked</string>
     <string name="spam_warning">Possible spam</string>
     <string name="spam_question">Was this call spam?</string>
-    <string name="spam_category_question">What kind of call was it?</string>
+    <string name="spam_question_block">Was this call spam? Block it</string>
+    <string name="spam_not">Not spam</string>
     <string name="spam_cat_telemarketing">Telemarketing</string>
     <string name="spam_cat_scam">Scam</string>
     <string name="spam_cat_survey">Survey</string>
@@ -105,7 +107,6 @@
     <string name="caller_question">Who was calling?</string>
     <string name="caller_hint">Company or organisation</string>
     <string name="caller_label_note">Saved as this number\'s label, on this phone only.</string>
-    <string name="spam_disclosure">Your answer is sent with the number to the Better Call Soul server.</string>
     <string name="setup_title">Welcome to Better Call Soul</string>
     <string name="setup_body">Permission is needed to show your calls, recents and contacts.</string>
     <string name="setup_permissions">Allow</string>
@@ -388,6 +389,8 @@
     <string name="block_abroad_add">Add</string>
     <string name="block_abroad_remove">Remove +%1$s</string>
     <string name="block_abroad_invalid">Type a country code, such as +49.</string>
+    <string name="block_reported_title">Block numbers you report as spam</string>
+    <string name="block_reported_body">A number you report as spam also goes on the blocked list and won\'t ring again.</string>
     <string name="block_spam_title">Block spam calls</string>
     <string name="block_spam_body">Numbers that enough people marked as spam are turned away without ringing. They still show in the call log, with no notification. Saved contacts always ring.</string>
     <string name="block_spam_votes">Spam votes needed</string>

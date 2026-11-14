@@ -218,8 +218,11 @@ fun MainScreen(
             onMissedRequestHandled()
         }
     }
-    LaunchedEffect(tab) {
-        if (tab == Tab.Recents || tab == Tab.Home) com.bettercallsoul.MissedCallReceiver.clear(context)
+    // The missed calls are seen once their list is in view; a page opened over it from one
+    // person's notification counts only that person's calls, so the others' notifications stay.
+    val atTabRoot = stack.isEmpty()
+    LaunchedEffect(tab, atTabRoot) {
+        if ((tab == Tab.Recents || tab == Tab.Home) && stack.isEmpty()) com.bettercallsoul.MissedCallReceiver.clear(context)
     }
     // A person's page asked for from a widget opens over whatever was there.
     LaunchedEffect(openRequest) {

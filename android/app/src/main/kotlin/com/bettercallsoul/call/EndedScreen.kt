@@ -1,6 +1,17 @@
 package com.bettercallsoul.call
 
+import android.app.Activity
+import android.app.KeyguardManager
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.automirrored.outlined.Label
+import androidx.compose.material.icons.outlined.PersonAdd
+import com.bettercallsoul.BlockedList
+import com.bettercallsoul.MainActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -63,7 +74,8 @@ private val reportScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
 @Composable
 fun EndedScreen(ended: EndedCall, onClose: () -> Unit) {
-    val app = LocalContext.current.container
+    val context = LocalContext.current
+    val app = context.container
     val number = ended.caller.number
     var asking by remember { mutableStateOf(false) }
     var interacted by remember { mutableStateOf(false) }
@@ -100,12 +112,19 @@ fun EndedScreen(ended: EndedCall, onClose: () -> Unit) {
                 Spacer(Modifier.height(6.dp))
                 Text(formatDuration(ended.durationSeconds), color = Color(0xFFC9CDD2), fontSize = 16.sp)
             }
-            if (!ended.caller.isContact) {
-                TextButton(onClick = {
-                    interacted = true
-                    editingTag = true
-                }) {
-                    Text(stringResource(if (ended.caller.isTagged) R.string.tag_edit else R.string.tag_add), color = Color.White)
+            if (!ended.caller.isContact && number.isNotBlank()) {
+                Spacer(Modifier.height(12.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    EndedAction(
+                        Icons.AutoMirrored.Outlined.Label,
+                        stringResource(if (ended.caller.isTagged) R.string.tag_edit else R.string.tag_add),
+                    ) {
+                        interacted = true
+                        editingTag = true
+                    }
+                    EndedAction(Icons.Outlined.PersonAdd, stringResource(R.string.action_add_to_contacts)) {
+                        openNewContact(context, number, onClose)
+                    }
                 }
             }
         }
@@ -138,34 +157,84 @@ fun EndedScreen(ended: EndedCall, onClose: () -> Unit) {
     }
 }
 
+@Composable
+private fun EndedAction(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, onClick: () -> Unit) {
+    TextButton(onClick = onClick) {
+        Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(6.dp))
+        Text(label, color = Color.White)
+    }
+}
+
+/**
+ * The new-contact page with the number filled in. On a locked phone it asks for the unlock first,
+ * since the app's own pages don't show over the lock screen.
+ */
+private fun openNewContact(context: Context, number: String, onClose: () -> Unit) {
+    fun open() {
+        context.startActivity(
+            Intent(context, MainActivity::class.java)
+                .setAction(MainActivity.ACTION_NEW_CONTACT)
+                .putExtra(MainActivity.EXTRA_NUMBER, number)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
+        )
+        onClose()
+    }
+    val keyguard = context.getSystemService(KeyguardManager::class.java)
+    val activity = context.findActivity()
+    if (activity == null || !keyguard.isKeyguardLocked) {
+        open()
+        return
+    }
+    keyguard.requestDismissKeyguard(activity, object : KeyguardManager.KeyguardDismissCallback() {
+        override fun onDismissSucceeded() = open()
+    })
+}
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
+/** With the setting on (it is by default), a number reported as spam is blocked too, so it can't ring again. */
+private suspend fun blockAsSpam(context: Context, number: String) {
+    if (context.container.blockReported && BlockedList.block(context, number)) {
+        withContext(Dispatchers.Main) { Toast.makeText(context, R.string.spam_blocked, Toast.LENGTH_SHORT).show() }
+    }
+}
+
 /**
  * Ends the call and reports the number as spam. Noted as answered first, so the screen after the
  * call doesn't ask about it again; the report then goes out on its own.
  */
-internal fun endAsSpam(app: AppContainer, number: String) {
+internal fun endAsSpam(context: Context, app: AppContainer, number: String) {
     val e164 = PhoneNumbers.toE164(number) ?: return
+    val appContext = context.applicationContext
     reportScope.launch {
         app.store.markAnswered(AnsweredNumber(CallerDirectory.keyOf(number), System.currentTimeMillis()))
         withContext(Dispatchers.Main) { CallManager.hangUp() }
+        blockAsSpam(appContext, number)
         app.spam.report(SpamReport(e164, app.deviceId, true))
     }
 }
 
-private enum class Step { Spam, Category, Caller }
+private enum class Step { Spam, Caller }
 
 /**
- * After a call from an unknown number: was it spam, and if not, who was it? The spam answer goes to
+ * After a call from an unknown number, one question: not spam, or which kind of spam. Not spam then
+ * asks who it was. The spam answer goes to
  * the server; who it was stays on the phone as the number's label.
  */
 @Composable
 fun SpamQuestion(number: String, onFinished: () -> Unit) {
-    val app = LocalContext.current.container
-    val scope = rememberCoroutineScope()
+    val context = LocalContext.current.applicationContext
+    val app = context.container
     var step by remember { mutableStateOf(Step.Spam) }
     var caller by remember { mutableStateOf("") }
 
     fun finish() {
-        scope.launch { app.store.markAnswered(AnsweredNumber(CallerDirectory.keyOf(number), System.currentTimeMillis())) }
+        reportScope.launch { app.store.markAnswered(AnsweredNumber(CallerDirectory.keyOf(number), System.currentTimeMillis())) }
         onFinished()
     }
 
@@ -174,36 +243,34 @@ fun SpamQuestion(number: String, onFinished: () -> Unit) {
         val name = label?.trim()?.take(40)?.takeIf { it.isNotEmpty() }
         reportScope.launch {
             if (name != null) app.store.saveTag(NumberTag(CallerDirectory.keyOf(number), name, System.currentTimeMillis()))
+            // Blocked before the card closes, so a page showing the number reads it as blocked.
+            if (isSpam) blockAsSpam(context, number)
+            withContext(Dispatchers.Main) { finish() }
             if (e164 != null) app.spam.report(SpamReport(e164, app.deviceId, isSpam, category))
         }
-        finish()
     }
 
     Column(Modifier.fillMaxWidth().padding(10.dp)) {
         when (step) {
             Step.Spam -> {
-                Text(stringResource(R.string.spam_question), fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurface)
+                // Says "block" only when a spam answer will block the number.
                 Text(
-                    stringResource(R.string.spam_disclosure),
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    stringResource(if (app.blockReported) R.string.spam_question_block else R.string.spam_question),
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    TextButton(onClick = ::finish) { Text(stringResource(R.string.action_skip)) }
-                    TextButton(onClick = { step = Step.Caller }) { Text(stringResource(R.string.action_no)) }
-                    TextButton(onClick = { step = Step.Category }) { Text(stringResource(R.string.action_yes)) }
-                }
-            }
-            Step.Category -> {
-                Text(stringResource(R.string.spam_category_question), fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurface)
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(10.dp))
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    AssistChip(onClick = { step = Step.Caller }, label = { Text(stringResource(R.string.spam_not)) })
                     SpamCategory.entries.forEach { category ->
                         AssistChip(
                             onClick = { send(true, category) },
                             label = { Text(stringResource(labelOf(category))) },
                         )
                     }
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    TextButton(onClick = ::finish) { Text(stringResource(R.string.action_skip)) }
                 }
             }
             Step.Caller -> {

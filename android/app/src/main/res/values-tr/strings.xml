@@ -28,8 +28,6 @@
     <string name="action_settings">Ayarlar</string>
     <string name="action_done">Tamam</string>
     <string name="action_skip">Atla</string>
-    <string name="action_yes">Evet</string>
-    <string name="action_no">Hayır</string>
     <string name="action_send">Gönder</string>
     <string name="search_hint">Kişilerde ara</string>
     <string name="field_phone">Telefon</string>
@@ -94,9 +92,13 @@
     <string name="channel_missed">Cevapsız aramalar</string>
     <string name="missed_call">Cevapsız arama</string>
     <string name="missed_call_back">Geri ara</string>
+    <string name="missed_rang">%1$s çaldı</string>
+    <string name="number_blocked">Engelli</string>
+    <string name="spam_blocked">Spam olarak bildirildi ve engellendi</string>
     <string name="spam_warning">Spam olabilir</string>
     <string name="spam_question">Bu arama spam mıydı?</string>
-    <string name="spam_category_question">Ne tür bir aramaydı?</string>
+    <string name="spam_question_block">Bu arama spam mıydı? Engelle</string>
+    <string name="spam_not">Spam değil</string>
     <string name="spam_cat_telemarketing">Reklam</string>
     <string name="spam_cat_scam">Dolandırıcılık</string>
     <string name="spam_cat_survey">Anket</string>
@@ -104,7 +106,6 @@
     <string name="caller_question">Arayan kimdi?</string>
     <string name="caller_hint">Firma veya kurum adı</string>
     <string name="caller_label_note">Numaranın etiketi olarak yalnızca bu telefona kaydedilir.</string>
-    <string name="spam_disclosure">Yanıtın numarayla birlikte Better Call Soul sunucusuna gönderilir.</string>
     <string name="setup_title">Better Call Soul\'a hoş geldin</string>
     <string name="setup_body">Aramaları, son aramaları ve rehberini gösterebilmek için izin gerekiyor.</string>
     <string name="setup_permissions">İzin ver</string>
@@ -387,6 +388,8 @@
     <string name="block_abroad_add">Ekle</string>
     <string name="block_abroad_remove">+%1$s kaldır</string>
     <string name="block_abroad_invalid">+49 gibi bir ülke kodu yazın.</string>
+    <string name="block_reported_title">Spam bildirince engelle</string>
+    <string name="block_reported_body">Spam olarak bildirdiğin numara engellenenler listesine de eklenir ve bir daha çalmaz.</string>
     <string name="block_spam_title">Spam aramaları engelle</string>
     <string name="block_spam_body">Yeterince kişinin spam olarak işaretlediği numaralar çalmadan reddedilir. Arama kaydında görünür, bildirim gelmez. Rehberdeki kişiler her zaman çalar.</string>
     <string name="block_spam_votes">Gereken spam oyu</string>

@@ -150,6 +150,8 @@ data class ContactMatch(
     val company: String?,
     val jobTitle: String?,
     val note: String?,
+    /** The user's own labels the contact is in. */
+    val labels: List<String> = emptyList(),
 )
 
 /** A contact as the search sees it. [details] are the e-mail, company and nickname lines. */
@@ -439,7 +441,7 @@ class ContactsRepository(context: Context) {
         } ?: return@withContext null
         val (id, name, photo) = found
         val work = organization(id)
-        ContactMatch(id, name, photo, work?.company, work?.title, note(id))
+        ContactMatch(id, name, photo, work?.company, work?.title, note(id), labels(id))
     }
 
     suspend fun detail(contactId: Long): ContactDetail? = withContext(Dispatchers.IO) {

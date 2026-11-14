@@ -174,7 +174,9 @@ class BcsInCallService : InCallService() {
             smallIcon = R.drawable.ic_call_notification,
             content = CallNotificationContent(
                 title = state.caller.title,
-                subtitle = state.caller.subtitle,
+                // A contact's labels come first, so "Family" or "Work" shows even when the line is cut.
+                subtitle = listOfNotNull(state.caller.labels.joinToString(", ").ifEmpty { null }, state.caller.subtitle)
+                    .joinToString(" · ").ifEmpty { null },
                 incoming = state.phase == CallPhase.Incoming,
                 quiet = CallManager.callScreenVisible.value || ringsInPill(state),
                 connectedAt = state.connectedAt,

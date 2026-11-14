@@ -32,7 +32,7 @@ data class BlockRules(
     }
 
     companion object {
-        const val DEFAULT_SPAM_VOTES = 3
+        const val DEFAULT_SPAM_VOTES = 5
     }
 }
 

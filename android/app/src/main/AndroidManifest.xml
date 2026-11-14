@@ -170,6 +170,9 @@
                 <action android:name="android.telecom.action.SHOW_MISSED_CALLS_NOTIFICATION" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name=".MissedCallActions"
+            android:exported="false" />
         <!-- Fetches the scanner's screen when the app is installed, so the first scan doesn't wait. -->
         <meta-data
             android:name="com.google.mlkit.vision.DEPENDENCIES"

@@ -28,8 +28,6 @@
     <string name="action_settings">Ajustes</string>
     <string name="action_done">Listo</string>
     <string name="action_skip">Omitir</string>
-    <string name="action_yes">Sí</string>
-    <string name="action_no">No</string>
     <string name="action_send">Enviar</string>
     <string name="search_hint">Buscar contactos</string>
     <string name="field_phone">Teléfono</string>
@@ -94,9 +92,13 @@
     <string name="channel_missed">Llamadas perdidas</string>
     <string name="missed_call">Llamada perdida</string>
     <string name="missed_call_back">Devolver llamada</string>
+    <string name="missed_rang">Sonó %1$s</string>
+    <string name="number_blocked">Bloqueado</string>
+    <string name="spam_blocked">Denunciado como spam y bloqueado</string>
     <string name="spam_warning">Posible spam</string>
     <string name="spam_question">¿Esta llamada era spam?</string>
-    <string name="spam_category_question">¿Qué tipo de llamada era?</string>
+    <string name="spam_question_block">¿Esta llamada era spam? Bloquear</string>
+    <string name="spam_not">No es spam</string>
     <string name="spam_cat_telemarketing">Telemarketing</string>
     <string name="spam_cat_scam">Estafa</string>
     <string name="spam_cat_survey">Encuesta</string>
@@ -104,7 +106,6 @@
     <string name="caller_question">¿Quién llamaba?</string>
     <string name="caller_hint">Empresa u organización</string>
     <string name="caller_label_note">Se guarda como etiqueta de este número, solo en este teléfono.</string>
-    <string name="spam_disclosure">Tu respuesta se envía con el número al servidor de Better Call Soul.</string>
     <string name="setup_title">Te damos la bienvenida a Better Call Soul</string>
     <string name="setup_body">Se necesita permiso para mostrar tus llamadas, recientes y contactos.</string>
     <string name="setup_permissions">Permitir</string>
@@ -317,6 +318,8 @@
     <string name="block_abroad_add">Agregar</string>
     <string name="block_abroad_remove">Quitar +%1$s</string>
     <string name="block_abroad_invalid">Escribe un prefijo de país, como +49.</string>
+    <string name="block_reported_title">Bloquear los números que denuncies como spam</string>
+    <string name="block_reported_body">Un número que denuncies como spam también pasa a la lista de bloqueados y no volverá a sonar.</string>
     <string name="block_spam_title">Bloquear llamadas de spam</string>
     <string name="block_spam_body">Los números que suficientes personas marcaron como spam se rechazan sin sonar. Siguen apareciendo en el registro de llamadas, sin notificación. Los contactos guardados siempre suenan.</string>
     <string name="block_spam_votes">Votos de spam necesarios</string>

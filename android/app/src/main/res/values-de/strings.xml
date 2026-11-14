@@ -28,8 +28,6 @@
     <string name="action_settings">Einstellungen</string>
     <string name="action_done">Fertig</string>
     <string name="action_skip">Überspringen</string>
-    <string name="action_yes">Ja</string>
-    <string name="action_no">Nein</string>
     <string name="action_send">Senden</string>
     <string name="search_hint">Kontakte suchen</string>
     <string name="field_phone">Telefon</string>
@@ -94,9 +92,13 @@
     <string name="channel_missed">Entgangene Anrufe</string>
     <string name="missed_call">Entgangener Anruf</string>
     <string name="missed_call_back">Zurückrufen</string>
+    <string name="missed_rang">%1$s geklingelt</string>
+    <string name="number_blocked">Blockiert</string>
+    <string name="spam_blocked">Als Spam gemeldet und blockiert</string>
     <string name="spam_warning">Möglicher Spam</string>
     <string name="spam_question">War dieser Anruf Spam?</string>
-    <string name="spam_category_question">Was für ein Anruf war das?</string>
+    <string name="spam_question_block">War dieser Anruf Spam? Blockieren</string>
+    <string name="spam_not">Kein Spam</string>
     <string name="spam_cat_telemarketing">Werbung</string>
     <string name="spam_cat_scam">Betrug</string>
     <string name="spam_cat_survey">Umfrage</string>
@@ -104,7 +106,6 @@
     <string name="caller_question">Wer hat angerufen?</string>
     <string name="caller_hint">Firma oder Organisation</string>
     <string name="caller_label_note">Wird als Label dieser Nummer gespeichert, nur auf diesem Telefon.</string>
-    <string name="spam_disclosure">Deine Antwort wird mit der Nummer an den Server von Better Call Soul gesendet.</string>
     <string name="setup_title">Willkommen bei Better Call Soul</string>
     <string name="setup_body">Um deine Anrufe, die Anrufliste und Kontakte zu zeigen, ist eine Berechtigung nötig.</string>
     <string name="setup_permissions">Zulassen</string>
@@ -317,6 +318,8 @@
     <string name="block_abroad_add">Hinzufügen</string>
     <string name="block_abroad_remove">+%1$s entfernen</string>
     <string name="block_abroad_invalid">Gib eine Ländervorwahl ein, z. B. +49.</string>
+    <string name="block_reported_title">Als Spam gemeldete Nummern blockieren</string>
+    <string name="block_reported_body">Eine Nummer, die du als Spam meldest, kommt auch auf die Sperrliste und klingelt nicht mehr.</string>
     <string name="block_spam_title">Spam-Anrufe blockieren</string>
     <string name="block_spam_body">Nummern, die genug Leute als Spam markiert haben, werden ohne Klingeln abgewiesen. Sie erscheinen weiter in der Anrufliste, ohne Benachrichtigung. Gespeicherte Kontakte klingeln immer.</string>
     <string name="block_spam_votes">Nötige Spam-Stimmen</string>

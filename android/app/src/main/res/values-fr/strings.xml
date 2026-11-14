@@ -28,8 +28,6 @@
     <string name="action_settings">Paramètres</string>
     <string name="action_done">OK</string>
     <string name="action_skip">Passer</string>
-    <string name="action_yes">Oui</string>
-    <string name="action_no">Non</string>
     <string name="action_send">Envoyer</string>
     <string name="search_hint">Rechercher des contacts</string>
     <string name="field_phone">Téléphone</string>
@@ -94,9 +92,13 @@
     <string name="channel_missed">Appels manqués</string>
     <string name="missed_call">Appel manqué</string>
     <string name="missed_call_back">Rappeler</string>
+    <string name="missed_rang">A sonné %1$s</string>
+    <string name="number_blocked">Bloqué</string>
+    <string name="spam_blocked">Signalé comme spam et bloqué</string>
     <string name="spam_warning">Spam probable</string>
     <string name="spam_question">Cet appel était-il du spam ?</string>
-    <string name="spam_category_question">De quel type d\'appel s\'agissait-il ?</string>
+    <string name="spam_question_block">Cet appel était-il du spam ? Bloquer</string>
+    <string name="spam_not">Pas du spam</string>
     <string name="spam_cat_telemarketing">Démarchage</string>
     <string name="spam_cat_scam">Arnaque</string>
     <string name="spam_cat_survey">Sondage</string>
@@ -104,7 +106,6 @@
     <string name="caller_question">Qui appelait ?</string>
     <string name="caller_hint">Entreprise ou organisme</string>
     <string name="caller_label_note">Enregistré comme libellé de ce numéro, sur ce téléphone uniquement.</string>
-    <string name="spam_disclosure">Votre réponse est envoyée avec le numéro au serveur de Better Call Soul.</string>
     <string name="setup_title">Bienvenue dans Better Call Soul</string>
     <string name="setup_body">Une autorisation est nécessaire pour afficher vos appels, récents et contacts.</string>
     <string name="setup_permissions">Autoriser</string>
@@ -317,6 +318,8 @@
     <string name="block_abroad_add">Ajouter</string>
     <string name="block_abroad_remove">Retirer +%1$s</string>
     <string name="block_abroad_invalid">Saisissez un indicatif pays, comme +49.</string>
+    <string name="block_reported_title">Bloquer les numéros signalés comme spam</string>
+    <string name="block_reported_body">Un numéro que vous signalez comme spam est aussi ajouté aux numéros bloqués et ne sonnera plus.</string>
     <string name="block_spam_title">Bloquer les appels de spam</string>
     <string name="block_spam_body">Les numéros signalés comme spam par suffisamment de personnes sont rejetés sans sonner. Ils restent visibles dans le journal d\'appels, sans notification. Les contacts enregistrés sonnent toujours.</string>
     <string name="block_spam_votes">Signalements requis</string>

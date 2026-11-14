@@ -21,6 +21,8 @@ import android.os.Bundle
 import android.view.MotionEvent
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
+import androidx.activity.viewModels
+import androidx.lifecycle.ViewModel
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -45,6 +47,11 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import com.bettercallsoul.telecom.CallManager
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.Lifecycle
+
+/** Survives a theme change, not the process: whether this activity's launch intent was acted on. */
+class LaunchState : ViewModel() {
+    var intentHandled = false
+}
 
 class MainActivity : ComponentActivity() {
     private var permissionsGranted by mutableStateOf(false)
@@ -96,8 +103,14 @@ class MainActivity : ComponentActivity() {
         AppLook.matchFormats(this)
         enableEdgeToEdge()
         if (BuildConfig.DEBUG) window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        // Recreated for a theme change, the activity gets the same intent again: not a new request.
-        if (savedInstanceState == null) handleDial(intent)
+        // Recreated for a theme change, the activity gets the same intent again: not a new request. The
+        // flag lives in a ViewModel, which a theme change keeps; after the process was killed it starts
+        // over, and the intent that brought the activity back (a notification, say) is then a new one.
+        // Brought back from the recent apps it carries its old intent, which was already acted on.
+        val launch: LaunchState by viewModels()
+        val fromHistory = intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY != 0
+        if (!launch.intentHandled && !(savedInstanceState != null && fromHistory)) handleDial(intent)
+        launch.intentHandled = true
         followFavorites()
         // Known before the first frame, so the question doesn't flash up for an app that already has the role.
         isDefaultDialer = holdsDialerRole()
@@ -194,9 +207,15 @@ class MainActivity : ComponentActivity() {
                 val number = intent.getStringExtra(WidgetActionActivity.EXTRA_NUMBER).orEmpty()
                 openRequest = if (contact >= 0) Route.Contact(contact) else number.takeIf(String::isNotBlank)?.let(Route::Number)
             }
+            ACTION_NEW_CONTACT ->
+                if (intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY == 0) {
+                    openRequest = Route.NewContact(intent.getStringExtra(EXTRA_NUMBER))
+                }
             MissedCallReceiver.ACTION_OPEN_MISSED -> {
-                MissedCallReceiver.clear(this)
-                missedRequest = intent.getStringExtra(MissedCallReceiver.EXTRA_NUMBER).orEmpty()
+                // One person's notification counts only their calls as seen; the summary, all of them.
+                val number = intent.getStringExtra(MissedCallReceiver.EXTRA_NUMBER).orEmpty()
+                if (number.isEmpty()) MissedCallReceiver.clear(this) else MissedCallReceiver.markSeen(this, number)
+                missedRequest = number
             }
         }
     }
@@ -382,12 +401,15 @@ class MainActivity : ComponentActivity() {
         requestRole.launch(getSystemService(RoleManager::class.java).createRequestRoleIntent(RoleManager.ROLE_DIALER))
     }
 
-    private companion object {
-        const val EXTRA_DEBUG_SCAN = "debug_scan"
+    companion object {
+        /** From the screen after a call: the new-contact page with [EXTRA_NUMBER] filled in. */
+        const val ACTION_NEW_CONTACT = "com.bettercallsoul.action.NEW_CONTACT"
+        const val EXTRA_NUMBER = "number"
+        private const val EXTRA_DEBUG_SCAN = "debug_scan"
 
         /** The QuickContact action older apps and launchers still send. */
-        const val ACTION_QUICK_CONTACT_OLD = "com.android.contacts.action.QUICK_CONTACT"
-        val REQUIRED_PERMISSIONS = listOfNotNull(
+        private const val ACTION_QUICK_CONTACT_OLD = "com.android.contacts.action.QUICK_CONTACT"
+        private val REQUIRED_PERMISSIONS = listOfNotNull(
             Manifest.permission.READ_CONTACTS,
             Manifest.permission.WRITE_CONTACTS,
             Manifest.permission.GET_ACCOUNTS,

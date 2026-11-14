@@ -28,8 +28,6 @@
     <string name="action_settings">الإعدادات</string>
     <string name="action_done">تم</string>
     <string name="action_skip">تخطي</string>
-    <string name="action_yes">نعم</string>
-    <string name="action_no">لا</string>
     <string name="action_send">إرسال</string>
     <string name="search_hint">البحث في جهات الاتصال</string>
     <string name="field_phone">الهاتف</string>
@@ -94,9 +92,13 @@
     <string name="channel_missed">المكالمات الفائتة</string>
     <string name="missed_call">مكالمة فائتة</string>
     <string name="missed_call_back">معاودة الاتصال</string>
+    <string name="missed_rang">رنّ لمدة %1$s</string>
+    <string name="number_blocked">محظور</string>
+    <string name="spam_blocked">تم الإبلاغ عنه كإزعاج وحظره</string>
     <string name="spam_warning">ربما مزعجة</string>
     <string name="spam_question">هل كانت هذه المكالمة مزعجة؟</string>
-    <string name="spam_category_question">ما نوع هذه المكالمة؟</string>
+    <string name="spam_question_block">هل كانت هذه المكالمة مزعجة؟ حظر</string>
+    <string name="spam_not">ليست مزعجة</string>
     <string name="spam_cat_telemarketing">تسويق هاتفي</string>
     <string name="spam_cat_scam">احتيال</string>
     <string name="spam_cat_survey">استطلاع</string>
@@ -104,7 +106,6 @@
     <string name="caller_question">من كان المتصل؟</string>
     <string name="caller_hint">اسم الشركة أو الجهة</string>
     <string name="caller_label_note">يُحفظ كتسمية لهذا الرقم، على هذا الهاتف فقط.</string>
-    <string name="spam_disclosure">تُرسل إجابتك مع الرقم إلى خادم Better Call Soul.</string>
     <string name="setup_title">مرحبًا بك في Better Call Soul</string>
     <string name="setup_body">يلزم الإذن لعرض مكالماتك وسجل المكالمات وجهات الاتصال.</string>
     <string name="setup_permissions">السماح</string>
@@ -451,6 +452,8 @@
     <string name="block_abroad_add">إضافة</string>
     <string name="block_abroad_remove">إزالة +%1$s</string>
     <string name="block_abroad_invalid">اكتب رمز دولة، مثل +49.</string>
+    <string name="block_reported_title">حظر الأرقام التي تبلغ عنها كمزعجة</string>
+    <string name="block_reported_body">الرقم الذي تبلغ عنه كمزعج يُضاف أيضًا إلى قائمة المحظورين ولن يرن مجددًا.</string>
     <string name="block_spam_title">حظر المكالمات المزعجة</string>
     <string name="block_spam_body">تُرفض الأرقام التي وسمها عدد كافٍ من الناس كمزعجة دون رنين. تبقى في سجل المكالمات، دون إشعار. جهات الاتصال المحفوظة ترن دائمًا.</string>
     <string name="block_spam_votes">عدد أصوات الإزعاج المطلوبة</string>
