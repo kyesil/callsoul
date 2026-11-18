@@ -402,9 +402,10 @@ class ContactsRepository(context: Context) {
     /**
      * What the keypad shows while digits are typed: contacts whose name the digits spell on the
      * keys (T9), then contacts whose number contains them. One row per contact, each with the
-     * number to call: the matching one, or the default for a name match.
+     * number to call: the matching one, or the default for a name match. With [calls], how often each
+     * number was called (by [callKey]), the contacts called most come first, counting all their numbers.
      */
-    suspend fun keypadSearch(typed: String, limit: Int = 3): List<SearchHit> = withContext(Dispatchers.IO) {
+    suspend fun keypadSearch(typed: String, limit: Int = 3, calls: Map<String, Int> = emptyMap()): List<SearchHit> = withContext(Dispatchers.IO) {
         if (typed.isBlank()) return@withContext emptyList()
         val projection = arrayOf(Phone.CONTACT_ID, NameOrder.nameColumn, Phone.NUMBER, Phone.PHOTO_THUMBNAIL_URI)
         val rows = resolver.query(
@@ -421,7 +422,13 @@ class ContactsRepository(context: Context) {
         }.orEmpty()
         val byName = rows.filter { T9.matchesName(typed, it.name) }.distinctBy { it.contactId }
         val byNumber = rows.filter { T9.matchesNumber(typed, it.number) }.distinctBy { it.contactId }
-        (byName + byNumber).distinctBy { it.contactId }.take(limit)
+        val found = (byName + byNumber).distinctBy { it.contactId }
+        if (calls.isEmpty()) return@withContext found.take(limit)
+        val called = rows.groupBy { it.contactId }.mapValues { (_, phones) ->
+            phones.map { callKey(it.number) }.distinct().sumOf { calls[it] ?: 0 }
+        }
+        // A stable sort: contacts called equally often keep the name-then-number order.
+        found.sortedByDescending { called[it.contactId] ?: 0 }.take(limit)
     }
 
     /** The first number of the contact with exactly this name, for a caller known only by name. */

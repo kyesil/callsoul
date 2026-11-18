@@ -33,7 +33,13 @@ class BcsInCallService : InCallService() {
     private val flip by lazy {
         FlipDetector(
             context = this,
-            onFlip = CallManager::silenceRinger,
+            onFlip = {
+                DebugLog.i(TAG, "turned face down, reject=${CallManager.rejectWhenFlipped()}, silent=${CallManager.silentWhenFaceDown()}")
+                when {
+                    CallManager.rejectWhenFlipped() -> CallManager.rejectRinging()
+                    CallManager.silentWhenFaceDown() -> CallManager.silenceRinger()
+                }
+            },
             onAlreadyDown = {
                 DebugLog.i(TAG, "phone face down when the call came, silent=${CallManager.silentWhenFaceDown()}")
                 if (CallManager.silentWhenFaceDown()) {
@@ -56,6 +62,7 @@ class BcsInCallService : InCallService() {
     override fun onCreate() {
         super.onCreate()
         CallManager.attach(this)
+        CallManager.phoneTurnedOver = flip::turnedOver
         scope.launch {
             CallManager.call.distinctUntilChanged { old, new ->
                 old?.phase == new?.phase && old?.caller == new?.caller && old?.connectedAt == new?.connectedAt
@@ -98,6 +105,7 @@ class BcsInCallService : InCallService() {
         scope.cancel()
         holdProximity(false)
         flip.stop()
+        CallManager.phoneTurnedOver = { false }
         overlay.hide()
         CallManager.detach()
         super.onDestroy()
@@ -203,8 +211,17 @@ class BcsInCallService : InCallService() {
             ?.apply { setReferenceCounted(false) }
     }
 
+    private val earCover by lazy { EarCover(this) }
+    private val ear by lazy {
+        EarWatch(this) { near ->
+            CallManager.setEarBlank(near)
+            if (near) earCover.show() else earCover.hide()
+        }
+    }
+
     /** Screen off near the ear; on release, wait until the phone leaves the ear before lighting up. */
     private fun holdProximity(near: Boolean) {
+        if (near) ear.start() else ear.stop()
         val lock = proximity ?: return
         if (near) {
             if (!lock.isHeld) {

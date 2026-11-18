@@ -28,6 +28,15 @@ class CallStatisticsTest {
     }
 
     @Test
+    fun averagesAreOverAnsweredCallsAndPeopleTalkedTo() {
+        val summary = CallStatistics.summarize(calls, since = 10, personOf = ::person)
+        assertEquals(3, summary.answered)
+        assertEquals(96, summary.secondsPerCall)
+        assertEquals(145, summary.secondsPerPerson)
+        assertEquals(0, CallStatistics.summarize(emptyList(), since = 0, personOf = ::person).secondsPerCall)
+    }
+
+    @Test
     fun aPersonsNumbersCountTogetherAndMissedCallsAreNotTalks() {
         val summary = CallStatistics.summarize(calls, since = 10, personOf = ::person)
         assertEquals(2, summary.people)

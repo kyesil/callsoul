@@ -189,8 +189,8 @@ class MainActivity : ComponentActivity() {
     private fun handleDial(intent: Intent) {
         if (BuildConfig.DEBUG) intent.getStringExtra(EXTRA_DEBUG_SCAN)?.let { scanRequest = it }
         // The link sent to bring up the system's question: it has done its job by arriving.
-        if (intent.getBooleanExtra(TelLinks.EXTRA_SETUP, false)) {
-            DebugLog.i("TelLinks", "picked: ${TelLinks.holder(this)}")
+        if (intent.getBooleanExtra(EXTRA_LINK_SETUP, false)) {
+            DebugLog.i("Links", "picked: tel ${TelLinks.holder(this)}, contact ${ContactLinks.holder(this)}")
             return
         }
         when (intent.action) {
@@ -312,7 +312,8 @@ class MainActivity : ComponentActivity() {
             !container.lockCallsAsked && !LockScreenCalls.allowed(this) -> SetupStep.LockCalls
             !container.whatsAppAccessAsked && !WhatsAppCallListener.hasAccess(this) &&
                 WhatsAppCallListener.whatsAppInstalled(this) -> SetupStep.WhatsApp
-            !container.telLinksAsked && TelLinks.holder(this) != TelLinks.Holder.Us -> SetupStep.TelLinks
+            !container.telLinksAsked && TelLinks.holder(this) != LinkHolder.Us -> SetupStep.TelLinks
+            !container.contactLinksAsked && ContactLinks.holder(this) != LinkHolder.Us -> SetupStep.ContactLinks
             else -> {
                 container.setupDone = true
                 null
@@ -329,6 +330,7 @@ class MainActivity : ComponentActivity() {
                 WhatsAppCallListener.openAccess(this)
             }
             SetupStep.TelLinks -> TelLinks.choose(this)
+            SetupStep.ContactLinks -> ContactLinks.choose(this)
         }
     }
 
@@ -342,6 +344,7 @@ class MainActivity : ComponentActivity() {
                 container.saveWhatsAppCalls(false)
             }
             SetupStep.TelLinks -> container.telLinksAsked = true
+            SetupStep.ContactLinks -> container.contactLinksAsked = true
         }
         refresh()
     }
@@ -357,13 +360,20 @@ class MainActivity : ComponentActivity() {
         // Links count as wanted once they open here; losing that afterwards (a new app that opens
         // links resets the choice) is a problem too.
         val links = TelLinks.holder(this)
-        if (links == TelLinks.Holder.Us && !container.telLinksWanted) container.telLinksWanted = true
+        if (links == LinkHolder.Us && !container.telLinksWanted) container.telLinksWanted = true
+        // Contacts from other apps: asked once, for those set up before this question existed too.
+        val contactLinks = ContactLinks.holder(this)
+        if (contactLinks == LinkHolder.Us) {
+            container.contactLinksWanted = true
+            container.contactLinksAsked = true
+        }
         suggestion = when {
             setupStep != null || !isDefaultDialer -> null
             !container.lockCallsAsked && !LockScreenCalls.allowed(this) -> Suggestion.LockCalls
             container.whatsAppCallsEnabled && !WhatsAppCallListener.hasAccess(this) &&
                 WhatsAppCallListener.whatsAppInstalled(this) -> Suggestion.WhatsApp
-            links != TelLinks.Holder.Us && container.telLinksWanted -> Suggestion.TelLinks
+            links != LinkHolder.Us && container.telLinksWanted -> Suggestion.TelLinks
+            contactLinks != LinkHolder.Us && (container.contactLinksWanted || !container.contactLinksAsked) -> Suggestion.ContactLinks
             else -> null
         }
     }
@@ -374,6 +384,7 @@ class MainActivity : ComponentActivity() {
             Suggestion.LockCalls -> LockScreenCalls.open(this)
             Suggestion.WhatsApp -> WhatsAppCallListener.openAccess(this)
             Suggestion.TelLinks -> TelLinks.choose(this)
+            Suggestion.ContactLinks -> ContactLinks.choose(this)
         }
     }
 
@@ -383,6 +394,10 @@ class MainActivity : ComponentActivity() {
             Suggestion.LockCalls -> container.lockCallsAsked = true
             Suggestion.WhatsApp -> container.saveWhatsAppCalls(false)
             Suggestion.TelLinks -> container.telLinksWanted = false
+            Suggestion.ContactLinks -> {
+                container.contactLinksWanted = false
+                container.contactLinksAsked = true
+            }
         }
         refreshSuggestion()
     }

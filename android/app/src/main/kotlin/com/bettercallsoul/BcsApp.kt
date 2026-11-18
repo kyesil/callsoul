@@ -143,6 +143,21 @@ class AppContainer(context: Context) {
         whatsApp.forget(fromWhatsApp)
     }
 
+    /** The numbers called by holding a key on the keypad, by key ('1' to '9'). */
+    var speedDials by mutableStateOf(
+        prefs.getString(KEY_SPEED_DIALS, null)?.lineSequence()
+            ?.mapNotNull { line -> line.split('=', limit = 2).takeIf { it.size == 2 && it[0].length == 1 && it[1].isNotBlank() } }
+            ?.associate { (key, number) -> key[0] to number }
+            .orEmpty(),
+    )
+        private set
+
+    /** Puts [number] on [key], or frees the key with null. */
+    fun setSpeedDial(key: Char, number: String?) {
+        speedDials = if (number.isNullOrBlank()) speedDials - key else speedDials + (key to number)
+        prefs.edit { putString(KEY_SPEED_DIALS, speedDials.toSortedMap().entries.joinToString("\n") { "${it.key}=${it.value}" }) }
+    }
+
     /** What the user searched for and then picked a result of, newest first. It stays on the phone. */
     var recentSearches by mutableStateOf(
         prefs.getString(KEY_RECENT_SEARCHES, null)?.split('\n')?.filter(String::isNotBlank).orEmpty(),
@@ -344,6 +359,16 @@ class AppContainer(context: Context) {
         get() = prefs.getBoolean(KEY_TEL_LINKS_ASKED, false)
         set(value) = prefs.edit { putBoolean(KEY_TEL_LINKS_ASKED, value) }
 
+    /** Whether the question about contacts opened from other apps was put once (setup step or banner). */
+    var contactLinksAsked: Boolean
+        get() = prefs.getBoolean(KEY_CONTACT_LINKS_ASKED, false)
+        set(value) = prefs.edit { putBoolean(KEY_CONTACT_LINKS_ASKED, value) }
+
+    /** Whether contacts from other apps opened here once; their going elsewhere later is then shown on the home screen. */
+    var contactLinksWanted: Boolean
+        get() = prefs.getBoolean(KEY_CONTACT_LINKS_WANTED, false)
+        set(value) = prefs.edit { putBoolean(KEY_CONTACT_LINKS_WANTED, value) }
+
     /** Whether the question about calls on the lock screen was put once, after the phone role came. */
     var lockCallsAsked: Boolean
         get() = prefs.getBoolean(KEY_LOCK_CALLS_ASKED, false)
@@ -376,6 +401,11 @@ class AppContainer(context: Context) {
     var silentWhenFaceDown: Boolean
         get() = prefs.getBoolean(KEY_FACE_DOWN, false)
         set(value) = prefs.edit { putBoolean(KEY_FACE_DOWN, value) }
+
+    /** Turning a ringing phone face down declines the call. */
+    var rejectWhenFlipped: Boolean
+        get() = prefs.getBoolean(KEY_FLIP_REJECT, false)
+        set(value) = prefs.edit { putBoolean(KEY_FLIP_REJECT, value) }
 
     /** A short beep when a call connects. */
     var toneOnConnect: Boolean
@@ -499,6 +529,8 @@ class AppContainer(context: Context) {
         const val KEY_LOOKUP = "spam_lookup"
         const val KEY_DEFAULT_ASKED = "default_phone_asked"
         const val KEY_TEL_LINKS_ASKED = "tel_links_asked"
+        const val KEY_CONTACT_LINKS_ASKED = "contact_links_asked"
+        const val KEY_CONTACT_LINKS_WANTED = "contact_links_wanted"
         const val KEY_LOCK_CALLS_ASKED = "lock_calls_asked"
         const val KEY_WHATSAPP_ACCESS_ASKED = "whatsapp_access_asked"
         const val KEY_SETUP_DONE = "setup_done"
@@ -512,6 +544,7 @@ class AppContainer(context: Context) {
         const val KEY_BLOCKED_PREFIXES = "blocked_prefixes"
         const val KEY_TEL_LINKS_WANTED = "tel_links_wanted"
         const val KEY_FACE_DOWN = "silent_face_down"
+        const val KEY_FLIP_REJECT = "reject_flipped"
         const val KEY_TONE_CONNECT = "tone_on_connect"
         const val KEY_THEME = "theme"
         const val KEY_TONE_END = "tone_on_end"
@@ -530,6 +563,7 @@ class AppContainer(context: Context) {
         const val KEY_QUICK_REPLIES = "quick_replies"
         const val KEY_SWIPE_MESSAGE = "swipe_message"
         const val KEY_RECENT_SEARCHES = "recent_searches"
+        const val KEY_SPEED_DIALS = "speed_dials"
         const val KEY_HISTORY_DAYS = "history_days"
         const val KEEP_LISTS_MILLIS = 5 * 60 * 1000L
         const val KEY_LABEL_SEARCHES = "label_searches"
@@ -565,6 +599,7 @@ class BcsApp : Application() {
         CallManager.init(
             container.directory,
             silentWhenFaceDown = { container.silentWhenFaceDown },
+            rejectWhenFlipped = { container.rejectWhenFlipped },
             ringInPill = { container.ringInPill },
             toneOnConnect = { container.toneOnConnect },
             toneOnEnd = { container.toneOnEnd },

@@ -103,6 +103,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bettercallsoul.BackupWatch
 import com.bettercallsoul.LockScreenCalls
+import com.bettercallsoul.ContactLinks
+import com.bettercallsoul.DefaultLinks
+import com.bettercallsoul.LinkHolder
 import com.bettercallsoul.TelLinks
 import com.bettercallsoul.R
 import androidx.core.net.toUri
@@ -185,7 +188,8 @@ fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBac
         },
         SettingEntry(SettingsGroup.Spam, listOf(R.string.block_abroad_title, R.string.block_abroad_body)) { BlockAbroadSettings() },
         SettingEntry(SettingsGroup.Spam, listOf(R.string.block_prefix_title, R.string.block_prefix_body)) { BlockPrefixSettings() },
-        SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_face_down_title, R.string.settings_face_down_body)) { FaceDownSettings() },
+        SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_face_down_title, R.string.settings_face_down_body, R.string.flip_reject_title, R.string.flip_reject_body)) { FaceDownSettings() },
+        SettingEntry(SettingsGroup.Calls, listOf(R.string.speed_dial_title, R.string.speed_dial_body)) { SpeedDialSettings() },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_replies_title, R.string.settings_replies_body)) { QuickReplySettings() },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.key_decline_title, R.string.key_decline_body)) { KeySettings() },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.tone_connect_title, R.string.tone_connect_body, R.string.tone_end_title, R.string.tone_end_body)) { ToneSettings() },
@@ -203,7 +207,7 @@ fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBac
         SettingEntry(SettingsGroup.Contacts, listOf(R.string.section_labels, R.string.labels_body)) {
             LinkCard(Icons.AutoMirrored.Outlined.Label, R.string.section_labels, R.string.labels_body) { onOpen(Route.Labels) }
         },
-        SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_default_held, R.string.tel_links_row)) { DefaultAppSettings(isDefaultDialer, onRequestDefault) },
+        SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_default_held, R.string.tel_links_row, R.string.contact_links_row)) { DefaultAppSettings(isDefaultDialer, onRequestDefault) },
         SettingEntry(
             SettingsGroup.WhatsApp,
             listOf(R.string.settings_whatsapp_title, R.string.settings_whatsapp_body, R.string.settings_whatsapp_pill_title, R.string.settings_whatsapp_pill_body),
@@ -522,9 +526,15 @@ private fun LookupSettings() {
 private fun FaceDownSettings() {
     val app = LocalContext.current.container
     var faceDown by remember { mutableStateOf(app.silentWhenFaceDown) }
+    var reject by remember { mutableStateOf(app.rejectWhenFlipped) }
     SwitchCard(R.string.settings_face_down_title, R.string.settings_face_down_body, faceDown) {
         faceDown = it
         app.silentWhenFaceDown = it
+    }
+    Spacer(Modifier.height(6.dp))
+    SwitchCard(R.string.flip_reject_title, R.string.flip_reject_body, reject) {
+        reject = it
+        app.rejectWhenFlipped = it
     }
 }
 
@@ -722,33 +732,36 @@ private fun DefaultAppSettings(isDefaultDialer: Boolean, onRequestDefault: () ->
                 }
             }
         }
-        if (isDefaultDialer) TelLinksRow()
+        if (isDefaultDialer) {
+            LinksRow(TelLinks, R.string.tel_links_row)
+            LinksRow(ContactLinks, R.string.contact_links_row)
+        }
     }
 }
 
-/** tel: links from other apps: the phone role doesn't cover them, so they are shown apart. */
+/** Links from other apps (numbers, contacts): the phone role doesn't cover them, so they are shown apart. */
 @Composable
-private fun TelLinksRow() {
+private fun LinksRow(links: DefaultLinks, title: Int) {
     val context = LocalContext.current
-    var holder by remember { mutableStateOf(TelLinks.holder(context)) }
+    var holder by remember { mutableStateOf(links.holder(context)) }
     LifecycleResumeEffect(Unit) {
-        holder = TelLinks.holder(context)
+        holder = links.holder(context)
         onPauseOrDispose {}
     }
     Row(Modifier.fillMaxWidth().padding(start = 10.dp, end = 10.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
-            Text(stringResource(R.string.tel_links_row), fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
+            Text(stringResource(title), fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
             val note = when (val h = holder) {
-                TelLinks.Holder.Us -> null
-                TelLinks.Holder.Nobody -> stringResource(R.string.tel_links_asks)
-                is TelLinks.Holder.Other -> stringResource(R.string.tel_links_other, TelLinks.label(context, h.packageName))
+                LinkHolder.Us -> null
+                LinkHolder.Nobody -> stringResource(R.string.tel_links_asks)
+                is LinkHolder.Other -> stringResource(R.string.tel_links_other, links.label(context, h.packageName))
             }
             if (note != null) Text(note, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        if (holder == TelLinks.Holder.Us) {
+        if (holder == LinkHolder.Us) {
             Text("✓", fontSize = 20.sp, color = CallGreen)
         } else {
-            TextButton(onClick = { TelLinks.choose(context) }) { Text(stringResource(R.string.tel_links_action)) }
+            TextButton(onClick = { links.choose(context) }) { Text(stringResource(R.string.tel_links_action)) }
         }
     }
 }
@@ -1121,7 +1134,7 @@ private fun DebugLogSettings(isDefaultDialer: Boolean) {
                             "App: ${BuildConfig.VERSION_NAME} (${BuildConfig.BUILD_TYPE})",
                             "Install ID: ${app.deviceId}",
                             "Default phone app: $isDefaultDialer",
-                            "Cloud lookup: ${app.spamLookupEnabled}, silent face down: ${app.silentWhenFaceDown}, animations: ${app.animationsEnabled}",
+                            "Cloud lookup: ${app.spamLookupEnabled}, silent face down: ${app.silentWhenFaceDown}, reject flipped: ${app.rejectWhenFlipped}, animations: ${app.animationsEnabled}",
                             "Overlay allowed: ${Settings.canDrawOverlays(context)}, system animations: ${systemAnimationsOn(context)}",
                             "Pill: ${PillStyle.load(context)}",
                         )

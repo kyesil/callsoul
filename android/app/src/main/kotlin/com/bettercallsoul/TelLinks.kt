@@ -1,42 +1,46 @@
 package com.bettercallsoul
 
 import android.content.ActivityNotFoundException
+import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.provider.ContactsContract
 import android.provider.Settings
 import com.bettercallsoul.diag.DebugLog
 
+/** Who opens a kind of link tapped in another app. */
+sealed interface LinkHolder {
+    data object Us : LinkHolder
+    data object Nobody : LinkHolder
+    data class Other(val packageName: String) : LinkHolder
+}
+
+/** Marks the link sent only to bring the system's question up, so it opens nothing when it arrives. */
+const val EXTRA_LINK_SETUP = "tel_links_setup"
+
 /**
- * Who opens a tel: link tapped in another app. The phone role only makes this app the one for
- * DIAL; a link comes as VIEW, which the system asks about until someone picks an app for always.
- * No app can make that choice for itself, so the best it can do is bring the question up once,
+ * A kind of link from other apps that the system asks about until someone picks an app for
+ * always. No app can make that choice for itself, so the best it can do is bring the question up,
  * at a moment of its own, with itself in the list.
  */
-object TelLinks {
-    sealed interface Holder {
-        data object Us : Holder
-        data object Nobody : Holder
-        data class Other(val packageName: String) : Holder
-    }
+abstract class DefaultLinks(private val tag: String) {
+    /** The link as other apps send it; [real] when it may actually open somewhere if picked "just once". */
+    protected abstract fun link(context: Context, real: Boolean): Intent?
 
-    /** Marks the link sent only to bring the question up, so it opens nothing when it arrives. */
-    const val EXTRA_SETUP = "tel_links_setup"
-
-    private fun link() = Intent(Intent.ACTION_VIEW, Uri.parse("tel:")).addCategory(Intent.CATEGORY_BROWSABLE)
-
-    fun holder(context: Context): Holder {
+    fun holder(context: Context): LinkHolder {
+        val link = link(context, real = false) ?: return LinkHolder.Nobody
         val pm = context.packageManager
-        val found = pm.resolveActivity(link(), PackageManager.MATCH_DEFAULT_ONLY)?.activityInfo
-            ?: return Holder.Nobody
+        val found = pm.resolveActivity(link, PackageManager.MATCH_DEFAULT_ONLY)?.activityInfo
+            ?: return LinkHolder.Nobody
         // Anything that isn't itself one of the link's handlers is the system's chooser, whatever a
         // phone maker calls it: nobody has been picked yet.
-        val handlers = pm.queryIntentActivities(link(), PackageManager.MATCH_DEFAULT_ONLY).map { it.activityInfo.packageName }
+        val handlers = pm.queryIntentActivities(link, PackageManager.MATCH_DEFAULT_ONLY).map { it.activityInfo.packageName }
         return when (found.packageName) {
-            context.packageName -> Holder.Us
-            in handlers -> Holder.Other(found.packageName)
-            else -> Holder.Nobody
+            context.packageName -> LinkHolder.Us
+            in handlers -> LinkHolder.Other(found.packageName)
+            else -> LinkHolder.Nobody
         }
     }
 
@@ -46,10 +50,10 @@ object TelLinks {
      */
     fun choose(context: Context) {
         val holder = holder(context)
-        DebugLog.i("TelLinks", "choose: $holder")
+        DebugLog.i(tag, "choose: $holder")
         val intent = when (holder) {
-            is Holder.Other -> Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${holder.packageName}"))
-            else -> link().putExtra(EXTRA_SETUP, true)
+            is LinkHolder.Other -> Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${holder.packageName}"))
+            else -> link(context, real = true)?.putExtra(EXTRA_LINK_SETUP, true) ?: return
         }
         try {
             context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK.takeIf { context !is android.app.Activity } ?: 0))
@@ -63,4 +67,29 @@ object TelLinks {
             val pm = context.packageManager
             pm.getApplicationLabel(pm.getApplicationInfo(packageName, 0)).toString()
         }.getOrDefault(packageName)
+}
+
+/** tel: links. The phone role only makes this app the one for DIAL; a link comes as VIEW. */
+object TelLinks : DefaultLinks("TelLinks") {
+    override fun link(context: Context, real: Boolean): Intent =
+        Intent(Intent.ACTION_VIEW, Uri.parse("tel:")).addCategory(Intent.CATEGORY_BROWSABLE)
+}
+
+/**
+ * A contact opened from another app, such as "Contact info" in a chat app. No role covers these;
+ * the system asks between the phone's contacts app and this one.
+ */
+object ContactLinks : DefaultLinks("ContactLinks") {
+    override fun link(context: Context, real: Boolean): Intent? {
+        // Picked "just once", the other app opens what it was sent, so the question uses a real
+        // contact; only which apps match the type matters for reading the choice back.
+        val id = if (real) firstContact(context) ?: return null else 1L
+        return Intent(Intent.ACTION_VIEW)
+            .setDataAndType(ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, id), ContactsContract.Contacts.CONTENT_ITEM_TYPE)
+    }
+
+    private fun firstContact(context: Context): Long? = runCatching {
+        context.contentResolver.query(ContactsContract.Contacts.CONTENT_URI, arrayOf(ContactsContract.Contacts._ID), null, null, null)
+            ?.use { if (it.moveToFirst()) it.getLong(0) else null }
+    }.getOrNull()
 }

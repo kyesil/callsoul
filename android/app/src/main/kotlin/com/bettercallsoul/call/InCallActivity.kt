@@ -19,6 +19,11 @@ import com.bettercallsoul.telecom.CallPhase
 import com.bettercallsoul.ui.BcsTheme
 import android.graphics.Color
 import androidx.activity.SystemBarStyle
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 
 class InCallActivity : ComponentActivity() {
     override fun attachBaseContext(newBase: Context) = super.attachBaseContext(AppLook.wrap(newBase))
@@ -56,8 +61,22 @@ class InCallActivity : ComponentActivity() {
                         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                     }
                 }
+                val earBlank by CallManager.earBlank.collectAsStateWithLifecycle()
+                LaunchedEffect(earBlank) { darken(earBlank) }
                 when {
-                    active != null -> CallScreen(active)
+                    active != null -> Box(Modifier.fillMaxSize()) {
+                        CallScreen(active)
+                        // At the ear: black, and the cheek presses nothing.
+                        if (earBlank) {
+                            Box(
+                                Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color.Black).pointerInput(Unit) {
+                                    awaitPointerEventScope {
+                                        while (true) awaitPointerEvent().changes.forEach { it.consume() }
+                                    }
+                                },
+                            )
+                        }
+                    }
                     // Someone in the contacts: there is nothing to ask or tag, so the call just closes.
                     // A call that failed still stays, for the reason.
                     finished != null && finished.caller.isContact && !finished.failed -> LaunchedEffect(finished) {
@@ -71,6 +90,13 @@ class InCallActivity : ComponentActivity() {
                     else -> LaunchedEffect(Unit) { finish() }
                 }
             }
+        }
+    }
+
+    /** The screen at its dimmest while the phone is at the ear, the phone's own brightness after. */
+    private fun darken(dark: Boolean) {
+        window.attributes = window.attributes.apply {
+            screenBrightness = if (dark) 0f else WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
         }
     }
 

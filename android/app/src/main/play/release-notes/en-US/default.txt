@@ -1,1 +1,4 @@
-Missed calls get one notification per caller, with how many times they called and how long it rang. The call notification shows the contact's labels. After a call from an unknown number you can label it or add it to contacts. A number you report as spam is blocked (Settings > Spam). Blocked numbers show as blocked on their page. Pull down on Home or Recents to refresh, a spinner shows while calls load, and Home lists twice as many calls.
+• While typing on the keypad, the people you call most come first.
+• Speed dial: hold a key from 1 to 9 to call the person on it; set it in Settings or by holding an empty key.
+• Statistics: an "All" tab, average talk time per answered call and per person, and each person's average per call.
+• During a call the screen goes dark and ignores touches at your ear, however you hold the phone.

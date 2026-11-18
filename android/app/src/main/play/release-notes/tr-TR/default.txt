@@ -1,1 +1,4 @@
-Cevapsız aramalarda her kişiye ayrı bildirim: kaç kez aradığı ve ne kadar çaldığı yazıyor. Arama bildiriminde kişinin etiketleri görünüyor. Bilinmeyen bir arama bitince numarayı etiketleyebilir veya rehbere ekleyebilirsiniz. Spam bildirdiğiniz numara engelleniyor (Ayarlar > Spam). Engelli numaralar kendi sayfasında görünüyor. Ana sayfa ve Son aramalar aşağı çekince yenileniyor, aramalar yüklenirken bir gösterge çıkıyor ve ana sayfa iki kat fazla arama gösteriyor.
+• Tuş takımında yazarken en çok aradığın kişiler en üstte.
+• Hızlı arama: 1–9 tuşlarına uzun basınca atadığın kişi aranır; Ayarlar'dan ya da boş tuşa uzun basarak atanır.
+• İstatistiklerde "Hepsi" sekmesi, cevaplanan arama başı ve kişi başı ortalama süre, her kişiyle arama başı ortalama.
+• Konuşurken telefon kulağa gelince ekran, nasıl tutulursa tutulsun kararır ve dokunmalar engellenir.

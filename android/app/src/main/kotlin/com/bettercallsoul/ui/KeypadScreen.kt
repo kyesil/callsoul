@@ -113,6 +113,8 @@ fun KeypadScreen(
 ) {
     val context = LocalContext.current
     var hits by remember { mutableStateOf(emptyList<SearchHit>()) }
+    // A held key with no number on it asks who it should call.
+    var assigning by remember { mutableStateOf<Char?>(null) }
 
     // The number keeps its own cursor and selection, so a digit goes where the cursor is and a copied
     // number can be pasted; [digits] stays the plain text the rest of the app sees.
@@ -125,9 +127,12 @@ fun KeypadScreen(
         if (value.text != digits) onDigitsChange(value.text)
     }
 
-    LaunchedEffect(digits) {
+    // How often each number was called from here, so the people called most top the matches.
+    var calls by remember { mutableStateOf<Map<String, Int>?>(null) }
+    LaunchedEffect(Unit) { calls = context.container.history.outgoingCounts() }
+    LaunchedEffect(digits, calls) {
         // One digit matches half the address book, so the list starts at two.
-        hits = if (digits.length >= 2) context.container.contacts.keypadSearch(digits, limit = MAX_MATCHES) else emptyList()
+        hits = if (digits.length >= 2) context.container.contacts.keypadSearch(digits, limit = MAX_MATCHES, calls = calls.orEmpty()) else emptyList()
     }
 
     // On a short screen the keys get smaller, so the banner or a few matching contacts still fit
@@ -201,6 +206,15 @@ fun KeypadScreen(
         Dialpad(
             onDigit = { edit(field.insert(it.toString())) },
             onPlus = { edit(field.insert("+")) },
+            // Held on an empty number, 1 to 9 call their speed dial; while typing, they just type.
+            onHold = { key ->
+                val number = context.container.speedDials[key]
+                when {
+                    digits.isNotEmpty() -> edit(field.insert(key.toString()))
+                    number != null -> onCall(number)
+                    else -> assigning = key
+                }
+            },
             keyHeight = keyHeight,
         )
 
@@ -220,6 +234,7 @@ fun KeypadScreen(
             }
         }
     }
+    assigning?.let { key -> SpeedDialDialog(key, onDismiss = { assigning = null }) }
     // The default-app banner lies over the top of the keypad instead of taking room from the keys;
     // it goes once a digit is typed, and its cross puts it away until the app is opened again.
     if (!isDefaultDialer && digits.isEmpty()) {
@@ -307,7 +322,14 @@ private val MIN_KEY_HEIGHT = 54.dp
 private val ROOM_ABOVE = 64.dp
 
 @Composable
-fun Dialpad(onDigit: (Char) -> Unit, onPlus: (() -> Unit)? = null, tint: Color = Color.Unspecified, keyHeight: Dp = KEY_HEIGHT) {
+fun Dialpad(
+    onDigit: (Char) -> Unit,
+    onPlus: (() -> Unit)? = null,
+    /** A long press on 1 to 9, for speed dial. */
+    onHold: ((Char) -> Unit)? = null,
+    tint: Color = Color.Unspecified,
+    keyHeight: Dp = KEY_HEIGHT,
+) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 27.dp)) {
         Keys.forEach { row ->
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
@@ -315,7 +337,11 @@ fun Dialpad(onDigit: (Char) -> Unit, onPlus: (() -> Unit)? = null, tint: Color =
                     DialKey(
                         key = key,
                         onClick = { onDigit(key.digit) },
-                        onLongClick = if (key.digit == '0') onPlus else null,
+                        onLongClick = when {
+                            key.digit == '0' -> onPlus
+                            onHold != null && key.digit in SpeedDialKeys -> { { onHold(key.digit) } }
+                            else -> null
+                        },
                         tint = tint,
                         height = keyHeight,
                         modifier = Modifier.weight(1f),

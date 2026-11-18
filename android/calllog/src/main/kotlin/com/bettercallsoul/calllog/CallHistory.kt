@@ -48,6 +48,11 @@ class CallHistory(context: Context, private val dao: LocalDao, private val keepD
         dao.callRecords().filter { it.number.filter(Char::isDigit).takeLast(10) in tails }.sumOf { it.seconds }
     }
 
+    /** How often each number was called from this phone, by its last ten digits ([callKey]): for ranking the keypad's matches. */
+    suspend fun outgoingCounts(): Map<String, Int> = withContext(Dispatchers.IO) {
+        dao.callRecords().filter { it.type == Calls.OUTGOING_TYPE }.groupingBy { callKey(it.number) }.eachCount()
+    }
+
     /** A call deleted from the list by the user stops counting too. */
     suspend fun forget(ids: Collection<Long>): Unit = withContext(Dispatchers.IO) {
         ids.chunked(500).forEach { dao.deleteCallRecords(it) }
@@ -60,6 +65,9 @@ class CallHistory(context: Context, private val dao: LocalDao, private val keepD
         val KEEP_CHOICES = listOf(7, 30, 365, 730, 1095, 1460, 1825)
     }
 }
+
+/** The same number however it is written: its last ten digits. */
+fun callKey(number: String): String = number.filter(Char::isDigit).takeLast(10)
 
 fun CallRecord.toStatCall(): StatCall = StatCall(
     number = number,

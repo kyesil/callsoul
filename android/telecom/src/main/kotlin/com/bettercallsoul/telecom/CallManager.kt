@@ -91,6 +91,13 @@ object CallManager {
     internal var silentWhenFaceDown: () -> Boolean = { false }
         private set
 
+    /** The user's choice that turning a ringing phone face down declines the call. */
+    internal var rejectWhenFlipped: () -> Boolean = { false }
+        private set
+
+    /** Whether the phone faces away now or did a moment ago; set by the in-call service while it watches. */
+    internal var phoneTurnedOver: () -> Boolean = { false }
+
     /** The user's choice that a call coming in while the phone is in use rings in the pill, not a pop-up. */
     internal var ringInPill: () -> Boolean = { false }
         private set
@@ -141,9 +148,19 @@ object CallManager {
     private val _ended = MutableStateFlow<EndedCall?>(null)
     val ended: StateFlow<EndedCall?> = _ended.asStateFlow()
 
+    private val _earBlank = MutableStateFlow(false)
+
+    /** The phone is at the ear: the call screen goes dark itself, whatever the system does with the display. */
+    val earBlank: StateFlow<Boolean> = _earBlank.asStateFlow()
+
+    internal fun setEarBlank(blank: Boolean) {
+        _earBlank.value = blank
+    }
+
     fun init(
         directory: CallerDirectory,
         silentWhenFaceDown: () -> Boolean,
+        rejectWhenFlipped: () -> Boolean = { false },
         ringInPill: () -> Boolean = { false },
         toneOnConnect: () -> Boolean = { false },
         toneOnEnd: () -> Boolean = { false },
@@ -151,6 +168,7 @@ object CallManager {
     ) {
         this.directory = directory
         this.silentWhenFaceDown = silentWhenFaceDown
+        this.rejectWhenFlipped = rejectWhenFlipped
         this.ringInPill = ringInPill
         this.toneOnConnect = toneOnConnect
         this.toneOnEnd = toneOnEnd
@@ -250,6 +268,13 @@ object CallManager {
         if (call.currentState == Call.STATE_HOLDING) call.unhold() else call.hold()
     }
 
+    /** Declines the ringing call, if one is still ringing. */
+    internal fun rejectRinging() {
+        val call = primary()?.takeIf { it.currentState == Call.STATE_RINGING } ?: return
+        DebugLog.i(TAG, "reject on turning face down")
+        call.reject(false, null)
+    }
+
     /** Stops the ringing only: the call keeps coming in, and the default phone app is allowed to do this. */
     @SuppressLint("MissingPermission")
     internal fun silenceRinger() {
@@ -266,12 +291,13 @@ object CallManager {
      * Telecom quieted the ringing: Android does that for a volume key or the power key pressed
      * while a call rings, before any app sees the key, and doesn't say which. With the user's choice
      * a volume key declines; the power key only quiets, as on any phone. The power key is the one that
-     * turns the screen off (or on), so a screen that changes just after tells them apart.
+     * turns the screen off (or on), so a screen that changes just after tells them apart. Some phones
+     * also quiet it themselves when turned over; that is no key either.
      */
     internal fun onSilenceRinger() {
         val call = primary()?.takeIf { it.currentState == Call.STATE_RINGING }
-        DebugLog.i(TAG, "ringer silenced by the system, self=$quietingItself, decline=${declineOnKey()}")
-        if (call == null || quietingItself || !declineOnKey()) return
+        DebugLog.i(TAG, "ringer silenced by the system, self=$quietingItself, decline=${declineOnKey()}, turned=${phoneTurnedOver()}")
+        if (call == null || quietingItself || !declineOnKey() || phoneTurnedOver()) return
         val power = service?.getSystemService(PowerManager::class.java)
         val screenWasOn = power?.isInteractive
         scope.launch {
@@ -285,6 +311,10 @@ object CallManager {
                 }
             }
             if (call.currentState != Call.STATE_RINGING) return@launch
+            if (phoneTurnedOver()) {
+                DebugLog.i(TAG, "turned over: only quieted")
+                return@launch
+            }
             DebugLog.i(TAG, "reject on volume key")
             call.reject(false, null)
         }

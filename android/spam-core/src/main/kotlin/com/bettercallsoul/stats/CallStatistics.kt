@@ -15,6 +15,8 @@ data class StatSummary(
     /** People actually talked to: a missed call doesn't count. */
     val people: Int,
     val calls: Int,
+    /** Calls that were talked on, in either direction: the ones the averages are taken over. */
+    val answered: Int,
     val incoming: Int,
     val outgoing: Int,
     val missed: Int,
@@ -22,7 +24,13 @@ data class StatSummary(
     val unsavedPeople: Int,
     /** Most talked to first. */
     val top: List<PersonTotal>,
-)
+) {
+    /** Average talk time of an answered call; 0 with none. */
+    val secondsPerCall: Long get() = if (answered == 0) 0 else talkSeconds / answered
+
+    /** Average talk time with each person talked to; 0 with nobody. */
+    val secondsPerPerson: Long get() = if (people == 0) 0 else talkSeconds / people
+}
 
 object CallStatistics {
     /** The totals of the [calls] made since [since]. */
@@ -38,6 +46,7 @@ object CallStatistics {
             talkSeconds = totals.sumOf { it.seconds },
             people = totals.size,
             calls = inPeriod.size,
+            answered = inPeriod.count { it.seconds > 0 },
             incoming = inPeriod.count { it.direction == CallDirection.Incoming },
             outgoing = inPeriod.count { it.direction == CallDirection.Outgoing },
             missed = inPeriod.count { it.direction == CallDirection.Missed },

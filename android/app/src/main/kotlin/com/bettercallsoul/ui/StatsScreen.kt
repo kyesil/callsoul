@@ -24,6 +24,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Call
 import androidx.compose.material.icons.outlined.People
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material.icons.outlined.PersonOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -62,10 +64,12 @@ import com.bettercallsoul.stats.StatSummary
 import com.bettercallsoul.telecom.CallerDirectory
 import java.util.concurrent.TimeUnit
 
-private enum class StatPeriod(val label: Int, val days: Long) {
+/** [days] null is everything kept here, however far back the history setting goes. */
+private enum class StatPeriod(val label: Int, val days: Long?) {
     Week(R.string.stats_week, 7),
     Month(R.string.stats_month, 30),
     Year(R.string.stats_year, 365),
+    All(R.string.stats_all, null),
 }
 
 /** Talk time and who with, over the last week, month or year. Reads the app's own copy of the calls. */
@@ -83,7 +87,8 @@ fun StatsScreen(onOpen: (Route) -> Unit, onBack: () -> Unit) {
 
     val known = callers
     val now = remember(records) { System.currentTimeMillis() }
-    val since = now - TimeUnit.DAYS.toMillis(period.days)
+    // "All" starts at the oldest call kept, so its date range says how far back that is.
+    val since = period.days?.let { now - TimeUnit.DAYS.toMillis(it) } ?: (records.minOfOrNull { it.date } ?: now)
     val summary = remember(records, known, period) {
         known?.let { people ->
             CallStatistics.summarize(records.map { it.toStatCall() }, since) { number ->
@@ -146,13 +151,14 @@ fun StatsScreen(onOpen: (Route) -> Unit, onBack: () -> Unit) {
     }
 }
 
-/** "2 sa 15 dk", "12 dk", "45 sn". */
+/** "2 sa 15 dk", "12 dk", "45 sn"; with [exact], "3 dk 12 sn" under an hour. */
 @Composable
-internal fun talkTime(seconds: Long): String {
+internal fun talkTime(seconds: Long, exact: Boolean = false): String {
     val hours = seconds / 3600
     val minutes = seconds % 3600 / 60
     return when {
         hours > 0 -> stringResource(R.string.duration_hm, hours, minutes)
+        exact && minutes > 0 && seconds % 60 > 0 -> stringResource(R.string.duration_ms, minutes, seconds % 60)
         minutes > 0 -> stringResource(R.string.duration_m, minutes)
         else -> stringResource(R.string.duration_s, seconds)
     }
@@ -174,6 +180,13 @@ private fun Tiles(summary: StatSummary) {
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             StatTile(Icons.Outlined.People, summary.people.toString(), stringResource(R.string.stats_people), Modifier.weight(1f))
             StatTile(Icons.Outlined.Call, summary.calls.toString(), stringResource(R.string.stats_calls), Modifier.weight(1f))
+        }
+        // Over the answered calls only, and the people actually talked to.
+        if (summary.answered > 0) {
+            Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                StatTile(Icons.Outlined.Timer, talkTime(summary.secondsPerCall, exact = true), stringResource(R.string.stats_per_call), Modifier.weight(1f))
+                StatTile(Icons.Outlined.Person, talkTime(summary.secondsPerPerson, exact = true), stringResource(R.string.stats_per_person), Modifier.weight(1f))
+            }
         }
         StatTile(
             Icons.Outlined.PersonOff,
@@ -264,6 +277,14 @@ private fun TopRow(person: PersonTotal, longest: Long, caller: KnownCaller?, lab
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            // With one call the average is the total, so it only shows from two.
+            if (person.calls > 1) {
+                Text(
+                    stringResource(R.string.stats_avg_short, talkTime(person.seconds / person.calls, exact = true)),
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }

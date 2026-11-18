@@ -20,6 +20,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bettercallsoul.R
+import com.bettercallsoul.ContactLinks
+import com.bettercallsoul.DefaultLinks
+import com.bettercallsoul.LinkHolder
 import com.bettercallsoul.TelLinks
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,7 +36,7 @@ import androidx.compose.ui.platform.LocalContext
  * question before any permission prompt, so the role comes first and the permissions only once it
  * is held; the rest follow on the same screen, each one only when still needed and each one skippable.
  */
-enum class SetupStep { Role, Permissions, LockCalls, WhatsApp, TelLinks }
+enum class SetupStep { Role, Permissions, LockCalls, WhatsApp, TelLinks, ContactLinks }
 
 /** First start: one [SetupStep] at a time under the welcome. */
 @Composable
@@ -51,6 +54,7 @@ fun SetupScreen(
         SetupStep.LockCalls -> Triple(R.string.lock_calls_title, R.string.lock_calls_prompt, R.string.lock_calls_action)
         SetupStep.WhatsApp -> Triple(R.string.settings_whatsapp_title, R.string.setup_whatsapp_body, R.string.lock_calls_action)
         SetupStep.TelLinks -> Triple(R.string.tel_links_title, R.string.tel_links_body, R.string.tel_links_action)
+        SetupStep.ContactLinks -> Triple(R.string.contact_links_title, R.string.contact_links_body, R.string.tel_links_action)
     }
     if (later != null) {
         Column(
@@ -136,7 +140,7 @@ fun DefaultPhonePrompt(onAccept: () -> Unit, onDismiss: () -> Unit) {
  * After the setup, a permission that went missing while its feature is still wanted, shown on the
  * home screen in the place of the default-app banner, one at a time in this order.
  */
-enum class Suggestion { LockCalls, WhatsApp, TelLinks }
+enum class Suggestion { LockCalls, WhatsApp, TelLinks, ContactLinks }
 
 /** The banner for a [Suggestion]; its cross gives the feature up, and Settings keeps the way back. */
 @Composable
@@ -148,22 +152,28 @@ fun SuggestionBanner(suggestion: Suggestion, onAccept: () -> Unit, onClose: () -
         Suggestion.WhatsApp -> SetupBanner(
             R.string.settings_whatsapp_title, stringResource(R.string.whatsapp_calls_prompt), R.string.lock_calls_action, onAccept, onClose,
         )
-        Suggestion.TelLinks -> {
-            // Asking again, or gone to another app, whose own page is the only place to undo that.
-            val context = LocalContext.current
-            // Read again on coming back: from that page, the holder has likely changed.
-            fun read() = (TelLinks.holder(context) as? TelLinks.Holder.Other)?.let { TelLinks.label(context, it.packageName) }
-            var other by remember { mutableStateOf(read()) }
-            LifecycleResumeEffect(Unit) {
-                other = read()
-                onPauseOrDispose { }
-            }
-            val app = other
-            if (app == null) {
-                SetupBanner(R.string.tel_links_title, stringResource(R.string.tel_links_lost), R.string.tel_links_action, onAccept, onClose)
-            } else {
-                SetupBanner(R.string.tel_links_title, stringResource(R.string.tel_links_lost_other, app), R.string.settings_whatsapp_late_open, onAccept, onClose)
-            }
-        }
+        Suggestion.TelLinks ->
+            LinksBanner(TelLinks, R.string.tel_links_title, R.string.tel_links_lost, R.string.tel_links_lost_other, onAccept, onClose)
+        Suggestion.ContactLinks ->
+            LinksBanner(ContactLinks, R.string.contact_links_title, R.string.contact_links_body, R.string.contact_links_other_body, onAccept, onClose)
+    }
+}
+
+/** Asking which app opens a kind of link, or sending to the other app's page, the only place to undo its choice. */
+@Composable
+private fun LinksBanner(links: DefaultLinks, title: Int, ask: Int, otherApp: Int, onAccept: () -> Unit, onClose: () -> Unit) {
+    val context = LocalContext.current
+    // Read again on coming back: from that page, the holder has likely changed.
+    fun read() = (links.holder(context) as? LinkHolder.Other)?.let { links.label(context, it.packageName) }
+    var other by remember { mutableStateOf(read()) }
+    LifecycleResumeEffect(Unit) {
+        other = read()
+        onPauseOrDispose { }
+    }
+    val app = other
+    if (app == null) {
+        SetupBanner(title, stringResource(ask), R.string.tel_links_action, onAccept, onClose)
+    } else {
+        SetupBanner(title, stringResource(otherApp, app), R.string.settings_whatsapp_late_open, onAccept, onClose)
     }
 }
