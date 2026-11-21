@@ -118,6 +118,8 @@
     <string name="settings_face_down_body">المكالمة التي تصل والهاتف مقلوب، أو التي تقلب الهاتف أثناء رنينها، ترن دون صوت مع إبقاء الشاشة مضاءة.</string>
     <string name="flip_reject_title">اقلب الهاتف للرفض</string>
     <string name="flip_reject_body">قلب الهاتف على وجهه أثناء رنين المكالمة يرفضها. لا تُرفض المكالمة التي تصل والهاتف مقلوب بالفعل.</string>
+    <string name="silent_in_use_title">صامت أثناء استخدام الهاتف</string>
+    <string name="silent_in_use_body">المكالمة التي تصل والهاتف غير مقفل وفي يدك ترن بلا صوت ولا اهتزاز؛ ويظل شريط المكالمة أو الإشعار يعرضها. أيًا كان هذا الإعداد، فإن الضغط المطول على الشريط الذي يرن يسكته أيضًا.</string>
     <string name="settings_overlay_title">العرض فوق التطبيقات الأخرى</string>
     <string name="settings_overlay_body">أثناء المكالمة تظهر فوق التطبيقات الأخرى أزرار للعودة إليها وتشغيل مكبر الصوت وإنهائها.</string>
     <string name="settings_pill_title">فقاعة المكالمة</string>
@@ -365,6 +367,12 @@
     <string name="stats_month">شهري</string>
     <string name="stats_year">سنوي</string>
     <string name="stats_all">الكل</string>
+    <string name="icon_title">رمز التطبيق</string>
+    <string name="icon_body">الرمز على الشاشة الرئيسية. قد يستغرق ظهور الرمز الجديد بضع ثوانٍ.</string>
+    <string name="icon_glass">زجاجي</string>
+    <string name="icon_clear">أبيض</string>
+    <string name="icon_green">أخضر</string>
+    <string name="icon_blue">أزرق</string>
     <string name="stats_total">إجمالي وقت المكالمات</string>
     <string name="stats_people">أشخاص تحدثت معهم</string>
     <string name="stats_calls">المكالمات</string>

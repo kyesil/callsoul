@@ -83,6 +83,7 @@ class MainActivity : ComponentActivity() {
 
     /** The favourites last put in the app icon's menu, so coming back to the app doesn't redo them. */
     private var shortcutFavorites: List<ContactRow>? = null
+    private var shortcutIcon: LauncherIcon? = null
 
     private val requestPermissions =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { refresh() }
@@ -246,11 +247,14 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 snapshotFlow { permissionsGranted }.first { it }
-                container.contacts.observe()
-                    .map { rows -> rows.favoritesInOrder() }
-                    .distinctUntilChanged()
-                    .collect { favorites ->
-                        if (favorites != shortcutFavorites) {
+                // A new home screen icon is a new launcher entry, whose menu starts empty: fill it again.
+                kotlinx.coroutines.flow.combine(
+                    container.contacts.observe().map { rows -> rows.favoritesInOrder() }.distinctUntilChanged(),
+                    snapshotFlow { container.launcherIcon },
+                ) { favorites, icon -> favorites to icon }
+                    .collect { (favorites, icon) ->
+                        if (favorites != shortcutFavorites || icon != shortcutIcon) {
+                            shortcutIcon = icon
                             FavoriteShortcuts.update(this@MainActivity, favorites)
                             Widgets.refresh(this@MainActivity)
                             shortcutFavorites = favorites

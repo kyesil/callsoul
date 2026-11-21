@@ -23,6 +23,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.border
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -108,6 +109,7 @@ import com.bettercallsoul.DefaultLinks
 import com.bettercallsoul.LinkHolder
 import com.bettercallsoul.TelLinks
 import com.bettercallsoul.R
+import com.bettercallsoul.LauncherIcon
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.bettercallsoul.container
@@ -189,6 +191,7 @@ fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBac
         SettingEntry(SettingsGroup.Spam, listOf(R.string.block_abroad_title, R.string.block_abroad_body)) { BlockAbroadSettings() },
         SettingEntry(SettingsGroup.Spam, listOf(R.string.block_prefix_title, R.string.block_prefix_body)) { BlockPrefixSettings() },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_face_down_title, R.string.settings_face_down_body, R.string.flip_reject_title, R.string.flip_reject_body)) { FaceDownSettings() },
+        SettingEntry(SettingsGroup.Calls, listOf(R.string.silent_in_use_title, R.string.silent_in_use_body)) { SilentInUseSettings() },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.speed_dial_title, R.string.speed_dial_body)) { SpeedDialSettings() },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.settings_replies_title, R.string.settings_replies_body)) { QuickReplySettings() },
         SettingEntry(SettingsGroup.Calls, listOf(R.string.key_decline_title, R.string.key_decline_body)) { KeySettings() },
@@ -222,6 +225,7 @@ fun SettingsScreen(isDefaultDialer: Boolean, onRequestDefault: () -> Unit, onBac
         ) { PillSettings(overlayAllowed) },
         SettingEntry(SettingsGroup.Looks, listOf(R.string.settings_theme_title, R.string.theme_system, R.string.theme_light, R.string.theme_dark)) { ThemeSettings() },
         SettingEntry(SettingsGroup.Looks, listOf(R.string.settings_language_title)) { LanguageSettings() },
+        SettingEntry(SettingsGroup.Looks, listOf(R.string.icon_title, R.string.icon_body)) { LauncherIconSettings() },
         SettingEntry(SettingsGroup.Looks, listOf(R.string.settings_animations_title, R.string.settings_animations_body)) { AnimationSettings() },
         SettingEntry(SettingsGroup.Looks, listOf(R.string.settings_swipe_title, R.string.settings_swipe_body, R.string.settings_swipe_message)) { SwipeSettings() },
         SettingEntry(SettingsGroup.Looks, listOf(R.string.settings_quick_menu_title, R.string.settings_quick_menu_body)) { QuickMenuSettings() },
@@ -535,6 +539,16 @@ private fun FaceDownSettings() {
     SwitchCard(R.string.flip_reject_title, R.string.flip_reject_body, reject) {
         reject = it
         app.rejectWhenFlipped = it
+    }
+}
+
+@Composable
+private fun SilentInUseSettings() {
+    val app = LocalContext.current.container
+    var silent by remember { mutableStateOf(app.silentInUse) }
+    SwitchCard(R.string.silent_in_use_title, R.string.silent_in_use_body, silent) {
+        silent = it
+        app.silentInUse = it
     }
 }
 
@@ -884,6 +898,48 @@ private fun QuickMenuSettings() {
 }
 
 /** The app's own switch. When the system has animations off it wins, and the switch says so. */
+/** The home screen icon: each choice as it looks, the chosen one outlined. */
+@Composable
+private fun LauncherIconSettings() {
+    val app = LocalContext.current.container
+    Card {
+        Column(Modifier.fillMaxWidth().padding(10.dp)) {
+            Text(stringResource(R.string.icon_title), fontSize = 17.sp, color = MaterialTheme.colorScheme.onSurface)
+            Text(stringResource(R.string.icon_body), fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.height(12.dp))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                LauncherIcon.entries.forEach { icon ->
+                    val chosen = app.launcherIcon == icon
+                    val shape = androidx.compose.foundation.shape.RoundedCornerShape(30)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
+                            .clickable { if (!chosen) app.saveLauncherIcon(icon) }
+                            .padding(8.dp),
+                    ) {
+                        androidx.compose.foundation.Image(
+                            androidx.compose.ui.res.painterResource(icon.preview),
+                            contentDescription = stringResource(icon.label),
+                            modifier = Modifier
+                                .size(64.dp)
+                                .border(if (chosen) 3.dp else 0.dp, if (chosen) MaterialTheme.colorScheme.primary else Color.Transparent, shape)
+                                .padding(if (chosen) 4.dp else 0.dp)
+                                .clip(shape),
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            stringResource(icon.label),
+                            fontSize = 13.sp,
+                            color = if (chosen) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 @Composable
 private fun AnimationSettings() {
     val context = LocalContext.current

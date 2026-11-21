@@ -1,4 +1,7 @@
-Better Call Soul reúne tu teléfono y tus contactos en una app tranquila y rápida. Sin anuncios ni pantallas de más. Diseños grandes y serenos para una mano: encuentra al instante a quien buscas y sabe de un vistazo quién te llama.
+Sin anuncios y de código abierto. Better Call Soul reúne tu teléfono y tus contactos en una app tranquila y rápida. Diseños grandes y serenos para una mano: encuentra al instante a quien buscas y sabe de un vistazo quién te llama.
+
+LLAMADAS DE WHATSAPP EN TU REGISTRO
+Las llamadas de WhatsApp entrantes, salientes y perdidas aparecen en la misma lista que las del teléfono, de voz o video y con su duración, también en el historial del contacto. Opcional; usa el acceso a notificaciones y todo queda en tu teléfono.
 
 CONTACTOS SIEMPRE ORDENADOS
 El repartidor, el administrador del edificio, aquel técnico que vino una sola vez: no tienen por qué estar en tu agenda. Ponle tu propia etiqueta a cualquier número y la próxima vez aparecerá con ese nombre. Las etiquetas quedan fuera de tus contactos y tu lista sigue limpia.
@@ -6,7 +9,6 @@ El repartidor, el administrador del edificio, aquel técnico que vino una sola v
 DESLIZA PARA LLAMAR
 • Desliza una fila a la derecha para llamar y a la izquierda para enviar un mensaje. A la izquierda se abre WhatsApp o SMS, como prefieras.
 • Filas deslizables con tus favoritos y las personas con las que más hablas: toca para ver el perfil y toca dos veces para llamar.
-• Mantén presionado el icono de la app y tendrás tus favoritos a mano.
 • La pestaña Buscar busca en contactos y llamadas a la vez y resalta la coincidencia.
 • En el teclado, los nombres (T9) y los números aparecen mientras escribes.
 
@@ -25,9 +27,7 @@ CONTRA EL SPAM
 QUÉ HAY EN AJUSTES
 • Silencio boca abajo: un teléfono boca abajo no suena, y al darle la vuelta se silencia una llamada que está sonando.
 • Rechazar con un mensaje: escribe tus propias respuestas rápidas por SMS.
-• Ve las llamadas de WhatsApp en tus recientes, con un icono de voz o video. Es opcional y necesita acceso a las notificaciones.
 • A qué distancia del borde empiezan los deslizamientos, para que nunca choquen con el gesto Atrás de Android.
-• El aspecto de la píldora de llamada, las animaciones y cuatro idiomas: turco, inglés, árabe y ruso.
 
 ESTADÍSTICAS
 Consulta por semana, mes y año cuánto hablaste, con cuántas personas, cuánto fue con números fuera de tus contactos y con quién hablas más. Todo se queda en tu teléfono y se guarda un año como máximo.
@@ -46,10 +46,8 @@ CONTACTOS
 • Todos los campos de Contactos de Google: teléfono, correo, dirección, cumpleaños, relaciones, campos personalizados, etiquetas, notas y una foto de la cámara.
 • Guarda en cualquiera de tus cuentas de Google o en el teléfono, y mueve contactos entre ellas.
 • Selecciona varios y elimínalos; los eliminados esperan 30 días en la papelera.
-• Agrega un número a un contacto existente y comparte un contacto como tarjeta.
-• Escanea el código QR de una tarjeta de visita y el nuevo contacto se completa solo.
 
-PRIVACIDAD
-Tus contactos y tu historial de llamadas se quedan en tu teléfono. La consulta de spam en la nube solo abarca números fuera de tus contactos y se puede desactivar. Más detalles en la política de privacidad.
+PRIVACIDAD Y CÓDIGO ABIERTO
+Tus contactos y tu historial de llamadas se quedan en tu teléfono. La consulta de spam en la nube solo abarca números fuera de tus contactos y se puede desactivar. Más detalles en la política de privacidad. Sin anuncios, sin rastreadores, sin versión de pago. Código abierto con licencia GPL-3.0: github.com/kyesil/callsoul
 
 Para usar Better Call Soul, hazla tu app de teléfono predeterminada.

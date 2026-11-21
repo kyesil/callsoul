@@ -1,4 +1,7 @@
-Better Call Soul réunit téléphone et contacts dans une appli calme et rapide. Sans pub, sans écrans superflus. De grands écrans sobres, pensés pour une main : trouvez vite la bonne personne et voyez d'un coup d'œil qui appelle.
+Sans publicité et open source. Better Call Soul réunit téléphone et contacts dans une appli calme et rapide. De grands écrans sobres, pensés pour une main : trouvez vite la bonne personne et voyez d'un coup d'œil qui appelle.
+
+LES APPELS WHATSAPP DANS LE JOURNAL
+Les appels WhatsApp entrants, sortants et manqués s'affichent dans la même liste que vos appels téléphoniques, vocal ou vidéo, avec leur durée, et dans l'historique du contact. Facultatif ; passe par l'accès aux notifications, tout reste sur le téléphone.
 
 DES CONTACTS BIEN RANGÉS
 Le livreur, le gardien de l'immeuble, ce plombier venu une seule fois : ils n'ont rien à faire dans votre carnet. Donnez à un numéro votre propre libellé : il s'affichera sous ce nom la prochaine fois. Les libellés restent hors de vos contacts, votre liste reste nette.
@@ -6,7 +9,6 @@ Le livreur, le gardien de l'immeuble, ce plombier venu une seule fois : ils n'on
 BALAYEZ POUR APPELER
 • Balayez une ligne vers la droite pour appeler, vers la gauche pour écrire. La gauche ouvre WhatsApp ou les SMS, au choix.
 • Des rangées de favoris et de contacts fréquents : appuyez pour le profil, deux fois pour appeler.
-• Appui prolongé sur l'icône de l'appli : vos favoris sont là.
 • L'onglet Rechercher parcourt contacts et appels à la fois et surligne la correspondance.
 • Sur le clavier, noms (T9) et numéros sont trouvés pendant la saisie.
 
@@ -25,9 +27,7 @@ CONTRE LE SPAM
 DANS LES PARAMÈTRES
 • Silence écran retourné : posé face cachée, le téléphone ne sonne pas ; le retourner coupe la sonnerie.
 • Refuser avec un message : rédigez vos propres réponses rapides par SMS.
-• Les appels WhatsApp dans vos récents, avec une icône audio ou vidéo. Facultatif ; nécessite l'accès aux notifications.
 • La distance du bord où commencent les balayages, pour ne pas gêner le geste Retour d'Android.
-• L'apparence de la pastille d'appel, les animations, et quatre langues : turc, anglais, arabe et russe.
 
 STATISTIQUES
 Par semaine, mois et année : votre temps d'appel, le nombre de personnes, la part des numéros hors contacts et vos contacts les plus fréquents. Tout reste sur le téléphone, un an au maximum.
@@ -47,9 +47,8 @@ CONTACTS
 • Enregistrez dans un de vos comptes Google ou sur le téléphone, et déplacez des contacts entre eux.
 • Supprimez-en plusieurs à la fois ; ils attendent 30 jours dans une corbeille.
 • Ajoutez un numéro à un contact existant et partagez un contact sous forme de fiche.
-• Scannez le code QR d'une carte de visite et le nouveau contact se remplit tout seul.
 
-CONFIDENTIALITÉ
-Vos contacts et votre historique d'appels restent sur votre téléphone. La vérification de spam dans le cloud ne concerne que les numéros hors contacts et peut être désactivée. Détails dans les règles de confidentialité.
+CONFIDENTIALITÉ ET OPEN SOURCE
+Vos contacts et votre historique d'appels restent sur votre téléphone. La vérification de spam dans le cloud ne concerne que les numéros hors contacts et peut être désactivée. Détails dans les règles de confidentialité. Ni publicité, ni traceurs, ni version payante. Code source ouvert sous GPL-3.0 : github.com/kyesil/callsoul
 
 Pour utiliser Better Call Soul, définissez-la comme appli Téléphone par défaut.

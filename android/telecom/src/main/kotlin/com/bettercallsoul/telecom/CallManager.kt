@@ -100,6 +100,9 @@ object CallManager {
 
     /** The user's choice that a call coming in while the phone is in use rings in the pill, not a pop-up. */
     internal var ringInPill: () -> Boolean = { false }
+
+    /** The user's choice that a call coming in while the phone is in use rings without sound. */
+    internal var silentInUse: () -> Boolean = { false }
         private set
 
     /** The user's choices for a short tone when a call connects and when it ends. */
@@ -165,6 +168,7 @@ object CallManager {
         toneOnConnect: () -> Boolean = { false },
         toneOnEnd: () -> Boolean = { false },
         declineOnKey: () -> Boolean = { false },
+        silentInUse: () -> Boolean = { false },
     ) {
         this.directory = directory
         this.silentWhenFaceDown = silentWhenFaceDown
@@ -173,6 +177,7 @@ object CallManager {
         this.toneOnConnect = toneOnConnect
         this.toneOnEnd = toneOnEnd
         this.declineOnKey = declineOnKey
+        this.silentInUse = silentInUse
     }
 
     @SuppressLint("MissingPermission") // The app opens only once the phone permission is granted.
@@ -273,6 +278,13 @@ object CallManager {
         val call = primary()?.takeIf { it.currentState == Call.STATE_RINGING } ?: return
         DebugLog.i(TAG, "reject on turning face down")
         call.reject(false, null)
+    }
+
+    /** Quiets the ringing call from the pill: a long press, since the phone is in hand anyway. */
+    fun silenceFromPill() {
+        if (primary()?.currentState != Call.STATE_RINGING) return
+        DebugLog.i(TAG, "silenced from the pill")
+        silenceRinger()
     }
 
     /** Stops the ringing only: the call keeps coming in, and the default phone app is allowed to do this. */

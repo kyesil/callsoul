@@ -1,4 +1,5 @@
-• Tuş takımında yazarken en çok aradığın kişiler en üstte.
-• Hızlı arama: 1–9 tuşlarına uzun basınca atadığın kişi aranır; Ayarlar'dan ya da boş tuşa uzun basarak atanır.
-• İstatistiklerde "Hepsi" sekmesi, cevaplanan arama başı ve kişi başı ortalama süre, her kişiyle arama başı ortalama.
-• Konuşurken telefon kulağa gelince ekran, nasıl tutulursa tutulsun kararır ve dokunmalar engellenir.
+• Yeni cam simge; Ayarlar'dan cam, beyaz, yeşil ya da mavi seçilebilir.
+• Telefon kullanılırken sessiz çal: kilidi açık telefona gelen arama zilsiz gelir. Çalan arama hapına uzun basınca da zil susar.
+• Gelen aramada kişinin fotoğrafı büyük ve bildirimde de görünür.
+• Tuş takımında en çok aradıkların üstte; 1–9 tuşlarına uzun basınca hızlı arama.
+• İstatistiklerde "Hepsi" sekmesi ve ortalama konuşma süreleri.

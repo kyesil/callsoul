@@ -56,6 +56,7 @@ class BcsInCallService : InCallService() {
             onAnswer = CallManager::answer,
             onSpeaker = CallManager::toggleSpeaker,
             onHangUp = CallManager::hangUp,
+            onSilence = CallManager::silenceFromPill,
         )
     }
 
@@ -128,6 +129,16 @@ class BcsInCallService : InCallService() {
                 getSystemService(NotificationManager::class.java).canUseFullScreenIntent()
             val awake = getSystemService(PowerManager::class.java).isInteractive
             DebugLog.i(TAG, "ringing: fullScreen=$fullScreen awake=$awake")
+            // The phone is in hand and the pill or pop-up is in sight: with the user's say, no ringtone.
+            if (screenInUse() && CallManager.silentInUse()) {
+                DebugLog.i(TAG, "phone in use: ringing silently")
+                CallManager.silenceRinger()
+                // Telecom may only start the ringtone after this; quiet it again once it has.
+                scope.launch {
+                    kotlinx.coroutines.delay(SILENT_AGAIN_MILLIS)
+                    if (call.currentState == Call.STATE_RINGING) CallManager.silenceRinger()
+                }
+            }
         }
         if (!ringing || !screenInUse()) {
             // An outgoing call comes up behind the burst on the app; a ringing one keeps the system's opening.
@@ -172,6 +183,24 @@ class BcsInCallService : InCallService() {
         CallManager.onMuteChanged(audioState.isMuted)
     }
 
+    private var photoFor: String? = null
+    private var photo: android.graphics.drawable.Icon? = null
+
+    /** The contact photo as a notification icon; read once per caller, since the notification is rebuilt often. */
+    private fun photoIcon(uri: String?): android.graphics.drawable.Icon? {
+        if (uri != photoFor) {
+            photoFor = uri
+            photo = uri?.let {
+                runCatching {
+                    contentResolver.openInputStream(android.net.Uri.parse(it))?.use { stream ->
+                        android.graphics.BitmapFactory.decodeStream(stream)?.let { bitmap -> android.graphics.drawable.Icon.createWithBitmap(bitmap) }
+                    }
+                }.getOrNull()
+            }
+        }
+        return photo
+    }
+
     private fun updateNotification(state: CallUiState?) {
         if (state == null) {
             stopForeground(STOP_FOREGROUND_REMOVE)
@@ -195,6 +224,7 @@ class BcsInCallService : InCallService() {
                 hangUp = CallActionReceiver.pendingIntent(this, CallActionReceiver.ACTION_HANG_UP),
                 answerLabel = getString(R.string.notification_answer),
                 hangUpLabel = getString(if (state.phase == CallPhase.Incoming) R.string.notification_decline else R.string.notification_end),
+                photo = photoIcon(state.caller.photoUri),
             ),
         )
         try {
@@ -247,6 +277,7 @@ class BcsInCallService : InCallService() {
 
     companion object {
         private const val TAG = "Service"
+        private const val SILENT_AGAIN_MILLIS = 600L
         private val EAR_PHASES = setOf(CallPhase.Dialing, CallPhase.Active, CallPhase.OnHold)
         const val ACTION_SHOW_CALL = "com.bettercallsoul.action.SHOW_CALL"
 

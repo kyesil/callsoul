@@ -119,6 +119,8 @@
     <string name="settings_face_down_body">A call that arrives while the phone lies face down, or that you turn face down while it rings, rings without sound and keeps the screen on.</string>
     <string name="flip_reject_title">Turn face down to decline</string>
     <string name="flip_reject_body">Turning the phone face down while a call rings declines it. A call that arrives while the phone already lies face down isn\'t declined.</string>
+    <string name="silent_in_use_title">Silent while the phone is in use</string>
+    <string name="silent_in_use_body">A call that comes in while the phone is unlocked and in your hand rings without sound or vibration; the call pill or pop-up still shows it. Whatever this is set to, holding the ringing pill also silences it.</string>
     <string name="settings_overlay_title">Show over other apps</string>
     <string name="settings_overlay_body">During a call, buttons to go back to it, switch the speaker or hang up show over other apps.</string>
     <string name="settings_pill_title">Call pill</string>
@@ -318,6 +320,12 @@
     <string name="stats_month">Monthly</string>
     <string name="stats_year">Yearly</string>
     <string name="stats_all">All</string>
+    <string name="icon_title">App icon</string>
+    <string name="icon_body">The icon on your home screen. The launcher may take a few seconds to show the new one.</string>
+    <string name="icon_glass">Glass</string>
+    <string name="icon_clear">White</string>
+    <string name="icon_green">Green</string>
+    <string name="icon_blue">Blue</string>
     <string name="stats_total">Total talk time</string>
     <string name="stats_people">People talked to</string>
     <string name="stats_calls">Calls</string>

@@ -143,6 +143,18 @@ class AppContainer(context: Context) {
         whatsApp.forget(fromWhatsApp)
     }
 
+    /** The home screen icon chosen in Settings; see [LauncherIcons]. */
+    var launcherIcon by mutableStateOf(
+        LauncherIcon.entries.firstOrNull { it.name == prefs.getString(KEY_LAUNCHER_ICON, null) } ?: LauncherIcon.Glass,
+    )
+        private set
+
+    fun saveLauncherIcon(icon: LauncherIcon) {
+        launcherIcon = icon
+        prefs.edit { putString(KEY_LAUNCHER_ICON, icon.name) }
+        LauncherIcons.apply(appContext, icon)
+    }
+
     /** The numbers called by holding a key on the keypad, by key ('1' to '9'). */
     var speedDials by mutableStateOf(
         prefs.getString(KEY_SPEED_DIALS, null)?.lineSequence()
@@ -407,6 +419,11 @@ class AppContainer(context: Context) {
         get() = prefs.getBoolean(KEY_FLIP_REJECT, false)
         set(value) = prefs.edit { putBoolean(KEY_FLIP_REJECT, value) }
 
+    /** A call that comes in while the phone is in use rings without sound; the pill or pop-up shows it. */
+    var silentInUse: Boolean
+        get() = prefs.getBoolean(KEY_SILENT_IN_USE, false)
+        set(value) = prefs.edit { putBoolean(KEY_SILENT_IN_USE, value) }
+
     /** A short beep when a call connects. */
     var toneOnConnect: Boolean
         get() = prefs.getBoolean(KEY_TONE_CONNECT, false)
@@ -545,6 +562,7 @@ class AppContainer(context: Context) {
         const val KEY_TEL_LINKS_WANTED = "tel_links_wanted"
         const val KEY_FACE_DOWN = "silent_face_down"
         const val KEY_FLIP_REJECT = "reject_flipped"
+        const val KEY_SILENT_IN_USE = "silent_in_use"
         const val KEY_TONE_CONNECT = "tone_on_connect"
         const val KEY_THEME = "theme"
         const val KEY_TONE_END = "tone_on_end"
@@ -564,6 +582,7 @@ class AppContainer(context: Context) {
         const val KEY_SWIPE_MESSAGE = "swipe_message"
         const val KEY_RECENT_SEARCHES = "recent_searches"
         const val KEY_SPEED_DIALS = "speed_dials"
+        const val KEY_LAUNCHER_ICON = "launcher_icon"
         const val KEY_HISTORY_DAYS = "history_days"
         const val KEEP_LISTS_MILLIS = 5 * 60 * 1000L
         const val KEY_LABEL_SEARCHES = "label_searches"
@@ -604,6 +623,7 @@ class BcsApp : Application() {
             toneOnConnect = { container.toneOnConnect },
             toneOnEnd = { container.toneOnEnd },
             declineOnKey = { container.declineOnKey },
+            silentInUse = { container.silentInUse },
         )
         WhatsAppTelecomCalls.init { call -> if (container.whatsAppCallsEnabled) container.whatsApp.save(call) }
         CallChannels.create(this, getString(R.string.channel_incoming), getString(R.string.channel_ongoing))

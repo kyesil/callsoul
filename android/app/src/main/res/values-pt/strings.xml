@@ -118,6 +118,8 @@
     <string name="settings_face_down_body">Uma chamada que chega com o telefone virado para baixo, ou que você vira para baixo enquanto toca, toca sem som e mantém a tela ligada.</string>
     <string name="flip_reject_title">Virar para recusar</string>
     <string name="flip_reject_body">Virar o telefone para baixo enquanto uma chamada toca a recusa. Uma chamada que chega com o telefone já virado não é recusada.</string>
+    <string name="silent_in_use_title">Silencioso enquanto usa o telefone</string>
+    <string name="silent_in_use_body">Uma chamada que chega com o telefone desbloqueado na sua mão toca sem som nem vibração; a pílula de chamada ou o aviso ainda a mostram. Seja qual for esta opção, manter pressionada a pílula que toca também a silencia.</string>
     <string name="settings_overlay_title">Mostrar sobre outros apps</string>
     <string name="settings_overlay_body">Durante uma chamada, botões para voltar a ela, alternar o alto-falante ou desligar aparecem sobre outros apps.</string>
     <string name="settings_pill_title">Cápsula de chamada</string>
@@ -263,6 +265,12 @@
     <string name="stats_month">Mensal</string>
     <string name="stats_year">Anual</string>
     <string name="stats_all">Tudo</string>
+    <string name="icon_title">Ícone do app</string>
+    <string name="icon_body">O ícone na tela inicial. O novo pode levar alguns segundos para aparecer.</string>
+    <string name="icon_glass">Vidro</string>
+    <string name="icon_clear">Branco</string>
+    <string name="icon_green">Verde</string>
+    <string name="icon_blue">Azul</string>
     <string name="stats_total">Tempo total de conversa</string>
     <string name="stats_people">Pessoas com quem falou</string>
     <string name="stats_calls">Chamadas</string>

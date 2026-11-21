@@ -1,4 +1,5 @@
-• While typing on the keypad, the people you call most come first.
-• Speed dial: hold a key from 1 to 9 to call the person on it; set it in Settings or by holding an empty key.
-• Statistics: an "All" tab, average talk time per answered call and per person, and each person's average per call.
-• During a call the screen goes dark and ignores touches at your ear, however you hold the phone.
+• A new glass icon; pick glass, white, green or blue in Settings.
+• Silent while the phone is in use: a call to an unlocked phone rings without sound. Holding the ringing call pill silences it too.
+• The caller's photo is bigger on the incoming screen and shows in the notification.
+• The people you call most come first on the keypad; hold 1–9 for speed dial.
+• Statistics get an "All" tab and average talk times.

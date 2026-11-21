@@ -1,4 +1,7 @@
-Better Call Soul brings your phone and contacts together in one calm, fast app. No ads, no extra screens. Big, quiet layouts made for one hand: find who you want right away and know who's calling at a glance.
+Ad-free and open source. Better Call Soul brings your phone and contacts together in one calm, fast app. Big, quiet layouts made for one hand: find who you want right away and know who's calling at a glance.
+
+WHATSAPP CALLS IN YOUR CALL LOG
+Incoming, outgoing and missed WhatsApp calls sit in the same list as your phone calls, marked voice or video, with how long they lasted, and in the person's history too. During a WhatsApp call the call pill comes along as well. Optional; it works through notification access and the records stay on your phone.
 
 KEEP YOUR CONTACTS CLEAN
 The courier, the building manager, that one-time plumber: they don't belong in your address book. Give any number your own label and it shows by that name next time. Labels stay out of your contacts, so your list stays tidy.
@@ -25,7 +28,6 @@ AGAINST SPAM
 WHAT'S IN SETTINGS
 • Silent when face down: a phone lying on its face doesn't ring, and flipping it silences a ringing call.
 • Decline with a message: write your own quick SMS replies.
-• See WhatsApp calls in your recents, with an icon for voice or video. Optional; it needs notification access.
 • How far from the edge swipes start, so they never clash with Android's back gesture.
 • The call pill's look, animations, and ten languages, from Turkish to Indonesian.
 
@@ -47,9 +49,8 @@ CONTACTS
 • Save to any of your Google accounts or to the phone, and move contacts between them.
 • Select several and delete; deleted contacts wait 30 days in a recycle bin.
 • Add a number to an existing contact, and share a contact as a card.
-• Scan a business card QR code and the new contact fills itself in.
 
-PRIVACY
-Your contacts and call history stay on your phone. The cloud spam lookup only covers numbers outside your contacts and can be turned off. See the privacy policy for details.
+PRIVACY AND OPEN SOURCE
+Your contacts and call history stay on your phone. The cloud spam lookup only covers numbers outside your contacts and can be turned off. See the privacy policy for details. No ads, no trackers, no paid version. The source code is open under GPL-3.0: github.com/kyesil/callsoul
 
 To use Better Call Soul, make it your default phone app.

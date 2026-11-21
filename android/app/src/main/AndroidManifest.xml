@@ -43,10 +43,6 @@
             android:launchMode="singleTask"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            <intent-filter>
                 <action android:name="android.intent.action.DIAL" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -68,6 +64,35 @@
                 <data android:mimeType="vnd.android.cursor.item/person" />
             </intent-filter>
         </activity>
+        <!-- The home screen entry: one alias per icon choice, only the chosen one enabled (see LauncherIcons). -->
+        <activity-alias android:name=".LauncherGlass" android:targetActivity=".MainActivity" android:exported="true"
+            android:icon="@mipmap/ic_launcher" android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias android:name=".LauncherClear" android:targetActivity=".MainActivity" android:exported="true"
+            android:icon="@mipmap/ic_launcher_clear" android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias android:name=".LauncherGreen" android:targetActivity=".MainActivity" android:exported="true"
+            android:icon="@mipmap/ic_launcher_green" android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias android:name=".LauncherBlue" android:targetActivity=".MainActivity" android:exported="true"
+            android:icon="@mipmap/ic_launcher_blue" android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
 
         <!-- A tap on a widget: does the action and closes, showing nothing but the menu. -->
         <activity

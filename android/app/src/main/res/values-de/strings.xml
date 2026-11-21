@@ -118,6 +118,8 @@
     <string name="settings_face_down_body">Ein Anruf, während das Telefon mit dem Display nach unten liegt oder während des Klingelns umgedreht wird, klingelt ohne Ton und der Bildschirm bleibt an.</string>
     <string name="flip_reject_title">Umdrehen lehnt ab</string>
     <string name="flip_reject_body">Wird das Telefon beim Klingeln mit dem Display nach unten gedreht, wird der Anruf abgelehnt. Ein Anruf, während es schon umgedreht liegt, wird nicht abgelehnt.</string>
+    <string name="silent_in_use_title">Lautlos, während das Telefon benutzt wird</string>
+    <string name="silent_in_use_body">Ein Anruf, der bei entsperrtem Telefon in deiner Hand eingeht, klingelt ohne Ton und Vibration; die Anruf-Pille oder das Pop-up zeigt ihn trotzdem. Unabhängig davon macht langes Drücken auf die klingelnde Pille sie stumm.</string>
     <string name="settings_overlay_title">Über anderen Apps einblenden</string>
     <string name="settings_overlay_body">Während eines Anrufs erscheinen über anderen Apps Tasten, um zum Anruf zurückzukehren, den Lautsprecher umzuschalten oder aufzulegen.</string>
     <string name="settings_pill_title">Anrufkapsel</string>
@@ -263,6 +265,12 @@
     <string name="stats_month">Monatlich</string>
     <string name="stats_year">Jährlich</string>
     <string name="stats_all">Alle</string>
+    <string name="icon_title">App-Symbol</string>
+    <string name="icon_body">Das Symbol auf dem Startbildschirm. Bis das neue erscheint, kann es einige Sekunden dauern.</string>
+    <string name="icon_glass">Glas</string>
+    <string name="icon_clear">Weiß</string>
+    <string name="icon_green">Grün</string>
+    <string name="icon_blue">Blau</string>
     <string name="stats_total">Gesprächszeit gesamt</string>
     <string name="stats_people">Gesprächspartner</string>
     <string name="stats_calls">Anrufe</string>

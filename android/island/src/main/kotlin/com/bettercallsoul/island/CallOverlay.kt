@@ -47,6 +47,8 @@ class CallOverlay(
     private val onSpeaker: () -> Unit = {},
     private val onHangUp: () -> Unit,
     private val timerColor: Int = Color.WHITE,
+    /** A long press on the pill while it rings: quiets the ringtone. */
+    private val onSilence: (() -> Unit)? = null,
 ) {
     private val context = context.applicationContext
     private val windows = this.context.getSystemService(WindowManager::class.java)
@@ -329,6 +331,13 @@ class CallOverlay(
         private var touchX = 0f
         private var touchY = 0f
         private var moved = false
+        private var held = false
+        private var holding: Runnable? = null
+
+        private fun stopHolding() {
+            holding?.let(handler::removeCallbacks)
+            holding = null
+        }
 
         @SuppressLint("ClickableViewAccessibility")
         override fun onTouch(view: View, event: MotionEvent): Boolean {
@@ -341,7 +350,18 @@ class CallOverlay(
                     touchX = event.rawX
                     touchY = event.rawY
                     moved = false
+                    held = false
                     view.isPressed = true
+                    // Held still while it rings: the ringtone stops, and the call keeps coming in.
+                    val silence = onSilence
+                    if (ringing && silence != null) {
+                        holding = Runnable {
+                            held = true
+                            view.isPressed = false
+                            view.performHapticFeedback(android.view.HapticFeedbackConstants.LONG_PRESS)
+                            silence()
+                        }.also { handler.postDelayed(it, ViewConfiguration.getLongPressTimeout().toLong()) }
+                    }
                 }
                 MotionEvent.ACTION_MOVE -> {
                     val dx = event.rawX - touchX
@@ -349,6 +369,7 @@ class CallOverlay(
                     if (!moved && hypot(dx, dy) > slop) {
                         moved = true
                         view.isPressed = false
+                        stopHolding()
                     }
                     if (moved) {
                         params.x = startX + dx.roundToInt()
@@ -357,10 +378,12 @@ class CallOverlay(
                     }
                 }
                 MotionEvent.ACTION_UP -> {
+                    stopHolding()
                     view.isPressed = false
-                    if (moved) snap(window) else view.performClick()
+                    if (moved) snap(window) else if (!held) view.performClick()
                 }
                 MotionEvent.ACTION_CANCEL -> {
+                    stopHolding()
                     view.isPressed = false
                     if (moved) snap(window)
                 }

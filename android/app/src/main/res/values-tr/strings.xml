@@ -118,6 +118,8 @@
     <string name="settings_face_down_body">Telefon yüzüstüyken gelen ya da çalarken yüzüstü çevrilen arama zil çalmadan, ekran açık bekler.</string>
     <string name="flip_reject_title">Yüzü kapatınca reddet</string>
     <string name="flip_reject_body">Arama çalarken telefonu yüzüstü çevirince arama reddedilir. Telefon zaten yüzüstüyken gelen arama reddedilmez.</string>
+    <string name="silent_in_use_title">Telefon kullanılırken sessiz çal</string>
+    <string name="silent_in_use_body">Telefon açık ve kilidi açıkken gelen arama zil çalmadan ve titremeden gelir; arama hapı ya da bildirim yine görünür. Bu ayar kapalı olsa da çalan hapa uzun basınca zil susar.</string>
     <string name="settings_overlay_title">Uygulamaların üzerinde göster</string>
     <string name="settings_overlay_body">Arama sürerken başka bir uygulamadayken aramaya dönme, hoparlör ve kapatma düğmesi görünür.</string>
     <string name="settings_pill_title">Arama hapı</string>
@@ -317,6 +319,12 @@
     <string name="stats_month">Aylık</string>
     <string name="stats_year">Yıllık</string>
     <string name="stats_all">Hepsi</string>
+    <string name="icon_title">Uygulama simgesi</string>
+    <string name="icon_body">Ana ekrandaki simge. Yenisinin görünmesi birkaç saniye sürebilir.</string>
+    <string name="icon_glass">Cam</string>
+    <string name="icon_clear">Beyaz</string>
+    <string name="icon_green">Yeşil</string>
+    <string name="icon_blue">Mavi</string>
     <string name="stats_total">Toplam konuşma</string>
     <string name="stats_people">Konuşulan kişi</string>
     <string name="stats_calls">Arama</string>

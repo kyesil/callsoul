@@ -208,7 +208,8 @@ private fun RevealOverlay(reveal: Reveal, onFinished: () -> Unit) {
 }
 
 @Composable
-private fun CallerHeader(status: String, caller: CallerInfo, showPhoto: Boolean) {
+/** [status] is the line above the caller (the talk time in a call); a ringing call has none and a bigger photo instead. */
+private fun CallerHeader(status: String?, caller: CallerInfo, showPhoto: Boolean) {
     // The caller rises gently into place when the screen opens.
     val motion = LocalMotion.current
     val appear = remember { Animatable(if (motion) 0f else 1f) }
@@ -225,10 +226,12 @@ private fun CallerHeader(status: String, caller: CallerInfo, showPhoto: Boolean)
             },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(status, color = Soft, fontSize = 16.sp)
-        Spacer(Modifier.height(24.dp))
+        if (status != null) {
+            Text(status, color = Soft, fontSize = 16.sp)
+            Spacer(Modifier.height(24.dp))
+        }
         if (showPhoto && caller.photoUri != null) {
-            Avatar(caller.title, caller.photoUri, 120.dp)
+            Avatar(caller.title, caller.photoUri, if (status == null) 168.dp else 120.dp)
             Spacer(Modifier.height(16.dp))
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -278,7 +281,7 @@ fun SpamBadge(caller: CallerInfo) {
 private fun IncomingCall(caller: CallerInfo, onAnswered: (Offset) -> Unit) {
     val context = LocalContext.current
     Column(Modifier.fillMaxSize()) {
-        CallerHeader(stringResource(R.string.call_incoming), caller, showPhoto = true)
+        CallerHeader(null, caller, showPhoto = true)
         CallerExtras(caller, Modifier.weight(1f).fillMaxWidth())
         caller.lastCallAt?.let { last ->
             Column(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {

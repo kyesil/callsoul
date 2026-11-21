@@ -118,6 +118,8 @@
     <string name="settings_face_down_body">Si llega una llamada con el teléfono boca abajo, o lo pones boca abajo mientras suena, entra sin sonido y la pantalla sigue encendida.</string>
     <string name="flip_reject_title">Boca abajo para rechazar</string>
     <string name="flip_reject_body">Poner el teléfono boca abajo mientras suena una llamada la rechaza. Una llamada que llega con el teléfono ya boca abajo no se rechaza.</string>
+    <string name="silent_in_use_title">Silencio mientras usas el teléfono</string>
+    <string name="silent_in_use_body">Una llamada que entra con el teléfono desbloqueado en tu mano suena sin sonido ni vibración; la píldora de llamada o el aviso la siguen mostrando. Sea cual sea este ajuste, mantener pulsada la píldora que suena también la silencia.</string>
     <string name="settings_overlay_title">Mostrar sobre otras apps</string>
     <string name="settings_overlay_body">Durante una llamada, aparecen sobre otras apps botones para volver a ella, cambiar el altavoz o colgar.</string>
     <string name="settings_pill_title">Píldora de llamada</string>
@@ -263,6 +265,12 @@
     <string name="stats_month">Mensual</string>
     <string name="stats_year">Anual</string>
     <string name="stats_all">Todo</string>
+    <string name="icon_title">Icono de la app</string>
+    <string name="icon_body">El icono de la pantalla de inicio. El nuevo puede tardar unos segundos en aparecer.</string>
+    <string name="icon_glass">Cristal</string>
+    <string name="icon_clear">Blanco</string>
+    <string name="icon_green">Verde</string>
+    <string name="icon_blue">Azul</string>
     <string name="stats_total">Tiempo total de conversación</string>
     <string name="stats_people">Personas con las que hablaste</string>
     <string name="stats_calls">Llamadas</string>

@@ -24,6 +24,8 @@ data class CallNotificationContent(
     /** Button labels for Android 10 and 11, which have no call notification style. */
     val answerLabel: String = "",
     val hangUpLabel: String = "",
+    /** The caller's contact photo, shown in the notification instead of their initial. */
+    val photo: Icon? = null,
 )
 
 /**
@@ -57,8 +59,9 @@ object CallNotifications {
             .setCategory(Notification.CATEGORY_CALL)
             .setOngoing(true)
             .setOnlyAlertOnce(!content.incoming)
+        content.photo?.let(builder::setLargeIcon)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val person = Person.Builder().setName(content.title).setImportant(true).build()
+            val person = Person.Builder().setName(content.title).setImportant(true).apply { content.photo?.let(::setIcon) }.build()
             builder.setStyle(
                 if (content.incoming) {
                     Notification.CallStyle.forIncomingCall(person, content.hangUp, content.answer)

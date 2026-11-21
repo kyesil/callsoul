@@ -118,6 +118,8 @@
     <string name="settings_face_down_body">Una chiamata che arriva mentre il telefono è a faccia in giù, o che capovolgi mentre squilla, squilla senza suono e lo schermo resta acceso.</string>
     <string name="flip_reject_title">Capovolgi per rifiutare</string>
     <string name="flip_reject_body">Capovolgere il telefono mentre squilla una chiamata la rifiuta. Una chiamata che arriva con il telefono già capovolto non viene rifiutata.</string>
+    <string name="silent_in_use_title">Silenzioso mentre usi il telefono</string>
+    <string name="silent_in_use_body">Una chiamata che arriva con il telefono sbloccato in mano squilla senza suono né vibrazione; la pillola di chiamata o il popup la mostrano comunque. Qualunque sia questa impostazione, tenere premuta la pillola che squilla la silenzia.</string>
     <string name="settings_overlay_title">Mostra sopra altre app</string>
     <string name="settings_overlay_body">Durante una chiamata, i pulsanti per tornarci, attivare l\'altoparlante o riagganciare compaiono sopra le altre app.</string>
     <string name="settings_pill_title">Pillola di chiamata</string>
@@ -263,6 +265,12 @@
     <string name="stats_month">Mensile</string>
     <string name="stats_year">Annuale</string>
     <string name="stats_all">Tutto</string>
+    <string name="icon_title">Icona dell\'app</string>
+    <string name="icon_body">L\'icona nella schermata Home. La nuova può impiegare qualche secondo ad apparire.</string>
+    <string name="icon_glass">Vetro</string>
+    <string name="icon_clear">Bianco</string>
+    <string name="icon_green">Verde</string>
+    <string name="icon_blue">Blu</string>
     <string name="stats_total">Conversazione totale</string>
     <string name="stats_people">Persone sentite</string>
     <string name="stats_calls">Chiamate</string>

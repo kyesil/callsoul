@@ -118,6 +118,8 @@
     <string name="settings_face_down_body">Panggilan yang masuk saat ponsel telungkup, atau yang Anda telungkupkan saat berdering, berdering tanpa suara dan layar tetap menyala.</string>
     <string name="flip_reject_title">Telungkupkan untuk menolak</string>
     <string name="flip_reject_body">Menelungkupkan ponsel saat panggilan berdering akan menolaknya. Panggilan yang masuk saat ponsel sudah telungkup tidak ditolak.</string>
+    <string name="silent_in_use_title">Senyap saat ponsel dipakai</string>
+    <string name="silent_in_use_body">Panggilan yang masuk saat ponsel tidak terkunci dan sedang dipakai berdering tanpa suara dan getar; pil panggilan atau pop-up tetap menampilkannya. Apa pun pengaturan ini, menahan pil yang berdering juga membuatnya senyap.</string>
     <string name="settings_overlay_title">Tampilkan di atas aplikasi lain</string>
     <string name="settings_overlay_body">Selama panggilan, tombol untuk kembali ke panggilan, mengganti speaker, atau menutup telepon tampil di atas aplikasi lain.</string>
     <string name="settings_pill_title">Pil panggilan</string>
@@ -263,6 +265,12 @@
     <string name="stats_month">Bulanan</string>
     <string name="stats_year">Tahunan</string>
     <string name="stats_all">Semua</string>
+    <string name="icon_title">Ikon aplikasi</string>
+    <string name="icon_body">Ikon di layar utama. Ikon baru mungkin perlu beberapa detik untuk muncul.</string>
+    <string name="icon_glass">Kaca</string>
+    <string name="icon_clear">Putih</string>
+    <string name="icon_green">Hijau</string>
+    <string name="icon_blue">Biru</string>
     <string name="stats_total">Total waktu bicara</string>
     <string name="stats_people">Orang yang dihubungi</string>
     <string name="stats_calls">Panggilan</string>

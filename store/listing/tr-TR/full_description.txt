@@ -1,4 +1,7 @@
-Better Call Soul, telefon ve rehberi tek uygulamada birleştiren, sade ve hızlı bir arama uygulaması. Reklam yok, gereksiz ekran yok. Büyük, sakin ekranları ve tek elle kullanıma uygun düzeniyle aradığını hemen bulursun, gelen aramayı bir bakışta tanırsın.
+Reklamsız ve açık kaynak. Better Call Soul, telefon ve rehberi tek uygulamada birleştiren, sade ve hızlı bir arama uygulaması. Büyük, sakin ekranları ve tek elle kullanıma uygun düzeniyle aradığını hemen bulursun, gelen aramayı bir bakışta tanırsın.
+
+WHATSAPP ARAMALARI DA ARAMA GEÇMİŞİNDE
+WhatsApp'tan gelen, giden ve cevapsız aramalar telefon aramalarının yanında aynı listede görünür: sesli mi görüntülü mü, ne kadar sürdüğü yazar, kişinin geçmişinde de durur. Konuşurken arama hapı WhatsApp aramalarında da gelir. İsteğe bağlıdır, bildirim erişimiyle çalışır; kayıtlar telefonda kalır.
 
 REHBERİ ÇÖPLÜĞE ÇEVİRME
 Kargocu, site yönetimi, tek seferlik usta... Bu numaraları rehbere kaydetmene gerek yok. Rehberinde olmayan numaralara kendi etiketini ver, bir dahaki aramada o adla görünsün. Etiketler rehbere eklenmez, listen temiz kalır.
@@ -25,7 +28,6 @@ SPAM'E KARŞI
 AYARLARDA NELER VAR
 • Yüzü kapalıyken sessiz çal: telefon ters duruyorsa zil çalmaz. Çalarken ters çevirince de susar.
 • Mesajla reddet: hazır SMS listeni kendin yaz.
-• WhatsApp aramalarını son aramalarda gör: simge sesli mi görüntülü mü olduğunu söyler. İsteğe bağlıdır, bildirim erişimi ister.
 • Kaydırmanın ekran kenarına uzaklığı: Android'in geri hareketiyle çakışmaz.
 • Arama hapının görünümü, animasyonlar ve Türkçeden Endonezceye on dil.
 
@@ -47,9 +49,8 @@ REHBER
 • Kaydederken Google hesapların arasından ya da telefondan seç; kişiyi hesaplar arasında taşı.
 • Çoklu seçip sil; silinenler 30 gün geri dönüşüm kutusunda bekler.
 • Var olan kişiye numara ekle, kişiyi kartvizit olarak paylaş.
-• Kartvizit QR kodunu tara, bilgiler yeni kişi ekranına dolsun.
 
-GİZLİLİK
-Rehberin ve arama geçmişin telefonunda kalır. Bulut spam sorgusu yalnızca rehberinde olmayan numaralar için yapılır ve kapatılabilir. Ayrıntılar gizlilik politikasında.
+GİZLİLİK VE AÇIK KAYNAK
+Rehberin ve arama geçmişin telefonunda kalır. Bulut spam sorgusu yalnızca rehberinde olmayan numaralar için yapılır ve kapatılabilir. Ayrıntılar gizlilik politikasında. Reklam, takip kodu ya da ücretli sürüm yok. Kaynak kodu GPL-3.0 lisansıyla açık: github.com/kyesil/callsoul
 
 Better Call Soul'u kullanmak için varsayılan telefon uygulaması yapman gerekir.

@@ -12,17 +12,17 @@ NOTES = os.path.abspath(os.path.join(HERE, "..", "release-notes"))
 
 TITLE = "Better Call Soul"
 SHORT = {
-    "tr-TR": "Telefon ve rehber bir arada: etiketler, spam uyarısı, kaydırarak arama.",
-    "en-US": "Phone and contacts in one: labels, spam warnings and swipe to call.",
-    "ar": "الهاتف وجهات الاتصال معًا: تسميات وتحذير من المزعج واتصال بالسحب.",
-    "ru-RU": "Звонилка и контакты вместе: метки, антиспам и звонок смахиванием.",
-    "de-DE": "Telefon und Kontakte in einem: Labels, Spam-Warnungen und Wischen zum Anrufen.",
-    "es-ES": "Teléfono y contactos en uno: etiquetas, avisos de spam y desliza para llamar.",
-    "es-419": "Teléfono y contactos en uno: etiquetas, avisos de spam y desliza para llamar.",
-    "fr-FR": "Téléphone et contacts réunis : libellés, alertes spam et balayage pour appeler.",
-    "it-IT": "Telefono e contatti in uno: etichette, avvisi di spam e scorri per chiamare.",
-    "pt-BR": "Telefone e contatos juntos: marcadores, alertas de spam e deslize para ligar.",
-    "id": "Telepon dan kontak jadi satu: label, peringatan spam, dan geser untuk memanggil.",
+    "tr-TR": "Reklamsız, açık kaynak telefon: WhatsApp aramaları da arama geçmişinde.",
+    "en-US": "Ad-free, open-source dialer: WhatsApp calls show up in your call log too.",
+    "ar": "بلا إعلانات ومفتوح المصدر: مكالمات واتساب تظهر في سجل المكالمات أيضًا.",
+    "ru-RU": "Без рекламы, с открытым кодом: звонки WhatsApp тоже в журнале вызовов.",
+    "de-DE": "Werbefrei und Open Source: auch WhatsApp-Anrufe in der Anrufliste.",
+    "es-ES": "Sin anuncios y de código abierto: tus llamadas de WhatsApp en el registro.",
+    "es-419": "Sin anuncios y de código abierto: tus llamadas de WhatsApp en el registro.",
+    "fr-FR": "Sans pub et open source : vos appels WhatsApp aussi dans le journal d'appels.",
+    "it-IT": "Senza pubblicità e open source: anche le chiamate WhatsApp nel registro.",
+    "pt-BR": "Sem anúncios e de código aberto: chamadas do WhatsApp no seu histórico.",
+    "id": "Tanpa iklan, sumber terbuka: panggilan WhatsApp juga masuk riwayat panggilan.",
 }
 RELEASE = {
     "tr-TR": "İlk sürüm: telefon ve rehber bir arada, kaydırarak arama ve cevaplama, numara etiketleri, bulut spam uyarısı, arama hapı, on dil.",
