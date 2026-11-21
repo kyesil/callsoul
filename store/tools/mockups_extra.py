@@ -20,34 +20,36 @@ TEXT = {
     "tr": {
         "tagline": "Reklamsız · Açık kaynak",
         "wa": "WhatsApp aramaları da burada",
-        "intro": "Reklamsız ve açık kaynak telefon",
+        "intro": "Reklamsız ve açık kaynak",
         "points": ["Reklam yok, takip yok", "Açık kaynak, GPL-3.0", "WhatsApp aramaları arama geçmişinde"],
         "whatsapp": "WhatsApp aramaları da arama geçmişinde",
         "wa_labels": ["Görüntülü", "Sesli", "Cevapsız"],
         "ring": "Ne kadar çaldığını gör: bildirimde ve geçmişte",
         "ring_note": "Kişinin fotoğrafı ve tek dokunuşla geri arama bildirimde",
-        "icons": "Yeni: dört simgeden birini seç",
+        "icons": "Dört simgeden birini seç",
         "call": "Arayan hakkında her şey bir bakışta",
         "stats": "İstatistikler: haftalık, aylık, yıllık ve hepsi",
         "pill": "Arama hapı işini bölmez",
         "pill_labels": ["Gelen arama", "Konuşmada"],
         "t9": "T9 ve numara arama",
+        "spam": "Spam uyarısı ve engelleme",
     },
     "en": {
         "tagline": "Ad-free · Open source",
         "wa": "WhatsApp calls are here too",
-        "intro": "An ad-free, open-source dialer",
+        "intro": "Ad-free and open source",
         "points": ["No ads, no trackers", "Open source, GPL-3.0", "WhatsApp calls in your call log"],
         "whatsapp": "WhatsApp calls in your call log too",
         "wa_labels": ["Video", "Voice", "Missed"],
         "ring": "See how long it rang, in the notification and the log",
         "ring_note": "The caller's photo and one-tap call back, right in the notification",
-        "icons": "New: pick one of four icons",
+        "icons": "Pick one of four icons",
         "call": "Everything about the caller at a glance",
         "stats": "Statistics: weekly, monthly, yearly and all",
         "pill": "The call pill never gets in your way",
         "pill_labels": ["Incoming", "In a call"],
         "t9": "T9 and number search",
+        "spam": "Spam alerts and blocking",
     },
 }
 
@@ -244,6 +246,39 @@ def pill(lang):
     save(canvas, lang, "2-pill")
 
 
+def stacked(raw, boxes):
+    """Pieces of one screen, one under the other: skips a line the picture doesn't need."""
+    parts = [raw.convert("RGB").crop(box) for box in boxes]
+    out = Image.new("RGB", (parts[0].width, sum(p.height for p in parts)))
+    y = 0
+    for part in parts:
+        out.paste(part, (0, y))
+        y += part.height
+    return out
+
+
+def spam(lang):
+    """The warning on the incoming screen, then the three ways to turn calls away, with their lists."""
+    t = TEXT[lang]
+    canvas = glass_background(W, H).convert("RGBA")
+    y = caption(canvas, t["spam"]) + 40
+    shot = lambda name: Image.open(os.path.join(RAW, lang, name + ".png"))
+    incoming, top, bottom = shot("30-spam-incoming"), shot("31-spam-top"), shot("31-spam-bottom")
+    # The country card without its "your country code" line: the emulator's SIM is American.
+    # The English capture stopped scrolling a few pixels lower down the page.
+    dy = {"en": 21}.get(lang, 0)
+    abroad = stacked(bottom, [(26, 836 + dy, 1054, 1182 + dy), (26, 1252 + dy, 1054, 1450 + dy)])
+    x, width, gap = 120, 840, 22
+    for raw, box in (
+        (incoming, (0, 190, 1080, 440)),
+        (top, (26, 1110, 1054, 1604)),
+        (abroad, (0, 0) + abroad.size),
+        (bottom, (26, 1620 + dy, 1054, 2160 + dy)),
+    ):
+        y = tile(canvas, raw, box, x, y, width) + gap
+    save(canvas, lang, "3-spam")
+
+
 def two_phones(lang, name, caption_text, first, second, height=1320):
     canvas = glass_background(W, H).convert("RGBA")
     caption(canvas, caption_text)
@@ -274,5 +309,6 @@ if __name__ == "__main__":
         ring(lang)
         pill(lang)
         call_screens(lang)
+        spam(lang)
         two_phones(lang, "8-stats", TEXT[lang]["stats"], "27-stats", "27-stats-list")
         print(lang)

@@ -1,5 +1,2 @@
-• Yeni cam simge; Ayarlar'dan cam, beyaz, yeşil ya da mavi seçilebilir.
-• Telefon kullanılırken sessiz çal: kilidi açık telefona gelen arama zilsiz gelir. Çalan arama hapına uzun basınca da zil susar.
-• Gelen aramada kişinin fotoğrafı büyük ve bildirimde de görünür.
-• Tuş takımında en çok aradıkların üstte; 1–9 tuşlarına uzun basınca hızlı arama.
-• İstatistiklerde "Hepsi" sekmesi ve ortalama konuşma süreleri.
+• Cam simgenin kenarındaki parıltı artık ana ekranda da görünüyor; simge telefonun yuvarlak kare şekline oturuyor.
+• Diğer simge seçenekleri de ana ekrana tam sığıyor.

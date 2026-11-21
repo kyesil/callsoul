@@ -1,5 +1,2 @@
-• A new glass icon; pick glass, white, green or blue in Settings.
-• Silent while the phone is in use: a call to an unlocked phone rings without sound. Holding the ringing call pill silences it too.
-• The caller's photo is bigger on the incoming screen and shows in the notification.
-• The people you call most come first on the keypad; hold 1–9 for speed dial.
-• Statistics get an "All" tab and average talk times.
+• The glass icon's shining rim now shows on the home screen too; the icon fits the phone's rounded square shape.
+• The other icon choices fit the home screen properly as well.
