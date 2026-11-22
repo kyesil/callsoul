@@ -77,6 +77,7 @@
     <string name="call_end">Akhiri panggilan</string>
     <string name="call_add">Tambah panggilan</string>
     <string name="call_bluetooth">Bluetooth</string>
+    <string name="call_route_phone">Ponsel (speaker telinga)</string>
     <string name="call_merge">Gabungkan</string>
     <string name="call_keypad_hide">Sembunyikan keypad</string>
     <string name="call_back_to_call">Kembali ke panggilan</string>

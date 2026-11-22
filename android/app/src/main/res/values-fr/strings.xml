@@ -77,6 +77,7 @@
     <string name="call_end">Raccrocher</string>
     <string name="call_add">Ajouter un appel</string>
     <string name="call_bluetooth">Bluetooth</string>
+    <string name="call_route_phone">Téléphone (écouteur)</string>
     <string name="call_merge">Fusionner</string>
     <string name="call_keypad_hide">Masquer le clavier</string>
     <string name="call_back_to_call">Retour à l\'appel</string>

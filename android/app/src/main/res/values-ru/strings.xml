@@ -77,6 +77,7 @@
     <string name="call_end">Завершить вызов</string>
     <string name="call_add">Добавить вызов</string>
     <string name="call_bluetooth">Bluetooth</string>
+    <string name="call_route_phone">Телефон (у уха)</string>
     <string name="call_merge">Объединить</string>
     <string name="call_keypad_hide">Скрыть клавиатуру</string>
     <string name="call_back_to_call">Вернуться к звонку</string>

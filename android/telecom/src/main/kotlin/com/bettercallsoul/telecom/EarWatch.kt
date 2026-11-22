@@ -11,15 +11,11 @@ import java.util.Locale
 import com.bettercallsoul.diag.DebugLog
 
 /**
- * Watches the proximity sensor alongside the system's proximity lock, which some phones don't honour
- * in every position. The moment the sensor says near, the screen is covered in black and stops taking
- * touches, however the phone is held; far again, it comes back. Each change is logged with how the
- * phone is held and whether the system turned the display off, so a phone that misses it can be told apart.
+ * Watches the proximity sensor alongside the system's proximity lock, for the log only: each change is
+ * written with how the phone is held and whether the system turned the display off, so a phone whose
+ * screen stays on at the ear can be told apart.
  */
-internal class EarWatch(
-    context: Context,
-    private val onNear: (Boolean) -> Unit,
-) : SensorEventListener {
+internal class EarWatch(context: Context) : SensorEventListener {
     private val sensors = context.getSystemService(SensorManager::class.java)
     private val displays = context.getSystemService(DisplayManager::class.java)
     private val proximity: Sensor? = sensors.getDefaultSensor(Sensor.TYPE_PROXIMITY)
@@ -46,7 +42,6 @@ internal class EarWatch(
         running = false
         sensors.unregisterListener(this)
         near = null
-        onNear(false)
     }
 
     override fun onSensorChanged(event: SensorEvent) {
@@ -67,7 +62,6 @@ internal class EarWatch(
             else -> "dozing"
         }
         DebugLog.i(TAG, "proximity ${if (now) "near" else "far"} ($distance of $range cm, ${held()}, display $display)")
-        onNear(now)
     }
 
     /** How the phone is held, from gravity: upright, sideways or flat. Only for the log. */

@@ -151,15 +151,6 @@ object CallManager {
     private val _ended = MutableStateFlow<EndedCall?>(null)
     val ended: StateFlow<EndedCall?> = _ended.asStateFlow()
 
-    private val _earBlank = MutableStateFlow(false)
-
-    /** The phone is at the ear: the call screen goes dark itself, whatever the system does with the display. */
-    val earBlank: StateFlow<Boolean> = _earBlank.asStateFlow()
-
-    internal fun setEarBlank(blank: Boolean) {
-        _earBlank.value = blank
-    }
-
     fun init(
         directory: CallerDirectory,
         silentWhenFaceDown: () -> Boolean,

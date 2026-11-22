@@ -78,6 +78,7 @@
     <string name="call_end">End call</string>
     <string name="call_add">Add call</string>
     <string name="call_bluetooth">Bluetooth</string>
+    <string name="call_route_phone">Phone (earpiece)</string>
     <string name="call_merge">Merge</string>
     <string name="call_keypad_hide">Hide keypad</string>
     <string name="call_back_to_call">Back to call</string>

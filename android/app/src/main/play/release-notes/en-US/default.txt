@@ -1,2 +1,2 @@
-• The glass icon's shining rim now shows on the home screen too; the icon fits the phone's rounded square shape.
-• The other icon choices fit the home screen properly as well.
+• The screen turns off at your ear even while a watch or computer is linked over Bluetooth and the sound comes from the earpiece.
+• In a call, hold the Bluetooth button for the list of devices: switch between them or back to the earpiece.

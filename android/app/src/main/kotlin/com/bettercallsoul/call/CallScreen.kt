@@ -59,6 +59,9 @@ import android.telecom.PhoneAccountHandle
 import android.telecom.TelecomManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -607,6 +610,8 @@ private fun BoxScope.OngoingCall(state: CallUiState) {
                     onBluetooth = {
                         if (!audio.onBluetooth && audio.bluetoothDevices.size > 1) pickBluetooth = true else CallManager.toggleBluetooth()
                     },
+                    // Held: the list, wherever the sound is now, to move between devices or back to the phone.
+                    onPickBluetooth = { pickBluetooth = true },
                     onKeypad = { showKeypad = true },
                 )
             }
@@ -632,18 +637,30 @@ private fun BoxScope.OngoingCall(state: CallUiState) {
             title = { Text(stringResource(R.string.call_bluetooth)) },
             text = {
                 Column {
-                    audio.bluetoothDevices.forEach { device ->
-                        Text(
-                            device.name,
-                            fontSize = 17.sp,
+                    @Composable
+                    fun Choice(name: String, current: Boolean, pick: () -> Unit) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    CallManager.selectBluetooth(device)
+                                    pick()
                                     pickBluetooth = false
                                 }
                                 .padding(vertical = 12.dp),
-                        )
+                        ) {
+                            Text(name, fontSize = 17.sp, modifier = Modifier.weight(1f))
+                            if (current) Icon(Icons.Filled.Check, null, Modifier.size(20.dp))
+                        }
+                    }
+                    audio.bluetoothDevices.forEach { device ->
+                        Choice(device.name, audio.onBluetooth && device.name == audio.bluetoothName) {
+                            CallManager.selectBluetooth(device)
+                        }
+                    }
+                    // Back to the phone itself; only offered while the sound is on a device.
+                    if (audio.onBluetooth) {
+                        Choice(stringResource(R.string.call_route_phone), current = false) { CallManager.toggleBluetooth() }
                     }
                 }
             },
@@ -755,7 +772,13 @@ private fun TypedDigits(typed: String) {
 }
 
 @Composable
-private fun ControlGrid(state: CallUiState, audio: AudioUiState, onBluetooth: () -> Unit, onKeypad: () -> Unit) {
+private fun ControlGrid(
+    state: CallUiState,
+    audio: AudioUiState,
+    onBluetooth: () -> Unit,
+    onPickBluetooth: () -> Unit,
+    onKeypad: () -> Unit,
+) {
     val context = LocalContext.current
     val onHold = state.phase == CallPhase.OnHold
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -788,6 +811,7 @@ private fun ControlGrid(state: CallUiState, audio: AudioUiState, onBluetooth: ()
                 detail = audio.bluetoothName,
                 active = audio.onBluetooth,
                 enabled = audio.bluetoothDevices.isNotEmpty(),
+                onLongClick = onPickBluetooth,
                 onClick = onBluetooth,
             )
         }
@@ -812,6 +836,7 @@ private fun Control(
     detail: String?,
     active: Boolean,
     enabled: Boolean = true,
+    onLongClick: (() -> Unit)? = null,
     onClick: () -> Unit,
 ) {
     Column(
@@ -820,12 +845,15 @@ private fun Control(
     ) {
         val fill by animateColorAsState(if (active) Color.White else Color.Transparent, motionSpec(tween(220)), label = "controlFill")
         val ink by animateColorAsState(if (active) Color.Black else Color.White, motionSpec(tween(220)), label = "controlInk")
+        val shape = RoundedCornerShape(18.dp)
         Surface(
-            onClick = onClick,
-            enabled = enabled,
-            shape = RoundedCornerShape(18.dp),
+            shape = shape,
             color = fill,
-            modifier = Modifier.size(56.dp).stretchy(),
+            modifier = Modifier
+                .size(56.dp)
+                .stretchy()
+                .clip(shape)
+                .combinedClickable(enabled = enabled, role = Role.Button, onLongClick = onLongClick, onClick = onClick),
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(icon, label, tint = ink, modifier = Modifier.size(28.dp))

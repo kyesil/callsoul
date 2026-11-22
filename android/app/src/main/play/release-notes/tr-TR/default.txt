@@ -1,2 +1,2 @@
-• Cam simgenin kenarındaki parıltı artık ana ekranda da görünüyor; simge telefonun yuvarlak kare şekline oturuyor.
-• Diğer simge seçenekleri de ana ekrana tam sığıyor.
+• Saat ya da bilgisayar Bluetooth ile bağlıyken ses ahizeden gelse de ekran kulakta kapanıyor.
+• Konuşmada Bluetooth düğmesine uzun basınca cihaz listesi açılıyor: cihazlar arasında ya da ahizeye geçilebiliyor.

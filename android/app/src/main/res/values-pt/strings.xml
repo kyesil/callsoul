@@ -77,6 +77,7 @@
     <string name="call_end">Encerrar chamada</string>
     <string name="call_add">Adicionar chamada</string>
     <string name="call_bluetooth">Bluetooth</string>
+    <string name="call_route_phone">Telefone (auricular)</string>
     <string name="call_merge">Mesclar</string>
     <string name="call_keypad_hide">Ocultar teclado</string>
     <string name="call_back_to_call">Voltar à chamada</string>

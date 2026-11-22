@@ -94,10 +94,11 @@ class BcsInCallService : InCallService() {
             // answered from the pill or the notification while another app is open. It stays held with
             // the keypad open too: the screen is only dark at the ear, and a menu's digits are typed
             // and then talked over with the phone back at the ear. On the speaker as well, so a phone
-            // held to the face or put in a pocket doesn't take touches.
+            // held to the face or put in a pocket doesn't take touches. And on Bluetooth: Telecom can name a
+            // watch or a linked computer as the route while the sound still comes from the earpiece, and
+            // the phone goes to the ear then. With real headphones the sensor sees nothing, so no harm.
             combine(CallManager.call, CallManager.audio) { call, audio ->
-                call != null && call.phase in EAR_PHASES && audio.routeKnown &&
-                    (audio.routeType == AudioRouteType.Earpiece || audio.routeType == AudioRouteType.Speaker)
+                call != null && call.phase in EAR_PHASES && audio.routeKnown
             }.distinctUntilChanged().collect(::holdProximity)
         }
     }
@@ -241,13 +242,8 @@ class BcsInCallService : InCallService() {
             ?.apply { setReferenceCounted(false) }
     }
 
-    private val earCover by lazy { EarCover(this) }
-    private val ear by lazy {
-        EarWatch(this) { near ->
-            CallManager.setEarBlank(near)
-            if (near) earCover.show() else earCover.hide()
-        }
-    }
+    // Only writes to the log how the sensor and the display behave at the ear; the system's lock does the rest.
+    private val ear by lazy { EarWatch(this) }
 
     /** Screen off near the ear; on release, wait until the phone leaves the ear before lighting up. */
     private fun holdProximity(near: Boolean) {
