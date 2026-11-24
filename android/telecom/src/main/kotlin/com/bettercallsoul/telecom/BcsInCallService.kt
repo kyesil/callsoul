@@ -30,6 +30,15 @@ import kotlinx.coroutines.launch
 /** Telecom binds this service for every call once the app holds the dialer role. */
 class BcsInCallService : InCallService() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    /**
+     * One background thread, in order, for what talks to the system and draws nothing: the call
+     * notification, the proximity lock and the sensors. Each is a binder call into the system, and
+     * together they took about a tenth of a second on the main thread just as a call was answered,
+     * which froze the call screen's opening animation halfway.
+     */
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    private val systemWork = Dispatchers.Default.limitedParallelism(1)
     private val flip by lazy {
         FlipDetector(
             context = this,
@@ -64,12 +73,12 @@ class BcsInCallService : InCallService() {
         super.onCreate()
         CallManager.attach(this)
         CallManager.phoneTurnedOver = flip::turnedOver
-        scope.launch {
+        scope.launch(systemWork) {
             CallManager.call.distinctUntilChanged { old, new ->
                 old?.phase == new?.phase && old?.caller == new?.caller && old?.connectedAt == new?.connectedAt
             }.collect(::updateNotification)
         }
-        scope.launch {
+        scope.launch(systemWork) {
             CallManager.call.map { it?.phase == CallPhase.Incoming }.distinctUntilChanged().collect { ringing ->
                 if (ringing) flip.start() else flip.stop()
             }
@@ -89,7 +98,7 @@ class BcsInCallService : InCallService() {
                 }
             }
         }
-        scope.launch {
+        scope.launch(systemWork) {
             // Held here rather than in the call screen, so the screen also goes dark for a call
             // answered from the pill or the notification while another app is open. It stays held with
             // the keypad open too: the screen is only dark at the ear, and a menu's digits are typed
@@ -246,6 +255,7 @@ class BcsInCallService : InCallService() {
     private val ear by lazy { EarWatch(this) }
 
     /** Screen off near the ear; on release, wait until the phone leaves the ear before lighting up. */
+    @Synchronized
     private fun holdProximity(near: Boolean) {
         if (near) ear.start() else ear.stop()
         val lock = proximity ?: return

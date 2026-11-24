@@ -1,2 +1,3 @@
+• Aramayı cevaplarken konuşma ekranına geçiş artık takılmadan, akıcı.
 • Saat ya da bilgisayar Bluetooth ile bağlıyken ses ahizeden gelse de ekran kulakta kapanıyor.
 • Konuşmada Bluetooth düğmesine uzun basınca cihaz listesi açılıyor: cihazlar arasında ya da ahizeye geçilebiliyor.

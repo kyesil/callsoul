@@ -1,2 +1,3 @@
+• Answering a call now slides into the call screen smoothly, without a stutter.
 • The screen turns off at your ear even while a watch or computer is linked over Bluetooth and the sound comes from the earpiece.
 • In a call, hold the Bluetooth button for the list of devices: switch between them or back to the earpiece.

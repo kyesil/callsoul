@@ -30,6 +30,7 @@ internal class FlipDetector(
      */
     fun turnedOver(): Boolean = SystemClock.elapsedRealtime() - awayAt < TURNED_MILLIS
 
+    @Synchronized
     fun start() {
         val sensor = sensors.getDefaultSensor(Sensor.TYPE_GRAVITY)
             ?: sensors.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -41,6 +42,7 @@ internal class FlipDetector(
         sensors.registerListener(this, sensor, SensorManager.SENSOR_DELAY_UI)
     }
 
+    @Synchronized
     fun stop() {
         sensors.unregisterListener(this)
     }
