@@ -3,4 +3,5 @@
     <string name="notification_answer">Annehmen</string>
     <string name="notification_decline">Ablehnen</string>
     <string name="notification_end">Auflegen</string>
+    <string name="notification_muted_caller">Klingelt lautlos</string>
 </resources>

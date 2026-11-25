@@ -95,6 +95,36 @@
     <string name="missed_call_back">Rappeler</string>
     <string name="missed_rang">A sonné %1$s</string>
     <string name="number_blocked">Bloqué</string>
+    <string name="remind_title">Me rappeler d\'appeler</string>
+    <string name="remind_note">Note (facultatif)</string>
+    <string name="remind_action">Rappeler</string>
+    <string name="remind_at">Rappel : %1$s</string>
+    <string name="remind_due">Rappel d\'appel</string>
+    <string name="remind_exact">Peut arriver en retard. Touchez pour autoriser l\'heure exacte.</string>
+    <string name="channel_reminders">Rappels d\'appel</string>
+    <string name="mute_quick">Couper 15 min</string>
+    <string name="remind_quick">Rappel dans 15 min</string>
+    <string name="mute_title">Couper la sonnerie</string>
+    <string name="mute_explain">Ses appels arrivent et s\'affichent toujours, sans sonner. Les appels WhatsApp aussi, si l\'appli peut lire les notifications.</string>
+    <string name="mute_custom">Durée</string>
+    <string name="mute_action">Couper</string>
+    <string name="mute_end">Rétablir la sonnerie</string>
+    <string name="muted_until">Silencieux jusqu\'à %1$s</string>
+    <plurals name="mute_minutes">
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
+    <plurals name="mute_hours">
+        <item quantity="one">%1$d heure</item>
+        <item quantity="other">%1$d heures</item>
+    </plurals>
+    <string name="mute_unit_minutes">Minutes</string>
+    <string name="mute_unit_hours">Heures</string>
+    <string name="mute_unit_days">Jours</string>
+    <plurals name="mute_days">
+        <item quantity="one">%1$d jour</item>
+        <item quantity="other">%1$d jours</item>
+    </plurals>
     <string name="spam_blocked">Signalé comme spam et bloqué</string>
     <string name="spam_warning">Spam probable</string>
     <string name="spam_question">Cet appel était-il du spam ?</string>

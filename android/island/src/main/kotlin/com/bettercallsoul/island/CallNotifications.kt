@@ -26,6 +26,8 @@ data class CallNotificationContent(
     val hangUpLabel: String = "",
     /** The caller's contact photo, shown in the notification instead of their initial. */
     val photo: Icon? = null,
+    /** Set for a caller muted for a while: said in the header, and the call never takes the full screen. */
+    val mutedNote: String? = null,
 )
 
 /**
@@ -55,7 +57,8 @@ object CallNotifications {
             .setSmallIcon(smallIcon)
             .setContentIntent(content.open)
             .setContentTitle(content.title)
-            .setContentText(content.subtitle)
+            // The call style shows no sub-text, so the muted note leads the text line.
+            .setContentText(listOfNotNull(content.mutedNote, content.subtitle).joinToString(" · ").ifEmpty { null })
             .setCategory(Notification.CATEGORY_CALL)
             .setOngoing(true)
             .setOnlyAlertOnce(!content.incoming)
@@ -75,7 +78,7 @@ object CallNotifications {
             if (content.incoming) builder.addAction(Notification.Action.Builder(icon, content.answerLabel, content.answer).build())
         }
 
-        if (content.incoming && !content.quiet) {
+        if (content.incoming && !content.quiet && content.mutedNote == null) {
             builder.setFullScreenIntent(content.open, true)
         }
         content.connectedAt?.let {

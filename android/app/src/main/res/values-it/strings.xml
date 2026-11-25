@@ -95,6 +95,36 @@
     <string name="missed_call_back">Richiama</string>
     <string name="missed_rang">Ha squillato %1$s</string>
     <string name="number_blocked">Bloccato</string>
+    <string name="remind_title">Ricordami di chiamare</string>
+    <string name="remind_note">Nota (facoltativa)</string>
+    <string name="remind_action">Ricorda</string>
+    <string name="remind_at">Promemoria: %1$s</string>
+    <string name="remind_due">Promemoria chiamata</string>
+    <string name="remind_exact">Può arrivare in ritardo. Tocca per consentire l\'ora esatta.</string>
+    <string name="channel_reminders">Promemoria chiamate</string>
+    <string name="mute_quick">Silenzia 15 min</string>
+    <string name="remind_quick">Ricorda tra 15 min</string>
+    <string name="mute_title">Silenzia chiamate</string>
+    <string name="mute_explain">Le sue chiamate arrivano e si vedono, ma senza squillare. Anche quelle WhatsApp, se l\'app può leggere le notifiche.</string>
+    <string name="mute_custom">Durata</string>
+    <string name="mute_action">Silenzia</string>
+    <string name="mute_end">Riattiva suoneria</string>
+    <string name="muted_until">Silenzioso fino alle %1$s</string>
+    <plurals name="mute_minutes">
+        <item quantity="one">%1$d minuto</item>
+        <item quantity="other">%1$d minuti</item>
+    </plurals>
+    <plurals name="mute_hours">
+        <item quantity="one">%1$d ora</item>
+        <item quantity="other">%1$d ore</item>
+    </plurals>
+    <string name="mute_unit_minutes">Minuti</string>
+    <string name="mute_unit_hours">Ore</string>
+    <string name="mute_unit_days">Giorni</string>
+    <plurals name="mute_days">
+        <item quantity="one">%1$d giorno</item>
+        <item quantity="other">%1$d giorni</item>
+    </plurals>
     <string name="spam_blocked">Segnalato come spam e bloccato</string>
     <string name="spam_warning">Possibile spam</string>
     <string name="spam_question">Questa chiamata era spam?</string>

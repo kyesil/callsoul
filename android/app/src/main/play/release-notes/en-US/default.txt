@@ -1,3 +1,3 @@
-• Answering a call now slides into the call screen smoothly, without a stutter.
-• The screen turns off at your ear even while a watch or computer is linked over Bluetooth and the sound comes from the earpiece.
-• In a call, hold the Bluetooth button for the list of devices: switch between them or back to the earpiece.
+• Mute one person's calls for a while: from their page, the bell on the incoming call screen, or the missed-call notification. WhatsApp calls too, with notification access.
+• Remind me to call: pick a time, add a note if you like, and call from the notification.
+• Two new buttons on missed calls: mute 15 min, remind in 15 min.

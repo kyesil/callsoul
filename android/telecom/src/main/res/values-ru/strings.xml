@@ -3,4 +3,5 @@
     <string name="notification_answer">Ответить</string>
     <string name="notification_decline">Отклонить</string>
     <string name="notification_end">Завершить вызов</string>
+    <string name="notification_muted_caller">Звонит без звука</string>
 </resources>

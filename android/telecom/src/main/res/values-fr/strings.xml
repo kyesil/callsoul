@@ -3,4 +3,5 @@
     <string name="notification_answer">Répondre</string>
     <string name="notification_decline">Refuser</string>
     <string name="notification_end">Raccrocher</string>
+    <string name="notification_muted_caller">Sonne en silencieux</string>
 </resources>

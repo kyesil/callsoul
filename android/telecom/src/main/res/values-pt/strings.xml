@@ -3,4 +3,5 @@
     <string name="notification_answer">Atender</string>
     <string name="notification_decline">Recusar</string>
     <string name="notification_end">Encerrar chamada</string>
+    <string name="notification_muted_caller">Toca em silêncio</string>
 </resources>

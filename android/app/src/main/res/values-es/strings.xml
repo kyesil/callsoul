@@ -95,6 +95,36 @@
     <string name="missed_call_back">Devolver llamada</string>
     <string name="missed_rang">Sonó %1$s</string>
     <string name="number_blocked">Bloqueado</string>
+    <string name="remind_title">Recordar llamar</string>
+    <string name="remind_note">Nota (opcional)</string>
+    <string name="remind_action">Recordar</string>
+    <string name="remind_at">Recordatorio: %1$s</string>
+    <string name="remind_due">Recordatorio de llamada</string>
+    <string name="remind_exact">Puede llegar tarde. Toca para permitir la hora exacta.</string>
+    <string name="channel_reminders">Recordatorios de llamada</string>
+    <string name="mute_quick">Silenciar 15 min</string>
+    <string name="remind_quick">Recordar en 15 min</string>
+    <string name="mute_title">Silenciar llamadas</string>
+    <string name="mute_explain">Sus llamadas siguen entrando y se muestran, pero sin sonar. También las de WhatsApp, si la app puede leer las notificaciones.</string>
+    <string name="mute_custom">Duración</string>
+    <string name="mute_action">Silenciar</string>
+    <string name="mute_end">Quitar silencio</string>
+    <string name="muted_until">Silenciado hasta las %1$s</string>
+    <plurals name="mute_minutes">
+        <item quantity="one">%1$d minuto</item>
+        <item quantity="other">%1$d minutos</item>
+    </plurals>
+    <plurals name="mute_hours">
+        <item quantity="one">%1$d hora</item>
+        <item quantity="other">%1$d horas</item>
+    </plurals>
+    <string name="mute_unit_minutes">Minutos</string>
+    <string name="mute_unit_hours">Horas</string>
+    <string name="mute_unit_days">Días</string>
+    <plurals name="mute_days">
+        <item quantity="one">%1$d día</item>
+        <item quantity="other">%1$d días</item>
+    </plurals>
     <string name="spam_blocked">Denunciado como spam y bloqueado</string>
     <string name="spam_warning">Posible spam</string>
     <string name="spam_question">¿Esta llamada era spam?</string>

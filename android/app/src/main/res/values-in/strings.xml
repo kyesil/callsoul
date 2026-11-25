@@ -95,6 +95,33 @@
     <string name="missed_call_back">Telepon balik</string>
     <string name="missed_rang">Berdering %1$s</string>
     <string name="number_blocked">Diblokir</string>
+    <string name="remind_title">Ingatkan untuk menelepon</string>
+    <string name="remind_note">Catatan (opsional)</string>
+    <string name="remind_action">Ingatkan</string>
+    <string name="remind_at">Pengingat: %1$s</string>
+    <string name="remind_due">Pengingat panggilan</string>
+    <string name="remind_exact">Bisa terlambat. Ketuk untuk mengizinkan waktu tepat.</string>
+    <string name="channel_reminders">Pengingat panggilan</string>
+    <string name="mute_quick">Bisukan 15 mnt</string>
+    <string name="remind_quick">Ingatkan 15 mnt lagi</string>
+    <string name="mute_title">Bisukan panggilan</string>
+    <string name="mute_explain">Panggilannya tetap masuk dan terlihat, tapi tanpa dering. Panggilan WhatsApp juga, jika aplikasi boleh membaca notifikasi.</string>
+    <string name="mute_custom">Durasi</string>
+    <string name="mute_action">Bisukan</string>
+    <string name="mute_end">Batalkan bisu</string>
+    <string name="muted_until">Dibisukan sampai %1$s</string>
+    <plurals name="mute_minutes">
+        <item quantity="other">%1$d menit</item>
+    </plurals>
+    <plurals name="mute_hours">
+        <item quantity="other">%1$d jam</item>
+    </plurals>
+    <string name="mute_unit_minutes">Menit</string>
+    <string name="mute_unit_hours">Jam</string>
+    <string name="mute_unit_days">Hari</string>
+    <plurals name="mute_days">
+        <item quantity="other">%1$d hari</item>
+    </plurals>
     <string name="spam_blocked">Dilaporkan sebagai spam dan diblokir</string>
     <string name="spam_warning">Kemungkinan spam</string>
     <string name="spam_question">Apakah panggilan ini spam?</string>

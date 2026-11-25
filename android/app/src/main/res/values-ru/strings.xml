@@ -95,6 +95,42 @@
     <string name="missed_call_back">Перезвонить</string>
     <string name="missed_rang">Звонил %1$s</string>
     <string name="number_blocked">Заблокирован</string>
+    <string name="remind_title">Напомнить позвонить</string>
+    <string name="remind_note">Заметка (необязательно)</string>
+    <string name="remind_action">Напомнить</string>
+    <string name="remind_at">Напоминание: %1$s</string>
+    <string name="remind_due">Напоминание о звонке</string>
+    <string name="remind_exact">Может прийти позже. Нажмите, чтобы разрешить точное время.</string>
+    <string name="channel_reminders">Напоминания о звонках</string>
+    <string name="mute_quick">Без звука 15 мин</string>
+    <string name="remind_quick">Напомнить через 15 мин</string>
+    <string name="mute_title">Без звука</string>
+    <string name="mute_explain">Звонки приходят и видны, но без звонка. И звонки WhatsApp, если приложению доступны уведомления.</string>
+    <string name="mute_custom">Длительность</string>
+    <string name="mute_action">Выключить звук</string>
+    <string name="mute_end">Включить звук</string>
+    <string name="muted_until">Без звука до %1$s</string>
+    <plurals name="mute_minutes">
+        <item quantity="one">%1$d минута</item>
+        <item quantity="few">%1$d минуты</item>
+        <item quantity="many">%1$d минут</item>
+        <item quantity="other">%1$d минуты</item>
+    </plurals>
+    <plurals name="mute_hours">
+        <item quantity="one">%1$d час</item>
+        <item quantity="few">%1$d часа</item>
+        <item quantity="many">%1$d часов</item>
+        <item quantity="other">%1$d часа</item>
+    </plurals>
+    <string name="mute_unit_minutes">Минуты</string>
+    <string name="mute_unit_hours">Часы</string>
+    <string name="mute_unit_days">Дни</string>
+    <plurals name="mute_days">
+        <item quantity="one">%1$d день</item>
+        <item quantity="few">%1$d дня</item>
+        <item quantity="many">%1$d дней</item>
+        <item quantity="other">%1$d дня</item>
+    </plurals>
     <string name="spam_blocked">Отмечен как спам и заблокирован</string>
     <string name="spam_warning">Возможно, спам</string>
     <string name="spam_question">Это был спам?</string>

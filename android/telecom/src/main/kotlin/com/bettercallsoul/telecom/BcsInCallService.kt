@@ -92,7 +92,7 @@ class BcsInCallService : InCallService() {
                     call == null -> overlay.hide()
                     call.phase == CallPhase.Incoming -> {
                         DebugLog.i(TAG, "pill: ringing")
-                        overlay.showRinging(call.caller.title)
+                        overlay.showRinging(call.caller.title, call.mutedCaller)
                     }
                     else -> overlay.show(call.connectedAt, shown.second)
                 }
@@ -132,7 +132,10 @@ class BcsInCallService : InCallService() {
         CallManager.onCallAdded(call)
         // On an unlocked phone a ringing call stays a pop-up, so whatever is on screen isn't interrupted.
         val ringing = call.currentState == Call.STATE_RINGING || call.currentState == Call.STATE_SIMULATED_RINGING
-        DebugLog.i(TAG, "call screen: ${if (!ringing || !screenInUse()) "opened" else "pop-up only (phone in use)"}")
+        // A caller muted for a while only gets the notification, on the lock screen too.
+        val muted = ringing && CallManager.isMuted(call.details.handle?.schemeSpecificPart.orEmpty())
+        val opens = !ringing || (!screenInUse() && !muted)
+        DebugLog.i(TAG, "call screen: ${if (opens) "opened" else if (muted) "notification only (muted caller)" else "pop-up only (phone in use)"}")
         if (ringing) {
             // Without the full-screen permission a sleeping, locked phone may not light up for the call.
             val fullScreen = Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE ||
@@ -150,7 +153,7 @@ class BcsInCallService : InCallService() {
                 }
             }
         }
-        if (!ringing || !screenInUse()) {
+        if (opens) {
             // An outgoing call comes up behind the burst on the app; a ringing one keeps the system's opening.
             val opening = if (ringing) 0 else Intent.FLAG_ACTIVITY_NO_ANIMATION
             startActivity(callScreenIntent(this).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or opening))
@@ -235,6 +238,7 @@ class BcsInCallService : InCallService() {
                 answerLabel = getString(R.string.notification_answer),
                 hangUpLabel = getString(if (state.phase == CallPhase.Incoming) R.string.notification_decline else R.string.notification_end),
                 photo = photoIcon(state.caller.photoUri),
+                mutedNote = if (state.mutedCaller) getString(R.string.notification_muted_caller) else null,
             ),
         )
         try {

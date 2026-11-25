@@ -96,6 +96,36 @@
     <string name="missed_call_back">Call back</string>
     <string name="missed_rang">Rang %1$s</string>
     <string name="number_blocked">Blocked</string>
+    <string name="remind_title">Remind me to call</string>
+    <string name="remind_note">Note (optional)</string>
+    <string name="remind_action">Remind</string>
+    <string name="remind_at">Reminder: %1$s</string>
+    <string name="remind_due">Call reminder</string>
+    <string name="remind_exact">May come late. Tap to allow exact time.</string>
+    <string name="channel_reminders">Call reminders</string>
+    <string name="mute_quick">Mute 15 min</string>
+    <string name="remind_quick">Remind in 15 min</string>
+    <string name="mute_title">Mute calls</string>
+    <string name="mute_explain">Their calls still come in and show, without ringing. WhatsApp calls too, when the app may read notifications.</string>
+    <string name="mute_custom">Duration</string>
+    <string name="mute_action">Mute</string>
+    <string name="mute_end">Unmute</string>
+    <string name="muted_until">Muted until %1$s</string>
+    <plurals name="mute_minutes">
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
+    <plurals name="mute_hours">
+        <item quantity="one">%1$d hour</item>
+        <item quantity="other">%1$d hours</item>
+    </plurals>
+    <string name="mute_unit_minutes">Minutes</string>
+    <string name="mute_unit_hours">Hours</string>
+    <string name="mute_unit_days">Days</string>
+    <plurals name="mute_days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
     <string name="spam_blocked">Reported as spam and blocked</string>
     <string name="spam_warning">Possible spam</string>
     <string name="spam_question">Was this call spam?</string>

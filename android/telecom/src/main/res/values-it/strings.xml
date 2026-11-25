@@ -3,4 +3,5 @@
     <string name="notification_answer">Rispondi</string>
     <string name="notification_decline">Rifiuta</string>
     <string name="notification_end">Termina chiamata</string>
+    <string name="notification_muted_caller">Squilla in silenzio</string>
 </resources>

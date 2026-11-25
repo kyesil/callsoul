@@ -32,6 +32,7 @@ class WhatsAppCallListener : NotificationListenerService() {
     private val scope = MainScope()
     private val tracker = WhatsAppCallTracker()
     private val pill by lazy { WhatsAppPill(this) }
+    private val quieter by lazy { WhatsAppRingQuieter(this) }
 
     override fun onCreate() {
         super.onCreate()
@@ -44,6 +45,7 @@ class WhatsAppCallListener : NotificationListenerService() {
 
     override fun onDestroy() {
         connected = false
+        quieter.giveBack()
         pill.close()
         scope.cancel()
         super.onDestroy()
@@ -52,6 +54,7 @@ class WhatsAppCallListener : NotificationListenerService() {
     override fun onListenerConnected() {
         connected = true
         DebugLog.i(TAG, "listener connected")
+        quieter.giveBack()
     }
 
     override fun onListenerDisconnected() {
@@ -76,6 +79,14 @@ class WhatsAppCallListener : NotificationListenerService() {
         // Settings then tells the user how to let the app run in the background.
         if (late > LATE_MILLIS) container.noteWhatsAppLate()
         tracker.onNotice(notice, sbn.postTime)?.let(::store)
+        // Someone muted on their page rings without sound; any later stage of the call gives it back.
+        if (notice.phase == CallPhase.Ringing && late < LATE_MILLIS &&
+            container.muted.isMuted(notice.number.ifEmpty { null }, notice.name)
+        ) {
+            quieter.quiet(sbn.key)
+        } else if (notice.phase != CallPhase.Ringing) {
+            quieter.stopped(null)
+        }
         // A notification that arrives late may be of a call that is already over.
         if (container.whatsAppPillEnabled && callStillShown()) {
             // A video call has WhatsApp's own screen in front, and a voice call turned into one does
@@ -95,6 +106,7 @@ class WhatsAppCallListener : NotificationListenerService() {
     override fun onNotificationRemoved(sbn: StatusBarNotification) {
         // Also with the switch turned off in the middle of a call, when no notice comes out of it.
         if (sbn.packageName in watched() && !callStillShown()) pill.hide()
+        if (sbn.packageName in watched()) quieter.stopped(sbn.key)
         val notice = notice(sbn) ?: return
         if (notice.phase == CallPhase.Missed) return
         // One stage of a call may give way to the next as a separate notification: the call goes on.

@@ -1,5 +1,7 @@
 package com.bettercallsoul.call
 
+import com.bettercallsoul.ui.MuteToolbarIcon
+import com.bettercallsoul.personOf
 import com.bettercallsoul.ui.formatContactDate
 import com.bettercallsoul.calllog.birthdayOf
 import androidx.compose.material.icons.outlined.Notes
@@ -61,6 +63,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.NotificationsOff
 import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -179,7 +182,7 @@ fun CallScreen(state: CallUiState) {
     CallBackdrop {
         when (state.phase) {
             CallPhase.SelectingAccount -> AccountPicker()
-            CallPhase.Incoming -> IncomingCall(state.caller, onAnswered = { center -> if (motion) reveal = Reveal(center) })
+            CallPhase.Incoming -> IncomingCall(state.caller, state.mutedCaller, onAnswered = { center -> if (motion) reveal = Reveal(center) })
             else -> OngoingCall(state)
         }
         reveal?.let { RevealOverlay(it, onFinished = { reveal = null }) }
@@ -281,10 +284,38 @@ fun SpamBadge(caller: CallerInfo) {
 }
 
 @Composable
-private fun IncomingCall(caller: CallerInfo, onAnswered: (Offset) -> Unit) {
+private fun IncomingCall(caller: CallerInfo, muted: Boolean, onAnswered: (Offset) -> Unit) {
+    Box(Modifier.fillMaxSize()) {
+        IncomingCallContent(caller, muted, onAnswered)
+        MuteFromCall(caller, Modifier.align(Alignment.TopEnd).padding(top = 4.dp, end = 8.dp))
+    }
+}
+
+/** The bell in the corner: quiets this ring and the caller's next ones, for as long as is picked. */
+@Composable
+private fun MuteFromCall(caller: CallerInfo, modifier: Modifier) {
+    if (caller.number.isBlank()) return
+    val app = LocalContext.current.container
+    var person by remember(caller.number) { mutableStateOf(listOf(caller.number) to caller.title.takeIf { caller.isContact }) }
+    LaunchedEffect(caller.number) { person = app.personOf(caller.number) }
+    Box(modifier) {
+        MuteToolbarIcon(person.first, person.second, active = Color.White, idle = Color.White, onChanged = CallManager::mutedCallerChanged)
+    }
+}
+
+@Composable
+private fun IncomingCallContent(caller: CallerInfo, muted: Boolean, onAnswered: (Offset) -> Unit) {
     val context = LocalContext.current
     Column(Modifier.fillMaxSize()) {
         CallerHeader(null, caller, showPhoto = true)
+        // Muted on their page for a while: the same bell as there, so the quiet ring isn't a puzzle.
+        if (muted) {
+            Row(Modifier.fillMaxWidth().padding(top = 10.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Filled.NotificationsOff, contentDescription = null, tint = Soft, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text(stringResource(com.bettercallsoul.telecom.R.string.notification_muted_caller), color = Soft, fontSize = 15.sp)
+            }
+        }
         CallerExtras(caller, Modifier.weight(1f).fillMaxWidth())
         caller.lastCallAt?.let { last ->
             Column(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {

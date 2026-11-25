@@ -78,6 +78,8 @@ class AppContainer(context: Context) {
     val exports = ContactExports(context, ContactExport(context, editor))
     val history = CallHistory(context, store) { historyDays }
     val whatsApp = WhatsAppCallLog(store, callLog, contacts) { historyDays }
+    val muted = MutedCallers(context)
+    val reminders = Reminders(context)
 
     /** How many days of calls the app keeps on the phone; a year unless the user picks otherwise. */
     var historyDays by mutableStateOf(prefs.getInt(KEY_HISTORY_DAYS, CallHistory.KEEP_DAYS))
@@ -624,10 +626,13 @@ class BcsApp : Application() {
             toneOnEnd = { container.toneOnEnd },
             declineOnKey = { container.declineOnKey },
             silentInUse = { container.silentInUse },
+            isMuted = { number -> container.muted.isMuted(number) },
         )
         WhatsAppTelecomCalls.init { call -> if (container.whatsAppCallsEnabled) container.whatsApp.save(call) }
         CallChannels.create(this, getString(R.string.channel_incoming), getString(R.string.channel_ongoing))
         MissedCallReceiver.createChannel(this)
+        ReminderReceiver.createChannel(this)
+        container.reminders.scheduleAll()
         // Android connects the listener by itself on most phones, which takes a moment.
         Handler(Looper.getMainLooper()).postDelayed({
             if (container.whatsAppCallsEnabled) WhatsAppCallListener.reconnect(this)

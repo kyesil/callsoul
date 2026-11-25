@@ -3,4 +3,5 @@
     <string name="notification_answer">Cevapla</string>
     <string name="notification_decline">Reddet</string>
     <string name="notification_end">Aramayı bitir</string>
+    <string name="notification_muted_caller">Sessiz çalıyor</string>
 </resources>

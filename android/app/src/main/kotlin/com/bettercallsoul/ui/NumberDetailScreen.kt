@@ -101,7 +101,10 @@ private fun NumberDetailScreen(number: String, onCall: (String) -> Unit, onOpen:
 
     Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
-            DetailToolbar(onBack)
+            DetailToolbar(onBack) {
+                MuteToolbarIcon(listOf(number), null)
+                RemindToolbarIcon(listOf(number))
+            }
             Column(Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Avatar(info.title, info.photoUri, 96.dp)
                 Spacer(Modifier.height(7.dp))
@@ -130,6 +133,8 @@ private fun NumberDetailScreen(number: String, onCall: (String) -> Unit, onOpen:
                     Text(it, fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 if (blocked) BlockedBadge()
+                MutedBadge(listOf(number))
+                RemindBadge(listOf(number))
                 if (showsSpamBadge(info)) SpamBadge(info)
                 TextButton(onClick = { editingTag = true }) {
                     Icon(Icons.Outlined.Edit, contentDescription = null, modifier = Modifier.size(16.dp))

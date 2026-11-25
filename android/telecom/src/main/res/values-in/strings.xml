@@ -3,4 +3,5 @@
     <string name="notification_answer">Jawab</string>
     <string name="notification_decline">Tolak</string>
     <string name="notification_end">Akhiri panggilan</string>
+    <string name="notification_muted_caller">Berdering tanpa suara</string>
 </resources>

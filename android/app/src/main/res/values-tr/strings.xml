@@ -95,6 +95,36 @@
     <string name="missed_call_back">Geri ara</string>
     <string name="missed_rang">%1$s çaldı</string>
     <string name="number_blocked">Engelli</string>
+    <string name="remind_title">Aramayı hatırlat</string>
+    <string name="remind_note">Not (isteğe bağlı)</string>
+    <string name="remind_action">Hatırlat</string>
+    <string name="remind_at">Hatırlatma: %1$s</string>
+    <string name="remind_due">Arama hatırlatması</string>
+    <string name="remind_exact">Gecikebilir. Tam zamanında gelmesi için dokunup izin ver.</string>
+    <string name="channel_reminders">Arama hatırlatmaları</string>
+    <string name="mute_quick">15 dk sessize al</string>
+    <string name="remind_quick">15 dk sonra hatırlat</string>
+    <string name="mute_title">Aramaları sustur</string>
+    <string name="mute_explain">Aramaları gelir ve görünür ama çalmaz. Uygulamanın bildirim erişimi varsa WhatsApp aramaları da.</string>
+    <string name="mute_custom">Süre</string>
+    <string name="mute_action">Sustur</string>
+    <string name="mute_end">Susturmayı kaldır</string>
+    <string name="muted_until">Sessiz, bitiş: %1$s</string>
+    <plurals name="mute_minutes">
+        <item quantity="one">%1$d dakika</item>
+        <item quantity="other">%1$d dakika</item>
+    </plurals>
+    <plurals name="mute_hours">
+        <item quantity="one">%1$d saat</item>
+        <item quantity="other">%1$d saat</item>
+    </plurals>
+    <string name="mute_unit_minutes">Dakika</string>
+    <string name="mute_unit_hours">Saat</string>
+    <string name="mute_unit_days">Gün</string>
+    <plurals name="mute_days">
+        <item quantity="one">%1$d gün</item>
+        <item quantity="other">%1$d gün</item>
+    </plurals>
     <string name="spam_blocked">Spam olarak bildirildi ve engellendi</string>
     <string name="spam_warning">Spam olabilir</string>
     <string name="spam_question">Bu arama spam mıydı?</string>

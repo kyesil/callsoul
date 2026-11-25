@@ -139,6 +139,11 @@ class MissedCallReceiver : BroadcastReceiver() {
         /** The log writes 0532..., +90532... and so on for one line. */
         private fun keyOf(number: String): String = number.filter(Char::isDigit).takeLast(10)
 
+        /** Brings the notifications up to date without a sound, after a button on one of them. */
+        suspend fun refresh(context: Context) {
+            if (unseen(context).isNotEmpty()) show(context, count = 0, alert = false)
+        }
+
         private suspend fun show(context: Context, count: Int, alert: Boolean) = lock.withLock {
             val app = context.container
             suspend fun read() = unseen(context).withRingTimes(runCatching { app.store.ringTimes() }.getOrDefault(emptyList()))
@@ -170,13 +175,14 @@ class MissedCallReceiver : BroadcastReceiver() {
                 val text = last.ringSeconds?.let {
                     context.getString(R.string.missed_rang, context.getString(R.string.ring_seconds, it.toInt()))
                 } ?: context.getString(R.string.missed_call)
+                val mutedUntil = number.takeIf(String::isNotBlank)?.let { app.muted.until(listOf(it)) }
                 val tag = TAG_PREFIX + keyOf(number)
                 shownTags += tag
                 lines += "$title · $text"
                 val builder = Notification.Builder(context, CHANNEL)
                     .setSmallIcon(android.R.drawable.stat_notify_missed_call)
                     .setContentTitle(title)
-                    .setContentText(text)
+                    .setContentText(listOfNotNull(text, mutedUntil?.let { context.getString(R.string.muted_until, clockTime(context, it)) }).joinToString(" · "))
                     .setCategory(Notification.CATEGORY_MISSED_CALL)
                     .setGroup(GROUP)
                     .setWhen(last.date)
@@ -188,13 +194,13 @@ class MissedCallReceiver : BroadcastReceiver() {
                     .setDeleteIntent(MissedCallActions.intent(context, MissedCallActions.ACTION_SEEN, number))
                 info?.photoUri?.let { photo(context, it) }?.let { builder.setLargeIcon(Icon.createWithBitmap(it)) }
                 if (number.isNotBlank()) {
-                    builder.addAction(
-                        Notification.Action.Builder(
-                            null,
-                            context.getString(R.string.missed_call_back),
-                            MissedCallActions.intent(context, MissedCallActions.ACTION_CALL_BACK, number),
-                        ).build(),
+                    fun button(label: Int, action: String) = builder.addAction(
+                        Notification.Action.Builder(null, context.getString(label), MissedCallActions.intent(context, action, number)).build(),
                     )
+                    button(R.string.missed_call_back, MissedCallActions.ACTION_CALL_BACK)
+                    if (mutedUntil == null) button(R.string.mute_quick, MissedCallActions.ACTION_MUTE)
+                    else button(R.string.mute_end, MissedCallActions.ACTION_UNMUTE)
+                    button(R.string.remind_quick, MissedCallActions.ACTION_REMIND)
                 }
                 manager.notify(tag, ID, builder.build())
             }
@@ -235,7 +241,7 @@ class MissedCallReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
 
-        private fun photo(context: Context, uri: String): Bitmap? = runCatching {
+        internal fun photo(context: Context, uri: String): Bitmap? = runCatching {
             ImageDecoder.decodeBitmap(ImageDecoder.createSource(context.contentResolver, Uri.parse(uri))) { decoder, info, _ ->
                 val side = minOf(info.size.width, info.size.height).coerceAtLeast(1)
                 val scale = 192f / side
@@ -256,6 +262,32 @@ class MissedCallActions : BroadcastReceiver() {
                 MissedCallReceiver.markSeen(context, number)
                 CallManager.place(context, number)
             }
+            // The caller stays in the missed calls, now with the note that they are quiet.
+            ACTION_MUTE, ACTION_UNMUTE -> later(context.applicationContext) { app ->
+                val (numbers, name) = app.container.personOf(number)
+                if (intent.action == ACTION_UNMUTE) {
+                    app.container.muted.unmute(numbers)
+                } else if (app.container.muted.until(numbers) == null) {
+                    app.container.muted.mute(numbers, name, QUICK_MINUTES)
+                }
+                MissedCallReceiver.refresh(app)
+            }
+            // The reminder takes the notification's place.
+            ACTION_REMIND -> {
+                MissedCallReceiver.markSeen(context, number)
+                quickReminder(context.applicationContext, listOf(number), null)
+            }
+        }
+    }
+
+    private fun later(app: Context, work: suspend (Context) -> Unit) {
+        val pending = goAsync()
+        scope.launch {
+            try {
+                work(app)
+            } finally {
+                pending.finish()
+            }
         }
     }
 
@@ -263,6 +295,10 @@ class MissedCallActions : BroadcastReceiver() {
         const val ACTION_SEEN = "com.bettercallsoul.action.MISSED_SEEN"
         const val ACTION_SEEN_ALL = "com.bettercallsoul.action.MISSED_SEEN_ALL"
         const val ACTION_CALL_BACK = "com.bettercallsoul.action.MISSED_CALL_BACK"
+        const val ACTION_MUTE = "com.bettercallsoul.action.MISSED_MUTE"
+        const val ACTION_UNMUTE = "com.bettercallsoul.action.MISSED_UNMUTE"
+        const val ACTION_REMIND = "com.bettercallsoul.action.MISSED_REMIND"
+        private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
         fun intent(context: Context, action: String, number: String): PendingIntent = PendingIntent.getBroadcast(
             context,

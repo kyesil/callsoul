@@ -1,5 +1,8 @@
 package com.bettercallsoul.ui
 
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.material.icons.outlined.QrCode2
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
@@ -506,6 +509,8 @@ fun ContactDetailScreen(contactId: Long, onCall: (String) -> Unit, onOpen: (Rout
                     }
                 }
             }
+            if (!own) MuteToolbarIcon(detail.phones.map { it.number }, detail.name)
+            if (!own) RemindToolbarIcon(detail.phones.map { it.number })
             ToolbarIcon(Icons.Outlined.QrCode2, stringResource(R.string.qr_title)) { showQr = true }
             if (!own) ToolbarIcon(Icons.Outlined.Delete, stringResource(R.string.contact_delete)) { confirmDelete = true }
             ToolbarIcon(Icons.Filled.Edit, stringResource(R.string.action_edit)) {
@@ -531,6 +536,8 @@ fun ContactDetailScreen(contactId: Long, onCall: (String) -> Unit, onOpen: (Rout
             detail.nickname?.let {
                 Text("“$it”", fontSize = 15.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
+            MutedBadge(detail.phones.map { it.number })
+            RemindBadge(detail.phones.map { it.number })
             val work = listOfNotNull(detail.company, detail.jobTitle, detail.department).joinToString(" · ")
             if (work.isNotEmpty()) {
                 Text(work, fontSize = 15.sp, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 16.dp))
@@ -786,6 +793,10 @@ fun DetailToolbar(onBack: () -> Unit, actions: @Composable () -> Unit = {}) {
     ) {
         ToolbarIcon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back), onBack)
         Spacer(Modifier.weight(1f))
-        actions()
+        // A contact has seven; narrower phones get them closer together rather than cut off.
+        val tight = LocalConfiguration.current.screenWidthDp < 400
+        CompositionLocalProvider(
+            LocalMinimumInteractiveComponentSize provides if (tight) 40.dp else LocalMinimumInteractiveComponentSize.current,
+        ) { actions() }
     }
 }

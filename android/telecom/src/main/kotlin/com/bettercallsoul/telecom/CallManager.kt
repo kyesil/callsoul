@@ -40,6 +40,8 @@ data class CallUiState(
     /** The other call on the line, waiting while this one is shown. */
     val held: HeldCall? = null,
     val canMerge: Boolean = false,
+    /** The caller is muted on their page for a while: the call rings without sound and not full screen. */
+    val mutedCaller: Boolean = false,
 )
 
 data class HeldCall(val title: String)
@@ -113,6 +115,10 @@ object CallManager {
     internal var declineOnKey: () -> Boolean = { false }
         private set
 
+    /** Whether the user muted this number on its page for a while. */
+    internal var isMuted: (String) -> Boolean = { false }
+        private set
+
     /** Set while the app itself quiets the ringer, so Telecom's echo of it is not taken for a key. */
     private var quietingItself = false
 
@@ -160,6 +166,7 @@ object CallManager {
         toneOnEnd: () -> Boolean = { false },
         declineOnKey: () -> Boolean = { false },
         silentInUse: () -> Boolean = { false },
+        isMuted: (String) -> Boolean = { false },
     ) {
         this.directory = directory
         this.silentWhenFaceDown = silentWhenFaceDown
@@ -169,6 +176,7 @@ object CallManager {
         this.toneOnEnd = toneOnEnd
         this.declineOnKey = declineOnKey
         this.silentInUse = silentInUse
+        this.isMuted = isMuted
     }
 
     @SuppressLint("MissingPermission") // The app opens only once the phone permission is granted.
@@ -276,6 +284,13 @@ object CallManager {
         if (primary()?.currentState != Call.STATE_RINGING) return
         DebugLog.i(TAG, "silenced from the pill")
         silenceRinger()
+    }
+
+    /** The ringing caller was muted or unmuted from the call screen: the ring stops at once, the mark follows. */
+    fun mutedCallerChanged() {
+        val call = primary()?.takeIf { it.currentState == Call.STATE_RINGING } ?: return
+        if (isMuted(numberOf(call))) silenceRinger()
+        publish()
     }
 
     /** Stops the ringing only: the call keeps coming in, and the default phone app is allowed to do this. */
@@ -446,8 +461,9 @@ object CallManager {
         val call = primary()
         val caller = call?.let(::callerOf)
         val other = topLevel().firstOrNull { it != call }
-        _call.value = if (call == null || caller == null) null else CallUiState(
-            phase = phaseOf(call),
+        val phase = call?.let(::phaseOf)
+        _call.value = if (call == null || caller == null || phase == null) null else CallUiState(
+            phase = phase,
             caller = caller,
             connectedAt = call.details.connectTimeMillis.takeIf { it > 0 },
             incoming = call.details.callDirection == Call.Details.DIRECTION_INCOMING,
@@ -456,6 +472,7 @@ object CallManager {
             held = other?.let(::callerOf)?.let { HeldCall(it.title) },
             canMerge = other != null &&
                 (call.conferenceableCalls.isNotEmpty() || call.details.can(Call.Details.CAPABILITY_MERGE_CONFERENCE)),
+            mutedCaller = phase == CallPhase.Incoming && isMuted(numberOf(call)),
         )
     }
 

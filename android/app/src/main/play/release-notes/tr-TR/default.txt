@@ -1,3 +1,3 @@
-• Aramayı cevaplarken konuşma ekranına geçiş artık takılmadan, akıcı.
-• Saat ya da bilgisayar Bluetooth ile bağlıyken ses ahizeden gelse de ekran kulakta kapanıyor.
-• Konuşmada Bluetooth düğmesine uzun basınca cihaz listesi açılıyor: cihazlar arasında ya da ahizeye geçilebiliyor.
+• Kişi ve numara sayfasından, gelen arama ekranındaki çandan ya da cevapsız bildiriminden birinin aramalarını bir süre sustur. Bildirim erişimi varsa WhatsApp aramaları da susar.
+• Aramayı hatırlat: süre seç, istersen not yaz; zamanı gelince bildirimden ara.
+• Cevapsız bildirimine iki tuş: 15 dk sessize al, 15 dk sonra hatırlat.

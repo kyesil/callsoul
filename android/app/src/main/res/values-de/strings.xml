@@ -95,6 +95,36 @@
     <string name="missed_call_back">Zurückrufen</string>
     <string name="missed_rang">%1$s geklingelt</string>
     <string name="number_blocked">Blockiert</string>
+    <string name="remind_title">An Anruf erinnern</string>
+    <string name="remind_note">Notiz (optional)</string>
+    <string name="remind_action">Erinnern</string>
+    <string name="remind_at">Erinnerung: %1$s</string>
+    <string name="remind_due">Anruferinnerung</string>
+    <string name="remind_exact">Kann später kommen. Tippen, um genaue Zeit zu erlauben.</string>
+    <string name="channel_reminders">Anruferinnerungen</string>
+    <string name="mute_quick">15 Min. stumm</string>
+    <string name="remind_quick">In 15 Min. erinnern</string>
+    <string name="mute_title">Anrufe stummschalten</string>
+    <string name="mute_explain">Anrufe kommen weiter an und werden angezeigt, klingeln aber nicht. Auch WhatsApp-Anrufe, wenn die App Benachrichtigungen lesen darf.</string>
+    <string name="mute_custom">Dauer</string>
+    <string name="mute_action">Stummschalten</string>
+    <string name="mute_end">Stummschaltung aufheben</string>
+    <string name="muted_until">Stumm bis %1$s</string>
+    <plurals name="mute_minutes">
+        <item quantity="one">%1$d Minute</item>
+        <item quantity="other">%1$d Minuten</item>
+    </plurals>
+    <plurals name="mute_hours">
+        <item quantity="one">%1$d Stunde</item>
+        <item quantity="other">%1$d Stunden</item>
+    </plurals>
+    <string name="mute_unit_minutes">Minuten</string>
+    <string name="mute_unit_hours">Stunden</string>
+    <string name="mute_unit_days">Tage</string>
+    <plurals name="mute_days">
+        <item quantity="one">%1$d Tag</item>
+        <item quantity="other">%1$d Tage</item>
+    </plurals>
     <string name="spam_blocked">Als Spam gemeldet und blockiert</string>
     <string name="spam_warning">Möglicher Spam</string>
     <string name="spam_question">War dieser Anruf Spam?</string>

@@ -27,6 +27,7 @@ import android.widget.Chronometer
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.core.content.edit
 import kotlin.math.hypot
 import kotlin.math.roundToInt
@@ -96,6 +97,7 @@ class CallOverlay(
         this.route = route
         stopBeat()
         setRinging(false)
+        mutedMark(clock, false)
         if (connectedAt == null) {
             clock.stop()
             clock.text = context.getString(R.string.overlay_dialing)
@@ -105,18 +107,29 @@ class CallOverlay(
         }
     }
 
-    /** Does nothing until the user has allowed drawing over other apps. */
-    fun showRinging(caller: String) {
+    /** Does nothing until the user has allowed drawing over other apps. [muted]: a crossed bell before the name. */
+    fun showRinging(caller: String, muted: Boolean = false) {
         if (!Settings.canDrawOverlays(context)) return
         if (root == null) attach()
         val clock = timer ?: return
         setRinging(true)
         clock.stop()
         clock.text = caller
+        mutedMark(clock, muted)
         if (!beatBig) {
             handler.removeCallbacks(beat)
             handler.post(beat)
         }
+    }
+
+    private fun mutedMark(clock: TextView, muted: Boolean) {
+        val bell = if (muted) context.getDrawable(R.drawable.ic_overlay_muted)?.mutate()?.apply {
+            setTint(clock.currentTextColor)
+            val size = sdp(13f)
+            setBounds(0, 0, size, size)
+        } else null
+        clock.setCompoundDrawablesRelative(bell, null, null, null)
+        clock.compoundDrawablePadding = sdp(4f)
     }
 
     private fun stopBeat() {
